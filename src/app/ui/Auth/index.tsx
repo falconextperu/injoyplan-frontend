@@ -155,7 +155,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                 <label className='font-normal block mt-3 font-sans' htmlFor="email">Email</label>
                                 <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="text" name='email' value={email} onChange={(e) => setEmail(e.target.value)} />
                             </div>
-                            <div className={isRegister ? "" : ""}>
+                            <div className={isRegister ? "grid grid-cols-2 gap-4 " : ""}>
                                 <div>
                                     <label className='font-normal block mt-3 font-sans' htmlFor="password">Contraseña</label>
                                     <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />

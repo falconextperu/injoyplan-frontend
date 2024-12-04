@@ -3,6 +3,8 @@ import styles from './header.module.css'
 import logo from '../../../../public/images/logo.png'
 import lupa from '../../../../public/svg/search.svg'
 import lupaMobile from '../../../../public/svg/search.svg'
+import fb from '../../../../public/svg/fb.svg'
+import ig from '../../../../public/svg/ig.svg'
 import cora from '../../../../public/svg/favorite.svg'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,10 +20,12 @@ import Image from 'next/image';
 import Auth from '../Auth';
 import useOutsideClick from '@/app/hooks/useOutsideClick';
 import useIsMobile from '@/app/hooks/useIsMobile';
+import { usePathname } from 'next/navigation'
 
 moment.locale('es');
 
 const Header = () => {
+
 
     const { auth }: IAuthState = useAuthStore();
     const { getEventBySearch, eventSearch, resetEventBySearch, events, getEvents }: IEventsState = useEventStore();
@@ -30,6 +34,9 @@ const Header = () => {
     const [isOpenFavorite, setIsOpenFavorite, refFavorite] = useOutsideClick(false);
     const [openAuth, setOpenAuth] = useState<boolean>(false);
     const navigation = useRouter()
+    const path = usePathname();
+
+    console.log(path)
 
     useEffect(() => {
         getFavorites();
@@ -73,7 +80,7 @@ const Header = () => {
     return (
         <div className="border-b border-solid border-[#e9e9e9] bg-[#F9FAFC]">
             <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
-            <div className="max-w-screen-2xl h-18 py-5 mx-auto items-center grid grid-cols-12">
+            <div className="max-w-screen-2xl md:max-w-screen-xl h-18 py-5 mx-auto items-center grid grid-cols-12">
                 <Link className='w-44' href="/"><Image src={logo} alt="logo" height={300} width={300} /></Link>
 
                 <div className={
@@ -110,7 +117,7 @@ const Header = () => {
                                     <div>
                                         <ul className={styles.dropdownHeader__wrapper} onClick={() => {
                                             setIsOpenEvent(false),
-                                            setSearch("")
+                                                setSearch("")
                                         }}>
                                             <div className={styles.dropdown__header}>
                                                 <div>
@@ -157,70 +164,82 @@ const Header = () => {
                     </div>
                 </div>
 
-                <div className={styles.corazon} ref={favoritesRef}>
-                    <p>{auth?.nombre} {auth?.Apellido}</p>
-                    {auth === null && <button onClick={() => setOpenAuth(true)}
-                        className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
-                    >Ingresar</button>}
-                    <Image src={cora} alt="cora" width={47} height={47} onClick={() => setIsOpenFavorite(true)} />
-                    {
-                        isOpenFavorite && (
-                            <div
-                                className={"opacity-100 visible z-10 shadow-custom-2"}
-                            >
-                                <ul className={styles.dropdownHeader__wrapper}>
-                                    <div className={styles.dropdown__header}>
-                                        <div>
-                                            <h6>Favoritos</h6>
-                                            {
-                                                isMobile && <div className={styles.closeFavorites}>
-                                                    <Icon width={30} icon="ic:baseline-close" onClick={() => setIsOpenFavorite(true)} />
-                                                </div>
-                                            }
-                                        </div>
-                                        <div className={styles.favorites__dropdown}>
-                                            {
-                                                eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
-                                                    <div className={styles.favorites}
-                                                        onClick={() => navigateEvent(item)}
-                                                        key={index}
-                                                        onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
-                                                        onMouseLeave={() => setHoveredFavoriteId(null)}
-                                                    >
-                                                        <div>
-                                                            <img src={item.url} alt="" />
-                                                        </div>
-                                                        <div>
-                                                            <p>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
-                                                            <h3>{item.titulo}</h3>
-                                                            <span>{item.NombreLocal}</span>
-                                                        </div>
-
-                                                        {
-                                                            isMobile && <Icon icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
-                                                        }
-
-                                                        {hoveredFavoriteId === item.idfavoritos && !isMobile && (
-                                                            <Icon icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
-                                                        )}
-                                                    </div>
-                                                )) :
-
-                                                    <div className={styles.noFavorite}>
-                                                        <div>
-                                                            <img src={nofavorite} alt="" />
-                                                            <strong>Aún no tienes eventos favoritos</strong>
-                                                            <p>En cuanto los tengas, podrás verlos aquí</p>
-                                                        </div>
-                                                    </div>
-                                            }
-                                        </div>
-                                    </div>
-                                </ul>
+                {
+                    path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? (
+                        <div className='col-start-12 flex'>
+                            <div className='border-[#007FA4] border border-solid rounded-full px-4 py-[10px]'>
+                            <Image className='' src={fb} width={10} alt='facebook' />
                             </div>
-                        )
-                    }
-                </div>
+                            <div className='ml-3 border-[#007FA4] border border-solid rounded-full px-3 py-[10px]'>
+                            <Image className='' src={ig} width={20} alt='ig' />
+                            </div>
+                        </div>
+                    ) :
+                        <div className={styles.corazon} ref={favoritesRef}>
+                            <p>{auth?.nombre} {auth?.Apellido}</p>
+                            {auth === null && <button onClick={() => setOpenAuth(true)}
+                                className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
+                            >Ingresar</button>}
+                            <Image src={cora} alt="cora" width={47} height={47} onClick={() => setIsOpenFavorite(true)} />
+                            {
+                                isOpenFavorite && (
+                                    <div
+                                        className={"opacity-100 visible z-10 shadow-custom-2"}
+                                    >
+                                        <ul className={styles.dropdownHeader__wrapper}>
+                                            <div className={styles.dropdown__header}>
+                                                <div>
+                                                    <h6>Favoritos</h6>
+                                                    {
+                                                        isMobile && <div className={styles.closeFavorites}>
+                                                            <Icon width={30} icon="ic:baseline-close" onClick={() => setIsOpenFavorite(true)} />
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div className={styles.favorites__dropdown}>
+                                                    {
+                                                        eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
+                                                            <div className={styles.favorites}
+                                                                onClick={() => navigateEvent(item)}
+                                                                key={index}
+                                                                onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
+                                                                onMouseLeave={() => setHoveredFavoriteId(null)}
+                                                            >
+                                                                <div>
+                                                                    <img src={item.url} alt="" />
+                                                                </div>
+                                                                <div>
+                                                                    <p>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
+                                                                    <h3>{item.titulo}</h3>
+                                                                    <span>{item.NombreLocal}</span>
+                                                                </div>
+
+                                                                {
+                                                                    isMobile && <Icon icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
+                                                                }
+
+                                                                {hoveredFavoriteId === item.idfavoritos && !isMobile && (
+                                                                    <Icon icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
+                                                                )}
+                                                            </div>
+                                                        )) :
+
+                                                            <div className={styles.noFavorite}>
+                                                                <div>
+                                                                    <img src={nofavorite} alt="" />
+                                                                    <strong>Aún no tienes eventos favoritos</strong>
+                                                                    <p>En cuanto los tengas, podrás verlos aquí</p>
+                                                                </div>
+                                                            </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </ul>
+                                    </div>
+                                )
+                            }
+                        </div>
+                }
             </div>
         </div>
     )

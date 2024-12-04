@@ -7,40 +7,41 @@ import instagram from '../../../../public/svg/instagram.svg'
 import libro from '../../../../public/svg/book.svg'
 import Link from 'next/link'
 import Image from 'next/image'
+import { sans } from '../../../../public/fonts'
 
 
 const Footer = () => {
     return (
         <div className='border-t border-[#f1f1f1]'>
             <footer className=''>
-                <div className='mx-auto max-w-screen-2xl pt-16 pb-16'>
+                <div className='mx-auto max-w-screen-2xl md:max-w-screen-xl pt-16 pb-16'>
                     <div className='flex justify-between'>
                         <div>
                             <h3 className='font-bold text-xl'>Conócenos</h3>
-                            <Link href='/nosotros'><p className='mt-4 mb-5 font-sans font-extralight '>Acerca de nosotros</p></Link>
+                            <Link href='/nosotros'><p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Acerca de nosotros</p></Link>
                         </div>
                         <div>
                             <h3 className='font-bold text-xl'>¿Necesitas ayuda?</h3>
-                            <Link href="/preguntas"><p className='mt-4 mb-5 font-sans font-extralight'>Preguntas frecuentes</p></Link>
-                            <Link href="/contactanos"><p className='mt-4 mb-5 font-sa'>Contáctanos</p></Link>
+                            <Link href="/preguntas-frecuentes"><p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Preguntas frecuentes</p></Link>
+                            <Link href="/contactanos"><p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Contáctanos</p></Link>
                         </div>
                         <div>
                             <h3 className='font-bold text-xl'>Políticas</h3>
-                            <Link href="/politicas-privacidad"><p className='mt-4 mb-5 font-sans font-extralight'>Política de privacidad</p></Link>
-                            <p className='mt-4 mb-5 font-sans font-extralight'>Política de cookies</p>
-                            <Link href="/terminos-y-condiciones"><p className='mt-4 mb-5 font-sans font-extralight'>Términos y condiciones de uso</p></Link>
+                            <Link href="/politicas-privacidad"><p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Política de privacidad</p></Link>
+                            <p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Política de cookies</p>
+                            <Link href="/terminos-y-condiciones"><p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Términos y condiciones de uso</p></Link>
                         </div>
                         <div>
                             <h3 className='font-bold text-xl'>Contáctanos</h3>
-                            <p className='mt-4 mb-5 font-sans font-extralight'>Escríbenos a nuestra casilla de correo:</p>
-                            <strong className='font-sans text-xl flex items-center text-[#007FA4] font-normal'><Image className='mr-2' src={mail} alt="mail" /> Contacto@injoyplan.com</strong>
+                            <p className={`${sans.className} font-[300] mt-6 text-[#212121]`}>Escríbenos a nuestra casilla de correo:</p>
+                            <strong className='font-sans text-xl flex items-center text-[#007FA4] mt-6 font-normal'><Image className='mr-2' src={mail} alt="mail" /> Contacto@injoyplan.com</strong>
                         </div>
                     </div>
 
 
                 </div>
                 <div className='bg-[#303033]'>
-                    <div className='mx-auto max-w-screen-2xl pt-8 pb-8 flex justify-between items-center'>
+                    <div className='mx-auto max-w-screen-2xl md:max-w-screen-xl pt-8 pb-8 flex justify-between items-center'>
                         <div>
                             <p className='text-[#fff]'>Copyright © 2021 Injoyplan</p>
                         </div>

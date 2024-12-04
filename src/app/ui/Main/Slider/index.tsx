@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { IBannersState, useBannersStore } from "../../../zustand/banners";
 import moment from "moment";
 import BannerSkeleton from "../../../components/Skeletons/banner";
+import banner from '../../../../../public/svg/banner.svg'
+import Image from "next/image";
 moment.locale('es');
 
 const Slide = () => {
@@ -58,11 +60,11 @@ const Slide = () => {
     return (
         <Slider {...settings}>
             {
-                banners?.length > 1 ? (
+                banners?.length === 0 ? (
                     banners.map((item: any) => (
                         <>
                             <div className={styles.content__slideImg}>
-                                <img src={item.url} alt="" />
+                                <Image src={banner} alt="banner" className="w-full" width={500} height={500} />
                                 <div className={styles.content__info}>
                                     <div>
                                         <h4>{item.titulo}</h4>

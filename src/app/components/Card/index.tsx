@@ -28,7 +28,7 @@ const Card = ({ item, addFavoritesByUser }: IProps) => {
                 className='h-full'>
                 <div className="bg-[#fff] h-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 group">
                     <div className='w-full h-56 rounded-t-2xl relative'>
-                        <Image src={item.url} alt="img2" width={400} height={400} className='h-full object-fill rounded-t-2xl' />
+                        <Image src={item.url} alt="img2" width={400} height={400} className='h-full w-full object-fill rounded-t-2xl' />
                         <div onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
@@ -50,7 +50,7 @@ const Card = ({ item, addFavoritesByUser }: IProps) => {
                             )
                         }
                     </div>
-                    <div className='p-4'>
+                    <div className='p-4 bg-[#fff] rounded-bl-2xl rounded-br-2xl'>
                         <div>
                             <span className='text-xs font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</span>
                             <h3 className='font-black text-xl text-[#212121]'>{item.titulo}</h3>

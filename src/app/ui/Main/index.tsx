@@ -23,7 +23,7 @@ const Main = () => {
 
     return (
         <div className="">
-           <div className="max-w-screen-2xl px-0 mx-auto grid grid-cols-12 gap-10">
+           <div className="max-w-screen-2xl md:max-w-screen-xl px-0 mx-auto grid grid-cols-12 gap-10">
                 <div className="col-start-1 col-span-8 mt-12">
                     <div>
                         <Slide />
