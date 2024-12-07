@@ -24,7 +24,7 @@ const Main = () => {
         <div className="">
            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md px-0 mx-auto grid grid-cols-12 gap-10 xl:px-10">
                 <div className="xl:col-start-1 xl:col-end-9 md:col-start-1 md:col-end-13 xl:mt-12 md:mt-6 col-start-1 col-end-13">
-                    <div>
+                    <div className='slider-banner'>
                         <Slide />
                     </div>
                 </div>

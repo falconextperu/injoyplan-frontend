@@ -4,6 +4,7 @@ import mail from '../../../../public/svg/email.svg';
 import facebook from '../../../../public/svg/facebook.svg';
 import twi from '../../../../public/svg/twitter.svg';
 import youtube from '../../../../public/svg/youtube.svg';
+import arrow from '../../../../public/svg/arrowdown.svg';
 import instagram from '../../../../public/svg/instagram.svg';
 import libro from '../../../../public/svg/book.svg';
 import Link from 'next/link';
@@ -59,7 +60,16 @@ const Footer = () => {
         </div>
 
         {/* Mobile View */}
-        <div className="block md:hidden mx-auto max-w-screen-md px-4 pt-8 pb-8">
+
+        <div className="block md:hidden mx-auto max-w-screen-md pt-8 pb-8">
+          <div className='block md:hidden px-8'>
+            <h3 className="font-bold text-lg">Contáctanos</h3>
+            <p className="text-sm text-[#212121] mt-6">Escríbenos a nuestra casilla de correo:</p>
+            <div className="flex items-center text-[#007FA4] mt-6 mb-10">
+              <Image src={mail} alt="mail" width={24} height={24} className="mr-2" />
+              <strong>Contacto@injoyplan.com</strong>
+            </div>
+          </div>
           {[
             { title: 'Conócenos', links: [{ label: 'Acerca de nosotros', href: '/nosotros' }] },
             {
@@ -78,13 +88,13 @@ const Footer = () => {
               ],
             },
           ].map((section, index) => (
-            <div key={index} className="mb-4">
+            <div key={index} className="mb-4 border-t border-solid border-[#EDEFF5] pt-4 px-8">
               <h3
                 className="font-bold text-lg flex justify-between items-center cursor-pointer"
                 onClick={() => toggleSection(index)}
               >
                 {section.title}
-                <span className="text-xl">{openSection === index ? '-' : '+'}</span>
+                <span className="text-xl">{openSection === index ? <Image src={arrow} height={13} width={13} alt='Arrow' /> : <Image src={arrow} height={13} width={13} alt='Arrow' />}</span>
               </h3>
               {openSection === index && (
                 <div className="mt-4 space-y-2">
@@ -99,36 +109,58 @@ const Footer = () => {
           ))}
 
           {/* Contact Section */}
-          <div>
-            <h3 className="font-bold text-lg">Contáctanos</h3>
-            <p className="text-sm text-[#212121] mt-4">Escríbenos a nuestra casilla de correo:</p>
-            <div className="flex items-center text-[#007FA4] mt-2">
-              <Image src={mail} alt="mail" width={24} height={24} className="mr-2" />
-              <strong>Contacto@injoyplan.com</strong>
+        </div>
+
+        <div className='bg-[#303033] md:block'>
+          <div className='mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md pt-8 pb-8 xl:px-10 flex justify-between items-center'>
+            <div>
+              <p className='text-[#fff]'>Copyright © 2021 Injoyplan</p>
+            </div>
+            <div className='flex items-center'>
+              <div className='flex justify-between border-r border-solid border-[rgba(255,255,255,0.1)]'>
+                <div>
+                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={facebook} alt="facebook" />
+                </div>
+                <div>
+                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={twi} alt="twi" />
+                </div>
+                <div>
+                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={youtube} alt="youtube" />
+                </div>
+                <div>
+                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={instagram} alt="instagram" />
+                </div>
+              </div>
+              <div className='ml-6 flex justify-center text-center'>
+                <div className='text-center mx-auto w-full'>
+                  <Image width={50} height={50} className='text-center mx-auto' src={libro} alt="libro" />
+                  <p className='text-[#fff] text-sm'>Libro de Reclamaciones</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer Bottom */}
-        <div className="bg-[#303033]">
+        <div className="bg-[#303033] block md:hidden">
           <div className="mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md pt-8 pb-8 flex flex-col sm:flex-row justify-between items-center xl:px-10">
             {/* Social Icons */}
             <div className="flex items-center space-x-4">
               {[facebook, twi, youtube, instagram].map((icon, index) => (
                 <div key={index} className="p-2 border rounded-full hover:bg-gray-700">
-                  <Image src={icon} alt={`icon-${index}`} width={32} height={32} />
+                  <Image src={icon} alt={`icon-${index}`} width={16} height={16} />
                 </div>
               ))}
             </div>
 
             {/* Libro de Reclamaciones */}
-            <div className="text-center mt-4 sm:mt-0">
-              <Image src={libro} alt="libro" width={40} height={40} />
+            <div className="text-center mt-12 sm:mt-0 w-full mx-auto mb-12">
+              <Image className='mx-auto' src={libro} alt="libro" width={40} height={40} />
               <p className="text-white text-sm">Libro de Reclamaciones</p>
             </div>
-
+            <hr className='border-1 border-solid border-[#737373] w-full' />
             {/* Copyright */}
-            <div className="text-white text-sm mt-4 sm:mt-0">
+            <div className="text-white text-sm mt-6 sm:mt-0">
               Copyright © 2021 Injoyplan
             </div>
           </div>

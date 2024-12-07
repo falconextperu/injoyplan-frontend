@@ -122,23 +122,23 @@
   padding: 10px; /* Agrega espacio horizontal entre las tarjetas */
 }
 
-.slick-list {
+.slider-banner .slick-list {
   height: 440px !important;
 }
 
-.slick-list > div {
+.slider-banner .slick-list > div {
   height: 98% !important;
 }
 
-.slick-list > div > div > div {
+.slider-banner .slick-list > div > div > div {
   height: 94%;
 }
 
-.slick-list img {
+.slider-banner .slick-list img {
   height: 100% !important;
 }
 
-.slide .slick-slide {
+.slider-banner .slide .slick-slide {
   padding: 0 !important;
 }
 
