@@ -21,7 +21,8 @@
     position: absolute;
     width: 100%;
     overflow-y: auto;
-    background: #fff;
+    border-radius: 5px;
+    background: #F6F6F6;
     box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
     z-index: 999999;
     top: 60px !important;
@@ -71,7 +72,8 @@
     text-align: left !important;
     margin: 0 !important;
     font-family: 'Quicksand';
-    font-size: 12px !important;
+    text-transform: capitalize !important;
+    font-size: 15px !important;
     cursor: pointer !important;
     transition: 0.2s;
     padding: 13px;
@@ -170,14 +172,13 @@
 }
 
 .input__select span {
-    font-size: 12px;
+    font-size: 16px !important;
     transition: 0.5s;
-    text-transform: uppercase;
     position: relative;
-    font-weight: 600;
+    font-weight: 700 !important;
     z-index: 1;
-    left: 30px;
-    top: -4px !important;
+    left: 0px;
+    top: -1px !important;
 }
 
 .options__selectTotal {

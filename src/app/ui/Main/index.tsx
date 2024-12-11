@@ -22,13 +22,13 @@ const Main = () => {
 
     return (
         <div className="">
-           <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md px-0 mx-auto grid grid-cols-12 gap-10 xl:px-10">
+           <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[998px] px-0 mx-auto grid grid-cols-12 gap-10 xl:px-10">
                 <div className="xl:col-start-1 xl:col-end-9 md:col-start-1 md:col-end-13 xl:mt-12 md:mt-6 col-start-1 col-end-13">
                     <div className='slider-banner'>
                         <Slide />
                     </div>
                 </div>
-                <div className="xl:col-start-9 scrollbar-thumb-gray-700 scrollbar-track-gray-200 scrollbar  xl:col-end-13 md:col-start-1 md:col-end-13 xl:mt-12 md:mt-0 w-full col-start-1 col-end-13 md:overflow-hidden overflow-x-scroll md:px-0 px-10">
+                <div className="xl:col-start-9 scrollbar-thumb-gray-700 scrollbar-track-gray-200 scrollbar  xl:col-end-13 md:col-start-1 md:col-end-13 xl:mt-12 md:mt-0 w-full col-start-1 col-end-13 md:overflow-hidden overflow-x-scroll md:px-0 px-5">
                     <div className='grid xl:grid-cols-2 gap-x-11 gap-y-3 md:grid-cols-4 grid-cols-4 gap-3 md:w-auto w-[900px]'>
                         {
                             countsCategories?.map((item: any, index: number) => (

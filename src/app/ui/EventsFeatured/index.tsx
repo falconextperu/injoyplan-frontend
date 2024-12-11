@@ -297,12 +297,12 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
 
     return (
         <div className='bg-[#FAFBFF] pb-[80px]'>
-            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md mx-auto md:mt-16 mt-8 xl:px-10">
-                <div className="md:px-0 px-10">
+            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] mx-auto md:mt-16 mt-8 xl:px-10 px-5">
+                <div className="md:px-0">
                     <div className='md:pt-12 pt-10'>
                         <h2 className='text-3xl mb-8 font-bold text-[#444444] md:text-[#212121]'>Eventos destacados</h2>
                     </div>
-                    <div className="grid auto-cols-min grid-cols-1 gap-5 2xl:grid-cols-4 xl:grid-cols-3 md:grid-cols-2">
+                    <div className="grid auto-cols-min grid-cols-1 gap-5 2xl:grid-cols-4 xl:grid-cols-3 md:grid-cols-3">
                         {
                             destacades.map((item: any, index: number) => {
                                 return (
@@ -318,73 +318,6 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
             </div>
         </div>
     )
-
-    // return (
-    //     <>
-    //         {
-    //             destacades.length > 0 && (
-    //                 <div className={styles.card}>
-
-    //                     <div className={styles.card__wrapper}>
-    //                         <div>
-    //                             <h2>Eventos destacados</h2>
-    //                         </div>
-    //                         <div className={styles.box}>
-    //                             {
-    //                                 destacades.map((item: any) => {
-    //                                     return (
-    //                                         <div>
-    //                                             <Link href={`/evento/${item.ideventos}/${item.idfecha}`}>
-    //                                                 <div>
-    //                                                     <div className={styles.image_event}>
-    //                                                         <img src={item.url} alt="img1" />
-    //                                                         <div onClick={(e) => {
-    //                                                             e.preventDefault();
-    //                                                             e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
-    //                                                             addFavoritesByUser(item);
-    //                                                         }}
-    //                                                             className={styles.heart}>
-    //                                                             <img src={item.esfavorito === 1 ? heart : heartOutline} alt="" />
-    //                                                         </div>
-    //                                                         {
-    //                                                             item.Destacado === 1 && (
-    //                                                                 <div className={styles.important}>
-    //                                                                     <p>Destacado</p>
-    //                                                                 </div>
-    //                                                             )
-    //                                                         }
-    //                                                     </div>
-    //                                                     <div className={styles.body__event}>
-    //                                                         <div>
-    //                                                             <span>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</span>
-    //                                                             <h3 data-fulltext={item.titulo} className={styles.titulo}>{item.titulo}</h3>
-    //                                                             <h5>{item.NombreLocal}</h5>
-    //                                                         </div>
-    //                                                         <div>
-    //                                                             <strong>Desde</strong>
-    //                                                             <h4>S/ {item.Monto || 0}.00</h4>
-    //                                                         </div>
-    //                                                     </div>
-    //                                                 </div>
-
-    //                                             </Link>
-    //                                             <a href={`https://${item.urlFuente}`} target="_blank" rel="noopener noreferrer">
-    //                                                 VER FUENTE
-    //                                             </a>
-    //                                         </div>
-    //                                     )
-    //                                 })
-    //                             }
-    //                         </div>
-    //                         <div className={styles.button__more}>
-    //                             <button type="submit">VER MÁS EVENTOS</button>
-    //                         </div>
-    //                     </div>
-    //                 </div>
-    //             )
-    //         }
-    //     </>
-    // )
 }
 
 export default EventsFeatured

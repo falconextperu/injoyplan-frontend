@@ -1,5 +1,4 @@
 "use client"
-// import styles from './footer.module.css';
 import mail from '../../../../public/svg/email.svg';
 import facebook from '../../../../public/svg/facebook.svg';
 import twi from '../../../../public/svg/twitter.svg';
@@ -22,7 +21,7 @@ const Footer = () => {
     <div className="border-t border-[#f1f1f1]">
       <footer>
         {/* Desktop View */}
-        <div className="hidden md:block mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md pt-16 pb-16 xl:px-10">
+        <div className="hidden md:block mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] pt-16 pb-16 xl:px-10">
           <div className="flex justify-between flex-wrap">
             <div>
               <h3 className="font-bold text-xl">Conócenos</h3>
@@ -99,7 +98,7 @@ const Footer = () => {
               {openSection === index && (
                 <div className="mt-4 space-y-2">
                   {section.links.map((link, idx) => (
-                    <Link href={link.href} key={idx} className="text-[#212121] text-sm font-light">
+                    <Link href={link.href} key={idx} className="text-[#212121] text-sm font-light block">
                       {link.label}
                     </Link>
                   ))}
@@ -111,8 +110,8 @@ const Footer = () => {
           {/* Contact Section */}
         </div>
 
-        <div className='bg-[#303033] md:block'>
-          <div className='mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md pt-8 pb-8 xl:px-10 flex justify-between items-center'>
+        <div className='bg-[#303033] hidden md:block'>
+          <div className='mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] pt-8 pb-8 xl:px-10 flex justify-between items-center'>
             <div>
               <p className='text-[#fff]'>Copyright © 2021 Injoyplan</p>
             </div>

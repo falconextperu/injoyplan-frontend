@@ -1,15 +1,14 @@
 "use client"
-import Image from "next/image";
 import Main from "./ui/Main";
 import { useEffect, useState } from "react";
 import { IEventsState, useEventStore } from "./zustand/events";
 import { ICategoriesState, useCategoriesState } from "./zustand/categories";
 import LoadingPage from "./ui/LandingPage";
-import Loading from "./components/Loading";
-import Card from "./ui/EventsFeatured";
 import Events from "./ui/Events";
 import EventsFeatured from "./ui/EventsFeatured";
 import MailBox from "./ui/MainBox";
+import Auth from "./ui/Auth";
+import Categories from "./ui/Categories";
 
 export default function Home() {
 
@@ -72,12 +71,14 @@ export default function Home() {
 
   return (
     <div>
-       {/* { hasVisited && selectedCategories === null && <Categories setOpenCategories={setOpenCategories} openCategories={openCategories} />} */}
-      <Main />
-      <EventsFeatured setOpenAuth={setOpenAuth} />
-      {/* <Card setOpenAuth={setOpenAuth} /> */}
-      <Events />
-      <MailBox />
+      <div>
+        { hasVisited && selectedCategories === null && <Categories setOpenCategories={setOpenCategories} openCategories={openCategories} /> }
+        <Main />
+        <EventsFeatured setOpenAuth={setOpenAuth} />
+        <Events setOpenAuth={setOpenAuth} />
+        <MailBox />
+      </div>
+      <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
     </div>
   );
 }

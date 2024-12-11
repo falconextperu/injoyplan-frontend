@@ -30,13 +30,6 @@
     font-weight: 900;
 }
 
-.corazon>img {
-    cursor: pointer;
-    background: #DBEAF1;
-    padding: 10px;
-    border-radius: 100%;
-}
-
 .search_container {
     grid-column: 4/9;
     display: flex;
@@ -125,42 +118,6 @@
     z-index: 999999;
 }
 
-.corazon>div {
-    background: #ffffff;
-    border-radius: 10px;
-    right: 130px ;
-    position: absolute;
-    width: 360px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-20px);
-    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
-    top: 100px;
-    width: 100%;
-    z-index: 999999;
-}
-
-.corazon>div::after {
-    border-bottom: 11px solid #fff;
-    border-left: 11px solid transparent;
-    border-right: 11px solid transparent;
-    content: "";
-    display: inline-block;
-    position: absolute;
-    right: 40px;
-    margin-right: auto;
-    margin-left: auto;
-    width: 1px;
-    top: -10px;
-}
-
-.corazon .active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    z-index: 1;
-    box-shadow: 0px 1px 6px 0px rgba(71, 89, 147, 0.2);
-}
 
 .favorites {
     display: flex;
@@ -172,12 +129,6 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 20px;
-}
-
-.dropdown__header h6 {
-    font-size: 20px;
-    border-bottom: 1px solid #EDEFF5;
     padding: 20px;
 }
 
@@ -215,12 +166,6 @@
     color: #9B292B;
 }
 
-.event__left > div:nth-child(1) {
-    width: 80px;
-    height: 50px;
-    margin-right: 20px;
-}
-
 .event__left > div img {
     width: 100%;
     height: 100%;
@@ -249,8 +194,6 @@
 .favorites h3 {
     margin-top: 0px;
     white-space: nowrap;
-    overflow: hidden;
-    width: 210px;
     text-overflow: ellipsis;
 }
 
@@ -349,9 +292,6 @@
     .favorites svg {
         right: 20px
     }
-    .dropdown__header h6 {
-        text-align: center;
-    }
     .closeFavorites {
         position: absolute;
         right: 13px;
@@ -404,34 +344,8 @@
         overflow: hidden;
         top: 0;
     }
-    .dropdown__header h6 {
-        text-align: left;
-        font-size: 18px;
-    }
-    .event__left > div:nth-child(1) {
-        height: 35px !important;
-        width: 80px !important;
-    }
-    .event__left > div:nth-child(2) {
-        width: 100%;
-    }
-    .event__left > div:nth-child(1) img {
-        width: 100%;
-        height: 100%;
-    }
-    .events h3 {
-        font-size: 15px;
-    }
-    .events span {
-        font-size: 12px;
-    }
-    .events p {
-        font-size: 12px;
-        width: 80px;
-        text-transform: capitalize;
-    }
-    .search_icon_container {
+    /* .search_icon_container {
         left: 60px;
         position: relative;
-    }
+    } */
 }

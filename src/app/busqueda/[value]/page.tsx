@@ -11,12 +11,18 @@ import SelectPro from "@/app/components/SelectPro";
 import { DateTime } from "@/app/components/Date";
 import comp from './../../../../public/svg/share.svg'
 import corp from './../../../../public/svg/heart.svg'
+import filter from './../../../../public/svg/filter.svg'
 import flc from './../../../../public/svg/angle_right.svg'
 import Link from "next/link";
 import Image from "next/image";
 import { quicksand, sans } from "../../../../public/fonts";
+import Card from "@/app/components/Card";
+import { IFavoriteState, useFavoriteStore } from "@/app/zustand/favorites";
+import useOutsideClick from "@/app/hooks/useOutsideClick";
+import ReactModal from "react-modal";
 
-const Busqueda = ({searchValue} : any) => {
+
+const Busqueda = ({ searchValue, setOpenAuth, auth }: any) => {
 
     moment.updateLocale('es', {
         months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
@@ -35,6 +41,8 @@ const Busqueda = ({searchValue} : any) => {
     const [search, setSearch] = useState<any>(searchValue || typeof isOnlyNumber === "number" ? "" : isOnlyNumber);
     const { countsCategories, getCategoriesCount }: ICategoriesState = useCategoriesState();
     const [category, setCategory] = useState<number>(search?.length === 1 ? Number(search) : 0)
+    const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
+
 
     const distritos = [
         { "id": 1, "value": "Cercado de Lima" },
@@ -81,7 +89,7 @@ const Busqueda = ({searchValue} : any) => {
 
     const searchFilters = () => {
         let data = {
-            "categoria": search.length === 1 ? search : 0,
+            "categoria": search?.length === 1 ? search : 0,
             "TipoEvento": 0,
             "Ubicacion": "",
             "horaInicioFin": "",
@@ -117,6 +125,21 @@ const Busqueda = ({searchValue} : any) => {
         getEventSearchByFilters(data);
     }, [search, date, category])
 
+    const searchDataFilter = () => {
+        let data = {
+            "categoria": category,
+            "TipoEvento": 0,
+            "Ubicacion": "",
+            "horaInicioFin": "",
+            "fecha": date,
+            "busqueda": "",
+            "cantPage": 12,
+            "page": 0
+        }
+        setIsOpenFilter(false)
+        getEventSearchByFilters(data);
+    }
+
     console.log(countsCategories)
 
     const handleSelectCategory = (_id: number) => {
@@ -129,85 +152,170 @@ const Busqueda = ({searchValue} : any) => {
 
     useEffect(() => {
         getCategoriesCount();
-    },[])
+    }, [])
 
     console.log(eventSearchByFilters)
+    const addFavoritesByUser = (item: any) => {
+        if (auth) {
+            console.log(item)
+            if (item.esfavorito === 1) {
+                deleteFavorite(item)
+            } else {
+                const data = {
+                    idEvento: item.ideventos,
+                    idFecha: item.idfecha,
+                    registrado: false
+                }
+                addFavorite(data)
+            }
+        } else {
+            setOpenAuth(true)
+        }
+    }
+
+    const [isOpenFilter, setIsOpenFilter, ref] = useOutsideClick(false);
+
+    const closeModal = () => {
+        setIsOpenFilter(false);
+        document.body.classList.remove('ReactModal__Body--open');
+    }
 
     return (
         <div>
             <>
-                <div className={styles.search__main}>
-                    <div>
-                        <div className={styles.input__search}>
-                            <input value={search.length === 1 ? "" : search} onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target?.value)} type="text" name='search' />
+                <div className="bg-[#007FA4]">
+                    <div className="py-14 2xl:max-w-screen-2xl xl:max-w-screen-xl mx-auto lg:max-w-screen-lg z-0 relative max-x-screen-md px-3 lg:px-4 xl:px-32">
+                        <div className="">
+                            <div className="flex items-center px-5 md:px-0">
+                                <div className="w-[400px] border-b border-solid border-[#fff] z-0 relative top-2">
+                                    <input className="w-full bg-transparent outline-none capitalize text-[#fff]" onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target?.value)} type="text" name='search' />
 
-                            <div className={styles.buttons__filters}>
-                                <Icon icon="ei:close" onClick={() => setSearch("")} />
-                                <div></div>
-                                <Icon onClick={searchFilters} icon="material-symbols:search" />
+                                    <div className="md:hidden relative top-[-28px] left-10 flex justify-end w-full">
+                                        <div className={styles.buttons__filters}>
+                                            <Icon icon="ei:close" onClick={() => setSearch("")} />
+                                            <div></div>
+                                            <Icon onClick={searchFilters} icon="material-symbols:search" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="hidden md:block">
+                                    <button className="border-[#fff] border rounded-full text-[#fff] px-20 py-2.5 uppercase ml-3 text-[12px]" onClick={searchFilters}>Buscar</button>
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <button onClick={searchFilters}>Buscar</button>
                         </div>
                     </div>
                 </div>
-                <div className={styles.explorer}>
+                <div>
+                    <div className="hidden md:grid md:grid-cols-4 md:overflow-hidden xl:gap-x-32 lg:gap-x-64 gap-5 mt-10 2xl:max-w-screen-2xl xl:max-w-screen-xl mx-auto lg:max-w-screen-lg relative max-x-screen-md px-3 lg:px-4 xl:px-32">
+                        <div className="md:col-auto sm:col-start-1 sm:col-end-5">
+                            <SelectPro isIconLeft={true} options={distritos} placeholder={`Explora en Lima, Peru`} name='distrito' onChange={() => { }} />
+                        </div>
+                        <div className="md:col-auto col-start-1 col-end-5">
+                            <DateTime onChange={handleDate} name="dateStart" placeholder="desde hoy" />
+                        </div>
+                        <div className="md:col-auto col-start-1 col-end-5">
+                            <SelectPro isIconLeft={false} options={countsCategories?.map((item: any) => ({
+                                id: item?.idCategorias,
+                                value: item?.nombreCategoria
+                            }))} placeholder={`Cualquier categoría`} name='categoria' onChange={handleSelectCategory} />
+                        </div>
 
-                    <div className={styles.filters__main}>
-                        <SelectPro isIconLeft={true} options={distritos} placeholder={`Explora en Lima, Peru`} name='distrito' onChange={() => { }} />
-
-                        <DateTime onChange={handleDate} name="dateStart" placeholder="desde hoy" />
-
-                        <SelectPro isIconLeft={false} options={countsCategories?.map((item: any) => ({
-                            id: item?.idCategorias,
-                            value: item?.nombreCategoria
-                        }))} placeholder={`Cualquier categoría`} name='categoria' onChange={handleSelectCategory} />
                     </div>
                     <div className={styles.event__notFound}>
                         {
                             eventSearchByFilters === undefined && <p>No se encontraron resultados para este evento, por favor vuelve intentarlo</p>
                         }
                     </div>
-                    <div className={styles.explorer_wrapper}>
-                        {
-                            eventSearchByFilters?.map((item: any, index: number) => (
-                                <motion.div className="shadow-custom-2 mb-16 relative min-h-[300]"
-                                    key={index}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() => navigateEvent(item)}
-                                    layout
-                                    initial={{ opacity: 0, y: 50 }}  // Animación inicial (fuera de la vista)
-                                    animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
-                                    exit={{ opacity: 0, y: -50 }}  // Animación al salir (desplazamiento hacia abajo)
-                                    transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
-                                >
-                                    <div>
-                                        <strong className={`${quicksand.className} font-[900] text-5xl text-[#444]`}>{moment(item?.FechaInicio)?.format('DD')}</strong>
-                                        <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment(item?.FechaInicio)?.format('MMM').toUpperCase()}</span>
+                    <div className="md:hidden px-8 mt-10 flex items-center justify-between">
+                        <p>{eventSearchByFilters?.length} resultados</p>
+                        <div className="flex cursor-pointer" onClick={() => setIsOpenFilter(true)}>
+                            <p className="text-[#007FA4] uppercase font-bold mr-2">Filtros </p>
+                            <Image src={filter} width={20} height={20} alt="filtro" />
+                        </div>
+                    </div>
+                    {
+                        isOpenFilter && (
+                            <ReactModal className={"p-0"} onRequestClose={() => setIsOpenFilter(false)} ariaHideApp={false} isOpen={isOpenFilter}>
+                                <div ref={ref} className="absolute top-0 w-full bg-[#fff] h-[100vh] z-50 p-10 overflow-hidden">
+                                    <h5 className="font-bold text-2xl border-b border-solid border-[#ddd] pb-5">Filtros de búsqueda</h5>
+                                    <div className="absolute top-3 right-3">
+                                        <Icon width={30} icon="ei:close" onClick={closeModal} />
                                     </div>
-                                    <div>
-                                        <img className={styles.lastimg} src={item?.url} alt="imagenes1" />
-                                    </div>
-                                    <div>
-                                        <h3 className={`${sans.className} font-[300] font-sans`}>{item?.titulo}</h3>
-                                        <h6 className={`${sans.className} font-[300] font-sans`}>{moment(item?.FechaInicio)?.format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
-                                        <h5 className={`${sans.className} font-[300] font-sans`}>{item?.NombreLocal}</h5>
-                                    </div>
-                                    <div className={styles.price}>
-                                        <span>Desde</span> <br />
-                                        <strong>S/ {Number(item.Monto).toFixed(2)}</strong>
-                                        {/* <h6>Visto 21 veces</h6> */}
-                                        <div>
-                                            <Image src={comp} alt="comp" width={20} height={20} />
-                                            <Image src={corp} alt="corp" width={20} height={20} />
+                                    <div className="md:grid md:grid-cols-4 md:overflow-hidden xl:gap-x-32 lg:gap-x-64 gap-5 mt-10 2xl:max-w-screen-2xl xl:max-w-screen-xl mx-auto lg:max-w-screen-lg relative max-x-screen-md lg:px-4 xl:px-32">
+                                        <div className="md:col-auto sm:col-start-1 sm:col-end-5 w-full">
+                                            <SelectPro isIconLeft={true} options={distritos} placeholder={`Explora en Lima, Peru`} name='distrito' onChange={() => { }} />
+                                        </div>
+                                        <div className="md:col-auto col-start-1 col-end-5 mt-5 w-full">
+                                            <DateTime onChange={handleDate} name="dateStart" placeholder="desde hoy" />
+                                        </div>
+                                        <div className="md:col-auto col-start-1 col-end-5 mt-5 pb-10 w-full">
+                                            <SelectPro isIconLeft={false} options={countsCategories?.map((item: any) => ({
+                                                id: item?.idCategorias,
+                                                value: item?.nombreCategoria
+                                            }))} placeholder={`Cualquier categoría`} name='categoria' onChange={handleSelectCategory} />
+                                        </div>
+                                        <div className="border-t border-solid border-[#ddd]"></div>
+                                        <div className="flex w-full">
+                                            <button onClick={searchDataFilter} className="bg-[#007FA4] uppercase mt-5 text-center w-full py-3 text-[#fff] rounded-full font-bold">Aplicar</button>
                                         </div>
                                     </div>
+                                </div>
+                            </ReactModal>
+                        )
+                    }
+                    <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl lg:max-w-screen-lg lg:px-4 h-18 py-5 mx-auto p-0 mt-3 xl:px-32">
+                        <div className="hidden md:block">
+                            {
+                                eventSearchByFilters?.map((item: any, index: number) => (
+                                    <motion.div className="max-h-[200px] grid rounded-2xl items-center grid-cols-12 shadow-custom-2 mb-16 relative"
+                                        key={index}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => navigateEvent(item)}
+                                        layout
+                                        initial={{ opacity: 0, y: 50 }}  // Animación inicial (fuera de la vista)
+                                        animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
+                                        exit={{ opacity: 0, y: -50 }}  // Animación al salir (desplazamiento hacia abajo)
+                                        transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
+                                    >
+                                        <div className="col-start-1 col-end-2 text-center">
+                                            <strong className={`${quicksand.className} block font-[900] text-5xl text-[#444]`}>{moment(item?.FechaInicio)?.format('DD')}</strong>
+                                            <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment(item?.FechaInicio)?.format('MMM').toUpperCase()}</span>
+                                        </div>
+                                        <div className="col-start-2 col-end-6 max-h-[200px]">
+                                            <div className="max-h-[200px] w-full">
+                                                <Image width={250} height={200} className="h-[revert-layer] w-full object-fill" src={item?.url} alt="imagenes1" />
+                                            </div>
+                                        </div>
+                                        <div className="col-start-6 col-end-11">
+                                            <h3 className={`${sans.className} ml-10 font-bold font-sans text-2xl text-[#444]`}>{item?.titulo}</h3>
+                                            <h6 className={`${sans.className} ml-10 mt-4 font-[300] font-sans`}>{moment(item?.FechaInicio)?.format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
+                                            <h5 className={`${sans.className} ml-10 font-[300] font-sans`}>{item?.NombreLocal}</h5>
+                                        </div>
+                                        <div className="col-start-11 col-end-13 justify-end flex">
+                                            <div className="mr-8">
+                                                <span className="text-sm flex justify-end">Desde</span>
+                                                <p className="mt-5 text-[#007FA4] text-2xl font-bold">S/ {Number(item.Monto).toFixed(2)}</p>
+                                                {/* <h6>Visto 21 veces</h6> */}
+                                                <div className="flex justify-end">
+                                                    <Image className="mr-5 mt-2" src={comp} alt="comp" width={20} height={20} />
+                                                    <Image className="mt-2" src={corp} alt="corp" width={20} height={20} />
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                    <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" href="/about">VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
-                                </motion.div>
-                            ))
-                        }
+                                        <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" href="/about">VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
+                                    </motion.div>
+                                ))
+                            }
+                        </div>
+
+                        <div className="block md:hidden px-8">
+                            {
+                                eventSearchByFilters?.map((item: any, index: number) => (
+                                    <Card item={item} height={450} key={index} addFavoritesByUser={addFavoritesByUser} />
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
             </>

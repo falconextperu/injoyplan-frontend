@@ -124,11 +124,13 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
         }
     }
 
+    console.log(data);
+
     return (
-        <div className="max-w-screen-2xl mx-auto mb-10">
+        <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl lg:max-w-screen-lg mx-auto mb-10 xl:px-10 px-0">
             {/* {showModal && <ModalDates setShowModal={setShowModal} showModal={showModal} dataFechaOrdenada={dataFechaOrdenada} />} */}
-            <div className='grid grid-cols-12 mt-10'>
-                <div className="col-span-7">
+            <div className='grid grid-cols-12 mt-10 gap-10'>
+                <div className="col-start-1 col-end-13 xl:col-start-1 xl:col-end-9 px-5">
                     <div>
                         <h2 className='text-[#007FA4] text-4xl font-bold'>{data[0]?.titulo}</h2>
                         <div>
@@ -139,37 +141,50 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                     </div>
                     <div className={styles.fuent}>
                         <img className={styles.logmagen} src={data[0]?.url} alt="bitimg" />
-                        <div className={styles.ress}>
+                        <div className='flex justify-between items-center'>
                             {/* href={`https://${item.urlFuente}`} */}
-                            <Link target='_blank' href={`https://${data[0]?.urlFuente}`}>VER FUENTE <Image src={flechaceleste} alt="flechaceleste" /></Link>
-                            <div className={styles.responsive}>
-                                <Image src={compartir} alt="compartir" />
-                                {data[0]?.favorito > 0 ? <Icon color='#A3ABCC' icon="mdi:heart-outline" /> : <img src={fav} alt="fav" />}
+                            <Link className='relative xl:bottom-0 bottom-[-3px]' target='_blank' href={`https://${data[0]?.urlFuente}`}>VER FUENTE <Image src={flechaceleste} alt="flechaceleste" /></Link>
+                            <div className="xl:hidden flex items-center">
+                                <div className='flex' onClick={handleCopyLink}>
+                                    <Image src={compartir} width={20} alt="compartir" /><span className='text-[#A3ABCC] ml-4 font-bold text-md'></span>
+                                </div>
+                                <div className='flex items-center' onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
+                                    addFavoritesByUser(data[0]);
+                                }}>
+                                    {data[0].favorito > 0 ? <div className='top-3'>
+                                        <Icon color='A3ABCC' width={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
+                                    </div> :
+                                        <div className='relative top-3'>
+                                            <Image src={fav} alt="fav" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
+                                        </div>}
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {
-                        !isMobile && (
-                            <div>
-                                <h4 className="text-[#212121] mt-10 text-xl font-bold mb-6">Lo que se sabe del evento</h4>
-                                <div className="text-[#212121] text-md font-thin font-sans mb-6">{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
-                            </div>
-                        )
+                        // !isMobile && (
+                        <div className='xl:block hidden'>
+                            <h4 className="text-[#212121] mt-10 text-xl font-bold mb-6">Lo que se sabe del evento</h4>
+                            <div className="text-[#212121] text-md font-thin font-sans mb-6">{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
+                        </div>
                     }
 
                     {
-                        !isMobile && (
+                        // !isMobile && (
+                        <div className='xl:block hidden'>
                             <div ref={mapRef}>
                                 <Map location={data[0]?.latitud_longitud} />
                             </div>
-                        )
+                        </div>
                     }
                 </div>
 
-                <div className={styles.boxmayor2}>
+                <div className="col-start-1 col-end-13 xl:col-start-9 xl:col-end-13">
 
-                    <div className="flex items-center justify-end">
+                    <div className="xl:items-center xl:flex xl:justify-end md:block hidden">
                         <div className='flex mr-10' onClick={handleCopyLink}>
                             <Image src={compartir} alt="compartir" /><span className='text-[#A3ABCC] ml-4 font-bold text-md'>Compartir</span>
                         </div>
@@ -180,13 +195,13 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                         }}>
                             {data[0].favorito > 0 ? <div className='flex items-center'>
                                 <Icon color='A3ABCC' width={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'>Favorito</span>
-                            </div> : 
-                            <div className='flex items-center'>
-                                <Image src={fav} alt="fav" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'>Favorito</span>
-                            </div>}
+                            </div> :
+                                <div className='flex items-center'>
+                                    <Image src={fav} alt="fav" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'>Favorito</span>
+                                </div>}
                         </div>
                     </div>
-                    <div className='bg-[#f7f7fa] mt-16 p-10 sticky top-4'>
+                    <div className='bg-[#f7f7fa] xl:mt-16 mt-0 xl:p-10 p-6 xl:sticky top-0 xl:top-4'>
                         <div>
                             <h6 className='font-bold'>Fecha y hora</h6>
                             <p className='font-thin'>{date}. {initHour} - {endHour}</p>
@@ -197,7 +212,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                             <div className='grid mt-4 grid-cols-5 gap-2'>
                                 {
                                     dataFechaOrdenada?.slice(0, 5).map((item: any, index: number) => (
-                                        <div className='cursor-pointer border py-2.5 rounded px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
+                                        <div className='cursor-pointer border py-2.5 w-[70px] h-[70px] rounded px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
                                             <strong className='block text-center text-xl'>{moment(item?.FechaInicio).utc().format('D')}</strong>
                                             <span className='font-thin text-center mx-auto block'>{moment(item?.FechaInicio).utc().format('MMM').toUpperCase()}</span>
                                         </div>
@@ -237,24 +252,24 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                     </div>
                     {/*responsive*/}
                     {
-                        isMobile && (
-                            <div className={styles.descriptionEventMovile}>
-                                <h4>Lo que se sabe del evento</h4>
-                                <p>{ReactHtmlParser(data[0]?.descripcionEvento)}</p>
+                        <div className='xl:hidden block px-5'>
+                            <div>
+                                <h4 className='mb-5 mt-5 font-bold text-[18px]'>Lo que se sabe del evento</h4>
+                                <div className='text-[#212121] text-md font-thin font-sans mb-6'>{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
                             </div>
-                        )
+                        </div>
                     }
                     {
-                        isMobile && (
+                        <div className='xl:hidden block mt-5'>
                             <div ref={mapRef} style={{ marginBottom: "15px", padding: "0px 10px" }}>
                                 <Map location={data[0]?.latitud_longitud} />
                             </div>
-                        )
+                        </div>
                     }
                 </div>
             </div>
 
-            { categoriesRelations?.code ? "" : <RelatedEvents data={data} /> }
+            {categoriesRelations?.code ? "" : <RelatedEvents data={data} />}
         </div >
 
 

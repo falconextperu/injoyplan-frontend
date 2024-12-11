@@ -3,10 +3,11 @@ import ReactModal from 'react-modal';
 import styles from './auth.module.css';
 import logo from '../../../../public/svg/logo.svg';
 import { Dispatch, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m, motion } from 'framer-motion';
 import { IAuthState, useAuthStore } from '../../zustand/auth';
 import useAlertStore from '../../zustand/alert';
 import Image from 'next/image';
+import useIsMobile from '@/app/hooks/useIsMobile';
 
 interface IProps {
     openAuth: boolean;
@@ -25,29 +26,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
     const [isRegister, setIsRegister] = useState<boolean>(false);
     const { signIn, login } : IAuthState = useAuthStore();
 
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        // Función para verificar el tamaño de la ventana
-        const handleResize = () => {
-            if (window.innerWidth <= 600) {
-                setIsMobile(true);
-            } else {
-                setIsMobile(false);
-            }
-        };
-
-        // Ejecuta la función cuando el componente se monta
-        handleResize();
-
-        // Añade un listener para detectar cambios en el tamaño de la ventana
-        window.addEventListener('resize', handleResize);
-
-        // Limpia el listener cuando el componente se desmonta
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
+    const isMobile = useIsMobile();
 
     // Estados para controlar los valores del formulario
     const [nombre, setNombre] = useState<string>("");
@@ -71,7 +50,11 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
             maxHeight: isMobile ? "100vh" : "880px",
             height: isMobile ? "100vh" : "",
             background: isMobile ? "#FFF" : "transparent",
-            transform: 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000
+        },
+        overlay: {
+            zIndex: 999, // Ensure the overlay is above the blurred content
         }
     };
     
@@ -89,8 +72,6 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
             terminoCondiciones: 1,
             politica: 1
         };
-
-       
 
         if(isRegister) {
             if(nombre === "" || apellido === "" || genero === "" || email === "" || password === "") {

@@ -21,7 +21,7 @@ const MailBox = () => {
     return (
 
         <div className='bg-[#861F20]'>
-            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md mx-auto">
+            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] mx-auto">
                 <div className="flex items-center justify-between pt-10 pb-10 px-10 xl:px-20 md:px-0">
                     <div>
                         <h2 className='text-[#fff] font-bold md:text-4xl text-3xl'>¡No te pierdas de los mejores eventos!</h2>

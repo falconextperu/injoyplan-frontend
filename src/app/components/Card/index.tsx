@@ -10,10 +10,11 @@ import { Event } from "@/app/interfaces/event";
 interface IProps {
     key: number
     item: Event
+    height?: number
     addFavoritesByUser: (event: Event) => void
 }
 
-const Card = ({ item, addFavoritesByUser }: IProps) => {
+const Card = ({ item, addFavoritesByUser,height }: IProps) => {
     return (
         <motion.div
             layout
@@ -21,7 +22,7 @@ const Card = ({ item, addFavoritesByUser }: IProps) => {
             animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
             exit={{ opacity: 0, y: -50 }}  // Animación al salir (desplazamiento hacia abajo)
             transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
-            className='min-h-[470px] flex flex-col justify-between w-full mb-5 md:mb-5'
+            className={`min-h-[${height}] flex flex-col justify-between w-full mb-5 md:mb-5`}
         >
             <Link
                 href={`/evento/${item.ideventos}/${item.idfecha}`}

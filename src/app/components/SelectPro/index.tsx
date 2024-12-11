@@ -211,6 +211,7 @@ const SelectPro = ({
     <>
       <div ref={ref} className={`${styles.wrapper__select} ${extraClass}`}>
         <div
+        onClick={() => setIsOpen(!isOpen)}
           className={
             `${disabled
               ? `${styles.input__select} ${styles.disabled__select}`

@@ -43,26 +43,18 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
     },
     setEventsAsFavorite: (idEvento, resp) => {
         set((state : any) => ({
-            events: state.events.map((event : any) =>
+            events: state?.events?.map((event : any) =>
                 event.ideventos === idEvento
                     ? { ...event, esfavorito: event.esfavorito === 0 ? 1 : 0, favorito: resp }
                     : event
-            ),
-            // dataEvent: state.dataEvent.map((dataEventItem : any) => ({
-            //     ...dataEventItem,
-            //     data: dataEventItem.data.map((item : any) =>
-            //         item.ideventos === idEvento
-            //             ? { ...item, favorito: resp }
-            //             : item
-            //     ),
-            // })),
+            )
         }));
     },
     setEventDataFavorite: (idEvento: any, resp: number) => {
         set((state : any) => ({
-            dataEvent: state.dataEvent.map((dataEventItem : any) => ({
+            dataEvent: state?.dataEvent?.map((dataEventItem : any) => ({
                 ...dataEventItem,
-                data: dataEventItem.data.map((item : any) =>
+                data: dataEventItem?.data?.map((item : any) =>
                     item.ideventos === idEvento
                         ? { ...item, favorito: resp }
                         : item
@@ -71,10 +63,8 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         }));
     },
     setEventsDeleteFavorite: (favorito: any) => {
-        console.log(favorito)
-        console.log("QUE VIENE DEL EVENTO", event)
         set((state: any) => ({
-            events: state.events.map((item: any) => 
+            events: state?.events?.map((item: any) => 
                 item.favorito === favorito
                 ? { ...item , esfavorito: item.esfavorito === 1 ? 0 : 1 }
                 : item
@@ -82,12 +72,10 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         }));
     },
     setEventDataDeleteDFavorite: (favorito: any) => {
-        console.log(favorito)
-        console.log("QUE VIENE DEL EVENTO", event)
         set((state: any) => ({
-            dataEvent: state.dataEvent.map((dataEventItem : any) => ({
+            dataEvent: state?.dataEvent?.map((dataEventItem : any) => ({
                 ...dataEventItem,
-                data: dataEventItem.data.map((item : any) =>
+                data: dataEventItem?.data?.map((item : any) =>
                     item.favorito === favorito
                 ? { ...item , favorito: null }
                 : item

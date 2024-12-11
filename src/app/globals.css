@@ -13,8 +13,13 @@
   overflow: hidden;
 }
 
+.blur-background {
+  filter: blur(5px);
+  pointer-events: none; /* Prevent interaction with background content */
+}
+
 .ReactModal__Overlay {
-  background-color: rgba(0, 0, 0, 0.4) !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
 }
 
 .slick-list {
@@ -41,6 +46,10 @@
   background: #7c7c7c;
   width: 55px !important;
   border-radius: 10px;
+}
+
+.slick-next:before , .slick-next , .slick-prev{
+  display: none !important;
 }
 
 .slick-dots li button:before {
@@ -143,30 +152,25 @@
 }
 
 .scrollbar {
-  border-radius: 28px !important;
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.1); /* Color del thumb y track */
 }
 
 .scrollbar::-webkit-scrollbar {
-  border-radius: 28px;
   width: 4px; /* Ancho del scrollbar vertical */
   height: 4px; /* Alto del scrollbar horizontal */
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-  border-radius: 28px;
   background: rgba(0, 0, 0, 0.5); /* Color del thumb */
   border-radius: 9999px; /* Bordes redondeados */
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  border-radius: 28px;
   background: rgba(0, 0, 0, 0.8); /* Color al hover */
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  border-radius: 9999px;
   background: rgba(0, 0, 0, 0.1); /* Color del track */
 }
 
@@ -177,20 +181,5 @@
 
   .slick-slider button {
     display: none !important;
-  }
-  .slick-list {
-    height: 350px !important;
-  }
-  
-  .slick-list > div {
-    height: 98% !important;
-  }
-  
-  .slick-list > div > div > div {
-    height: 94%;
-  }
-  
-  .slick-list img {
-    height: 100% !important;
   }
 }

@@ -68,9 +68,9 @@ const Slide = () => {
             <div className="h-full">
                 <div className="h-full">
                     <Image src={banner} alt="banner" className="w-full h-full object-cover" />
-                    <div className="absolute md:top-40 top-10 left-6">
+                    <div className="absolute md:top-40 top-24 left-6">
                         <div>
-                            <h4 className="bg-customText text-[#fff] rounded text-3xl p-2 w-fit">Estamos JOBdidos Vol. 2</h4>
+                            <h4 className="bg-customText text-[#fff] rounded text-2xl md:text-3xl p-2 w-fit">Estamos JOBdidos Vol. 2</h4>
                             <div>
                                 <div className="flex items-center w-fit bg-customText text-[#fff] rounded text-md p-2 ">
                                     <p className="ml-2">VIE <strong className="font-normal block">15 ENE</strong></p>
