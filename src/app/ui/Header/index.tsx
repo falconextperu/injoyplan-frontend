@@ -186,7 +186,7 @@ const Header = () => {
                                 isOpenFavorite && (
                                     <div
                                         ref={refFavorite}
-                                        className={"top-0 left-0 w-full md:w-auto h-[100vh] overflow-hidden md:h-auto md:shadow-custom-2 bg-[#fff] md:rounded-xl md:top-14 absolute md:right-0 z-50 md:after:absolute md:after:top-[-10px] md:after:right-[10px] md:after:mx-auto md:after:w-[1px] md:after:border-b-[11px] md:after:border-b-white md:after:border-l-[11px] md:after:border-l-transparent md:after:border-r-[11px] md:after:border-r-transparent md:after:content-['']"}
+                                        className={"top-0 md:left-auto left-0 w-full md:w-[430px] h-[100vh] overflow-hidden md:overflow-y-auto md:max-h-[350px] md:shadow-custom-2 bg-[#fff] md:rounded-xl md:top-14 absolute md:right-0 z-50 md:after:absolute md:after:top-[-10px] md:after:right-[10px] md:after:mx-auto md:after:w-[1px] md:after:border-b-[11px] md:after:border-b-white md:after:border-l-[11px] md:after:border-l-transparent md:after:border-r-[11px] md:after:border-r-transparent md:after:content-['']"}
                                     >
                                         <ul>
                                             <div>

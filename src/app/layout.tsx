@@ -8,10 +8,8 @@ export const metadata: Metadata = {
   title: "Injoyplan",
   description: "Injoyplan plataforma web que necesitas para poder ver los eventos más importantes para tí",
   icons: {
-    icon: "../../public/svg/logo.svg",
-    shortcut: "../../public/svg/logo.svg",
-    apple: "../../public/svg/logo.svg",
-  },
+    icon: '/svg/logo.svg'
+  }
 };
 
 export default function RootLayout({
@@ -23,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="../../public/svg/logo.svg" />
+        <link rel="icon" href="/svg/logo.svg" />
       </head>
       <body className={`${quicksand.className}`}>
         <ClientLayout children={children} />
