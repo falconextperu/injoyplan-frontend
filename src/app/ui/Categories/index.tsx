@@ -96,7 +96,7 @@ const Categories = ({ setOpenCategories, openCategories }: IProps) => {
                         <div className={styles.categories}>
                             <div className='p-8 text-center'>
                                 <div>
-                                    <h2 className='text-[#861F21] font-bold text-3xl mt-5'>¡Bienvenido a Injoyplan!</h2>
+                                    <h2 className='text-[#861F21] font-bold text-4xl mt-5'>¡Bienvenido a Injoyplan!</h2>
                                     <p className='text-[#444] text-[14px] mt-2'>Tus gustos sobre todo, elígelos y te recomendaremos los mejores eventos para tí.</p>
                                 </div>
                                 <div className="grid grid-cols-4 gap-8 mt-8">
@@ -126,7 +126,7 @@ const Categories = ({ setOpenCategories, openCategories }: IProps) => {
                                     }
                                 </div>
                                 <div className="mt-10">
-                                    <button className='cursor-pointer bg-[#007FA4] text-[#fff] px-14 mb-6 py-2 rounded-full' onClick={handleContinue}>Continuar</button>
+                                    <button className='cursor-pointer bg-[#007FA4] text-[#fff] px-14 mb-6 py-2 rounded-full uppercase' onClick={handleContinue}>Continuar</button>
                                     <p className='text-[#007fa4] cursor-pointer font-medium underline' onClick={handleContinue}>No, no tengo un gusto en especifico</p>
                                 </div>
                             </div>

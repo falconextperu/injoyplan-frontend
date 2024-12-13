@@ -1,6 +1,6 @@
 "use client";
 import styles from './header.module.css'
-import logo from '../../../../public/images/logo.png'
+import logo from '../../../../public/svg/injoyplan.svg'
 import lupa from '../../../../public/svg/search.svg'
 import lupaMobile from '../../../../public/svg/searchmobile.svg'
 import fb from '../../../../public/svg/fb.svg'
@@ -14,14 +14,14 @@ import { IAuthState, useAuthStore } from '../../zustand/auth'
 import { IEventsState, useEventStore } from '../../zustand/events'
 import { IFavoriteState, useFavoriteStore } from '../../zustand/favorites'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import nofavorite from '../../../../public/svg/nofavorite.svg'
 import moment from 'moment'
-// import Auth from '../../Auth'
 import Image from 'next/image';
 import Auth from '../Auth';
 import useOutsideClick from '@/app/hooks/useOutsideClick';
 import useIsMobile from '@/app/hooks/useIsMobile';
 import { usePathname } from 'next/navigation'
+import { quicksand, sans } from '../../../../public/fonts';
+import 'moment/locale/es'; // Importa el idioma español
 
 moment.locale('es');
 
@@ -77,15 +77,37 @@ const Header = () => {
 
     const isMobile = useIsMobile();
 
+    function HighlightedText({ text, highlight }: { text: string; highlight: string }) {
+        if (!highlight) {
+            return <span>{text}</span>;
+        }
 
+        // Crear una expresión regular para buscar el texto que coincide, ignorando mayúsculas/minúsculas
+        const regex = new RegExp(`(${highlight})`, 'gi');
+        const parts = text.split(regex);
+
+        return (
+            <span>
+                {parts.map((part, index) =>
+                    regex.test(part) ? (
+                        <b key={index} className="font-black text-black">
+                            {part}
+                        </b>
+                    ) : (
+                        part
+                    )
+                )}
+            </span>
+        );
+    }
     return (
-        <div className="border-b border-solid border-[#e9e9e9] bg-[#F9FAFC]">
+        <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
             <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
-            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-5 px-5 mx-auto items-center grid grid-cols-12">
-                <Link className='w-44' href="/"><Image src={logo} alt="logo" height={300} width={300} /></Link>
+            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-6 px-5 mx-auto items-center grid grid-cols-12">
+                <Link className='w-48' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
                 <div className={
                     isMobile ?
-                        styles.search_containerMobile : "relative border col-start-4 col-end-9 w-full col-span-5 flex items-center border-1 border-solid border-[#ddd] rounded-[50px] bg-white"}>
+                        styles.search_containerMobile : "relative border col-start-4 col-end-9 w-full col-span-5 flex items-center border-1 border-solid border-[#e8e8e8] rounded-[50px] bg-white"}>
                     <div className="flex justify-center pr-2 pl-4">
                         <Image src={lupa} width={28} onClick={() => setIsOpenEvent(true)} alt="lupa" className={styles.search_icon} />
                     </div>
@@ -96,7 +118,7 @@ const Header = () => {
                                 onClick={() => setIsOpenEvent(true)}
                                 onChange={(e: any) => setSearch(e.target.value)}
                                 type="text" placeholder="Evento, equipo o artista"
-                                className="w-full bg-transparent border-none rounded-3xl relative outline-none font-[Quicksand] py-4 text-md text-[#5C6570] font-bold"
+                                className="w-full placeholder:text-[#bababa] bg-transparent border-none rounded-3xl relative outline-none font-[Quicksand] py-3 text-md text-[#5C6570] font-bold"
                             />
                         }
                         {
@@ -116,26 +138,26 @@ const Header = () => {
                                         }}>
                                             <div>
                                                 <div>
-                                                    {eventSearch?.length > 0 ? <h6 className='font-bold text-2xl text-left px-6 pt-4 pb-4 border-b border-solid border-[#ddd]'>Eventos</h6> :
+                                                    {eventSearch?.length > 0 ? <h6 className='font-bold text-xl text-left px-6 pt-4 pb-4 border-b border-solid border-[#ddd]'>Eventos</h6> :
                                                         <p className={styles.noResults}>Ver todos los resultado para <strong>{search || "Por buscar ..."}</strong></p>
                                                     }
                                                 </div>
                                                 <div>
                                                     {eventSearch?.length > 0 && eventSearch?.map((item: any, index: number) => (
-                                                        <Link href={`/evento/${item.ideventos}/${item.idfecha}`} key={index}>
-                                                            <div className={styles.events}>
+                                                        <Link className={sans.className} href={`/evento/${item.ideventos}/${item.idfecha}`} key={index}>
+                                                            <div className='flex justify-between px-5 pb-0 pt-4'>
                                                                 <div className='flex items-center'>
-                                                                    <div className="w-[80px] h-[55px] mr-4">
-                                                                        <Image className='w-full h-full object-cover' objectFit='contain' width={100} height={100} src={item.url} alt="" />
+                                                                    <div className="w-[40px] h-[40px] mr-4">
+                                                                        <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
                                                                     </div>
                                                                     <div>
-                                                                        <h3 className='font-bold text-[18px]'>{item.titulo}</h3>
-                                                                        <span>{item.NombreLocal}</span>
+                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis w-[320px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
+                                                                        <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
                                                                     </div>
                                                                 </div>
-                                                                <div>
-                                                                    <p> {moment(item.FechaInicio).utc().format('ddd, D MMM').toUpperCase()}</p>
-                                                                    <span>{item.HoraInicio}</span>
+                                                                <div className='text-right capitalize'>
+                                                                    <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utc().format('ddd, D MMM').toLowerCase().replace('.',"")}</p>
+                                                                    <p className={quicksand.className + ' text-right text-[#848484] text-[14px]'}>{item.HoraInicio}</p>
                                                                 </div>
                                                             </div>
                                                         </Link>
@@ -166,12 +188,12 @@ const Header = () => {
                                 <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
                             </div>
                             <div className='ml-3 border-[#007FA4] border border-solid rounded-full md:px-2.5 px-3 py-3 md:py-[10px]'>
-                                <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20}  alt='ig' />
+                                <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20} alt='ig' />
                             </div>
                         </div>
                     ) :
                         <div className="col-start-9 col-end-13 flex justify-end md:relative items-center" ref={favoritesRef}>
-                           {isMobile && auth !== null ?  <p className='font-bold text-[#007FA4] bg-[#DBEBF1] rounded-full p-2'>{auth?.nombre[0]} {auth?.Apellido?.[0]}</p> :  <p className='font-bold mr-3'>{auth?.nombre} {auth?.Apellido}</p>}
+                            {isMobile && auth !== null ? <p className='font-bold text-[#007FA4] bg-[#DBEBF1] rounded-full p-2'>{auth?.nombre[0]} {auth?.Apellido?.[0]}</p> : <p className='font-bold mr-3'>{auth?.nombre} {auth?.Apellido}</p>}
                             {auth === null && <button onClick={() => setOpenAuth(true)}
                                 className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
                             >Ingresar</button>}
@@ -179,9 +201,9 @@ const Header = () => {
                                 isMobile &&
                                 <Image onClick={() => setIsOpenEvent(true)} className='mr-2 ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />
                             }
-                          
-                                <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                           
+
+                            <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+
                             {
                                 isOpenFavorite && (
                                     <div
@@ -228,7 +250,7 @@ const Header = () => {
 
                                                             <div className='p-10 px-16 relative z-50 text-center mx-auto flex justify-center'>
                                                                 <div>
-                                                                    <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60}/>
+                                                                    <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60} />
                                                                     <strong className='text-[16px]'>Aún no tienes eventos favoritos</strong>
                                                                     <p className='text-[14px] mt-2'>En cuanto los tengas, podrás verlos aquí</p>
                                                                 </div>

@@ -14,7 +14,7 @@
 }
 
 .blur-background {
-  filter: blur(5px);
+  filter: blur(3px);
   pointer-events: none; /* Prevent interaction with background content */
 }
 

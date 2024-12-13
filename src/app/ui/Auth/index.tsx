@@ -21,10 +21,10 @@ const variants = {
 };
 
 const Auth = ({ openAuth, setOpenAuth }: IProps) => {
-    
+
 
     const [isRegister, setIsRegister] = useState<boolean>(false);
-    const { signIn, login } : IAuthState = useAuthStore();
+    const { signIn, login }: IAuthState = useAuthStore();
 
     const isMobile = useIsMobile();
 
@@ -57,7 +57,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
             zIndex: 999, // Ensure the overlay is above the blurred content
         }
     };
-    
+
 
     // Función para manejar el envío del formulario
     const handleSubmit = async () => {
@@ -73,14 +73,14 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
             politica: 1
         };
 
-        if(isRegister) {
-            if(nombre === "" || apellido === "" || genero === "" || email === "" || password === "") {
+        if (isRegister) {
+            if (nombre === "" || apellido === "" || genero === "" || email === "" || password === "") {
                 return useAlertStore.getState().alert("Complete los datos obligatorios para crear su cuenta", "error")
             }
             signIn(body)
             setIsRegister(false)
         } else {
-            if(email === "" || password === "") {
+            if (email === "" || password === "") {
                 return useAlertStore.getState().alert("Complete datos obligatorios para iniciar sesion", "error")
             }
             let data = {
@@ -114,8 +114,8 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                     <div className="py-0">
                         <div className='text-center'>
                             <Image src={logo} className='mx-auto' width={60} height={60} alt="Logo" />
-                            <h2 className='font-bold font-sans text-2xl mt-2 text-[#212121] mb-0'>Bienvenido a Injoyplan !</h2>
-                            <p className='mt-2 mb-2 font-sans font-thin'>Registra o crea tu primera cuenta y empieza a explorar los eventos más importantes para ti</p>
+                            <h2 className='font-bold font-sans text-2xl mt-2 text-[#212121] mb-0'>¡Bienvenido a Injoyplan!</h2>
+                            <p className='mt-1 mb-2 font-sans font-thin'>Empieza a explorar los eventos más importantes para ti</p>
                         </div>
                         <div>
                             {
@@ -123,30 +123,31 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                     <div className="grid grid-cols-2 gap-4 mt-8">
                                         <div>
                                             <label className='font-normal font-sans' htmlFor="nombre">Nombres</label>
-                                            <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="text" name='nombre' value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                                            <input className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="text" name='nombre' value={nombre} onChange={(e) => setNombre(e.target.value)} />
                                         </div>
                                         <div>
                                             <label className='font-normal font-sans' htmlFor="apellido">Apellidos</label>
-                                            <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="text" name='apellido' value={apellido} onChange={(e) => setApellido(e.target.value)} />
+                                            <input className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="text" name='apellido' value={apellido} onChange={(e) => setApellido(e.target.value)} />
                                         </div>
                                     </div>
                                 )
                             }
                             <div>
                                 <label className='font-normal block mt-3 font-sans' htmlFor="email">Email</label>
-                                <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="text" name='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                <input className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="text" name='email' value={email} onChange={(e) => setEmail(e.target.value)} />
                             </div>
                             <div className={isRegister ? "grid grid-cols-2 gap-4 " : ""}>
                                 <div>
                                     <label className='font-normal block mt-3 font-sans' htmlFor="password">Contraseña</label>
-                                    <input className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    <input className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                                 </div>
                                 {
                                     isRegister && (
                                         <div>
-                                            <label className='font-normal block mt-3 font-sans' htmlFor="genero">Género</label>
-                                            <select className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-3 rounded-md' value={genero} onChange={(e) => setGenero(e.target.value)}>
+                                            <label className='font-normal block mt-3 font-sans' htmlFor="genero">Sexo</label>
+                                            <select className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-2 rounded-md py-[9px]' value={genero} onChange={(e) => setGenero(e.target.value)}>
                                                 <option value="Seleccionar">Seleccionar</option>
+                                                <option value="No especificar">No Especificar</option>
                                                 <option value="Masculino">Masculino</option>
                                                 <option value="Femenino">Femenino</option>
                                             </select>
@@ -155,7 +156,18 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                 }
                             </div>
                             {
-                                isRegister && <p className='text-sm mt-3 mb-3'>Al hacer click en <strong>Registrarte</strong>, aceptas los términos y condiciones, nuestra política de privacidad y política de cookies.</p>
+                                isRegister && (
+                                    <>
+                                        <div className='flex items-start mt-4'>
+                                            <input type="checkbox" className='relative top-1 mr-1' />
+                                            <p className='text-sm mt-0'>Al hacer click en <strong>Registrarte</strong>, aceptas los términos y condiciones, nuestra política de privacidad y política de cookies.</p>
+                                        </div>
+                                        <div className='flex items-start mt-3'>
+                                            <input type="checkbox" className='relative top-1 mr-1' />
+                                            <p className='text-sm mt-0'>Autorizo el uso de mis datos personales para recibir información, ofertas, promociones, o contenido publicitario o comercial relacionado con esta web, Injoyplan y sus vinculados.</p>
+                                        </div>
+                                    </>
+                                )
                             }
                             <div>
                                 <button className='bg-[#007FA4] p-3 text-[#Fff] font-sans font-bold rounded w-full mt-4' onClick={handleSubmit}>{isRegister ? "Registrarte" : "Iniciar Sesión"}</button>
@@ -166,7 +178,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                     isRegister ? (
                                         <p>¿ Ya tienes una cuenta ? <span className='block text-[#007FA4] font-bold' onClick={() => setIsRegister(false)}>inicia sesión</span></p>
                                     ) :
-                                        <p>¿ Aún no te has creado una cuenta ? <span  className='block text-[#007FA4] font-bold' onClick={() => setIsRegister(true)}>regístrate</span></p>
+                                        <p>¿ Aún no te has creado una cuenta ? <span className='block text-[#007FA4] font-bold' onClick={() => setIsRegister(true)}>regístrate</span></p>
                                 }
                             </div>
                         </div>
