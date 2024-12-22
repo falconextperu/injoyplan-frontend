@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["res.cloudinary.com"]
   },
-  output: "export",
+  output: "standalone",
   distDir: "out"
 };
 
