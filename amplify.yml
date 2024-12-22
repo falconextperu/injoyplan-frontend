@@ -3,14 +3,15 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm install --legacy-peer-deps
+        - npm install -g pnpm # Instala pnpm globalmente
+        - pnpm install --frozen-lockfile # Instala dependencias
     build:
       commands:
-        - npm run build
+        - pnpm build # Construye tu aplicación
   artifacts:
-    baseDirectory: dist   # Cambia 'build' por 'dist'
+    baseDirectory: out # Cambia esto según la carpeta donde se genera tu aplicación
     files:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - node_modules # Asegúrate de cachear las dependencias
