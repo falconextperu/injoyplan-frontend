@@ -133,7 +133,7 @@ const Footer = () => {
               <div className='ml-6 flex justify-center text-center'>
                 <div className='text-center mx-auto w-full'>
                   <Image width={50} height={50} className='text-center mx-auto' src={libro} alt="libro" />
-                  <p className='text-[#fff] text-sm'>Libro de Reclamaciones</p>
+                  <Link href="libro-de-reclamaciones" ><p className='text-[#fff] text-sm'>Libro de Reclamaciones</p></Link>
                 </div>
               </div>
             </div>
@@ -155,7 +155,7 @@ const Footer = () => {
             {/* Libro de Reclamaciones */}
             <div className="text-center mt-12 sm:mt-0 w-full mx-auto mb-12">
               <Image className='mx-auto' src={libro} alt="libro" width={40} height={40} />
-              <p className="text-white text-sm">Libro de Reclamaciones</p>
+              <Link href="libro-de-reclamaciones" ><p className='text-[#fff] text-sm'>Libro de Reclamaciones</p></Link>
             </div>
             <hr className='border-1 border-solid border-[#737373] w-full' />
             {/* Copyright */}

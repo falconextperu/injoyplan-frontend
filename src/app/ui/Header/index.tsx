@@ -153,7 +153,7 @@ const Header = () => {
         return () => {
             document.body.classList.remove('ReactModal__Body--open');
         };
-    }, [isOpenFavorite]);
+    }, [isOpenFavorite, isOpenEvent]);
 
     return (
         <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
@@ -164,9 +164,9 @@ const Header = () => {
                     !path.startsWith("/busqueda") && (
                         <div className={
                             isMobile ?
-                                styles.search_containerMobile : "relative border col-start-4 col-end-9 w-full col-span-5 flex items-center border-1 border-solid border-[#e8e8e8] rounded-[50px] bg-white"}>
+                                styles.search_containerMobile : "hidden relative border col-start-4 col-end-9 w-full col-span-5 md:flex items-center border-1 border-solid border-[#e8e8e8] rounded-[50px] bg-white"}>
                             <div className="flex justify-center pr-2 pl-4">
-                                <Image src={lupa} width={28} onClick={() => setIsOpenEvent(true)} alt="lupa" className={styles.search_icon} />
+                                <Image src={lupa} width={28} onClick={() => setIsOpenEvent(true)} alt="lupa" className="hidden md:block" />
                             </div>
                             <div className={styles.search + 'relative w-full rounded-2xl'} ref={searchRef}>
                                 {
@@ -176,17 +176,17 @@ const Header = () => {
                                         onChange={(e: any) => setSearch(e.target.value)}
                                         type="text" placeholder="Evento, equipo o artista"
                                         value={search}
-                                        className="w-full placeholder:text-[#bababa] bg-transparent border-none rounded-3xl relative outline-none font-[Quicksand] py-3 text-md text-[#5C6570] font-bold"
+                                        className="w-full  placeholder:text-[#bababa] bg-transparent border-none rounded-3xl relative outline-none font-[Quicksand] py-3 text-md text-[#5C6570] font-bold"
                                     />
                                 }
                                 {
                                     isOpenEvent && (
-                                        <div ref={refEvent} className={"md:max-h-[400px] md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
+                                        <div ref={refEvent} className={"hidden md:block md:max-h-[400px] px-5 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
                                             {
-                                                isMobile && <div className={styles.searchMobile}>
-                                                    <Image src={lupa} alt="lupa" className={styles.search_icon} />
-                                                    <input className='w-full' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento, equipo o artista" />
-                                                    <Icon icon="openmoji:close" color='#9B292B' onClick={() => setIsOpenEvent(false)} />
+                                                isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full">
+                                                    <Image src={lupa} alt="lupa" className="" />
+                                                    <input className='w-full outline-none pl-3' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento, equipo o artista" />
+                                                    <Icon width={30} icon="openmoji:close" color='#8B2B2C' onClick={() => setIsOpenEvent(false)} />
                                                 </div>
                                             }
                                             <div>
@@ -194,14 +194,14 @@ const Header = () => {
                                                     {
                                                         eventSearch?.length > 0 ? <>
                                                             <div>
-                                                                <h3 className='p-5 sticky top-0 font-bold bg-[#fff] z-50 text-[18px] border-b border-solid border-[#ddd]'>Eventos</h3>
+                                                                <h3 className='pt-5 pb-5 md:p-5 md:pb-4 sticky top-0 font-bold bg-[#fff] z-50 text-[20px] border-b border-solid border-[#ddd]'>Eventos</h3>
                                                                 {eventSearch?.length > 0 && eventSearch?.slice(0, 10)?.map((item: any, index: number) => (
                                                                     <Link onClick={() => {
                                                                         saveSearch(item.titulo)
 
                                                                     }} className={sans.className} href={`/evento/${item?.ideventos}/${item.idfecha}`} key={index}>
 
-                                                                        <div className='flex justify-between px-5 pb-3 pt-4'>
+                                                                        <div className='flex justify-between md:p-5 pb-3 pt-2 md:pt-5'>
                                                                             <div className='flex items-center'>
                                                                                 <div className="w-[40px] h-[40px] mr-4">
                                                                                     <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
@@ -211,7 +211,7 @@ const Header = () => {
                                                                                     <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className='text-right capitalize'>
+                                                                            <div className='text-right'>
                                                                                 <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utc().format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
                                                                                 <p className={quicksand.className + ' text-right text-[#848484] text-[14px]'}>{item.HoraInicio}</p>
                                                                             </div>
@@ -225,8 +225,8 @@ const Header = () => {
                                                                         <div onClick={() => {
                                                                             saveSearch(search)
 
-                                                                        }} className='px-5 p-4 border-t border-solid border-[#ddd]'>
-                                                                            <Link className='text-md text-[#861F20]' href={`/busqueda/${search}`}><p>Ver todos los resultados por <strong>{search}</strong></p></Link>
+                                                                        }} className='pt-4 md:p-4 border-t border-solid border-[#ddd]'>
+                                                                            <Link className='text-md text-[#1087AA]' href={`/busqueda/${search}`}><p>Ver todos los resultados por <strong>{search}</strong></p></Link>
                                                                         </div>
                                                                     )
                                                                 }
@@ -269,6 +269,101 @@ const Header = () => {
                                         </div>
                                     )
                                 }
+
+                                {
+                                    isMobile && isOpenEvent && (
+                                        <ReactModal isOpen ariaHideApp={false}  className={"p-0 bg-[#fff] overflow-y-auto h-[100vh]"}>
+                                            <div ref={refEvent} className={"md:hidden md:max-h-[400px] px-5 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
+                                                {
+                                                    isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full icon">
+                                                        <Image src={lupa} alt="lupa" className="" />
+                                                        <input className='w-full outline-none pl-3' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento, equipo o artista" />
+                                                        <Icon width={33} icon="openmoji:close" onClick={() => setIsOpenEvent(false)} />
+                                                    </div>
+                                                }
+                                                <div>
+                                                    <div>
+                                                        {
+                                                            eventSearch?.length > 0 ? <>
+                                                                <div>
+                                                                    <h3 className='pt-5 pb-5 md:p-5 md:pb-4 sticky top-0 font-bold bg-[#fff] z-50 text-[20px] border-b border-solid border-[#ddd]'>Eventos</h3>
+                                                                    {eventSearch?.length > 0 && eventSearch?.slice(0, 10)?.map((item: any, index: number) => (
+                                                                        <Link onClick={() => {
+                                                                            saveSearch(item.titulo)
+
+                                                                        }} className={sans.className} href={`/evento/${item?.ideventos}/${item.idfecha}`} key={index}>
+
+                                                                            <div className='flex justify-between md:p-5 pb-3 pt-2 md:pt-5'>
+                                                                                <div className='flex items-center'>
+                                                                                    <div className="w-[40px] h-[40px] mr-4">
+                                                                                        <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis w-[320px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
+                                                                                        <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className='text-right'>
+                                                                                    <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utc().format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
+                                                                                    <p className={quicksand.className + ' text-right text-[#848484] text-[14px]'}>{item.HoraInicio}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </Link>
+                                                                    ))}
+                                                                </div>
+                                                                <div>
+                                                                    {
+                                                                        eventSearch?.length > 0 && (
+                                                                            <div onClick={() => {
+                                                                                saveSearch(search)
+
+                                                                            }} className='pt-4 md:p-4 border-t border-solid border-[#ddd]'>
+                                                                                <Link className='text-md text-[#1087AA]' href={`/busqueda/${search}`}><p>Ver todos los resultados por <strong>{search}</strong></p></Link>
+                                                                            </div>
+                                                                        )
+                                                                    }
+                                                                </div>
+                                                            </>
+                                                                :
+
+
+                                                                <div>
+                                                                    {
+                                                                        isFindResult ? <>
+                                                                            <div>
+                                                                                <p className='p-4 py-5 text-[#862020]'>Ver todos los resultados para <strong>{search}</strong></p>
+                                                                            </div>
+                                                                        </> :
+                                                                            <>
+                                                                                {recentSearches?.length > 0 &&
+                                                                                    // <p className={styles.noResults}>Ver todos los resultado para <strong>{search || "Por buscar ..."}</strong></p>
+                                                                                    <div>
+                                                                                        <h3 className='p-5 font-bold text-[16px] border-b border-solid border-[#ddd] mb-3'>Recientes</h3>
+                                                                                        <ul>
+                                                                                            {recentSearches.length > 0 ? (
+                                                                                                recentSearches.map((term, index) => (
+                                                                                                    <li key={index} onClick={() => setSearch(term)} className="px-5 py-2 cursor-pointer hover:bg-gray-100">
+                                                                                                        {term}
+                                                                                                    </li>
+                                                                                                ))
+                                                                                            ) : (
+                                                                                                <p className="p-2 text-gray-500">No tienes búsquedas recientes</p>
+                                                                                            )}
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                }
+                                                                            </>
+                                                                    }
+                                                                </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ReactModal>
+
+
+                                    )
+                                }
                             </div>
                         </div>
                     )
@@ -276,7 +371,7 @@ const Header = () => {
 
                 {
                     path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? (
-                        <div className='col-start-8 col-end-13 flex justify-end items-center'>
+                        <div className='col-start-9 col-end-13 flex justify-end items-center'>
                             <div className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px]'>
                                 <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
                             </div>
@@ -295,14 +390,14 @@ const Header = () => {
                                 <Image onClick={() => setIsOpenEvent(true)} className='mr-2 ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />
                             }
 
-                           {
-                            isOpenFavorite ? (
-                                <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                            ) : 
-                            (
-                                <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                            )
-                           }
+                            {
+                                isOpenFavorite ? (
+                                    <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                                ) :
+                                    (
+                                        <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                                    )
+                            }
 
 
                             <div className='md:hidden'>

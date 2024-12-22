@@ -99,7 +99,7 @@ const Categories = ({ setOpenCategories, openCategories }: IProps) => {
                                     <h2 className='text-[#861F21] font-bold text-4xl mt-5'>¡Bienvenido a Injoyplan!</h2>
                                     <p className='text-[#444] text-[14px] mt-2'>Tus gustos sobre todo, elígelos y te recomendaremos los mejores eventos para tí.</p>
                                 </div>
-                                <div className="grid grid-cols-4 gap-8 mt-8">
+                                <div className="grid md:grid-cols-4 md:gap-8 md:mt-8 mt-10 grid-cols-2 gap-5">
                                     {
                                         categories?.map((item: Category) => (
                                             <div

@@ -74,6 +74,14 @@
   opacity: 1;
 }
 
+.icon path {
+  stroke: #862020 !important;
+}
+
+.option-ph {
+  color: #d5c5c5 !important;
+}
+
 .slick-dots li {
   height: 5px !important;
   margin-left: 40px !important;

@@ -45,7 +45,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
             borderRadius: "10px",
             boxShadow: "0 0 50px #523f6926",
             border: "none",
-            width: isMobile ? "auto" : "550px",
+            width: isMobile ? "100%" : "550px",
             padding: isMobile ? "0px" : "0px",
             maxHeight: isMobile ? "100vh" : "880px",
             height: isMobile ? "100vh" : "",
@@ -115,7 +115,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                         <div className='text-center'>
                             <Image src={logo} className='mx-auto' width={60} height={60} alt="Logo" />
                             <h2 className='font-bold font-sans text-2xl mt-2 text-[#212121] mb-0'>¡Bienvenido a Injoyplan!</h2>
-                            <p className='mt-1 mb-2 font-sans font-thin'>Empieza a explorar los eventos más importantes para ti</p>
+                            <p className='mt-1 mb-10 font-sans font-thin'>Empieza a explorar los eventos más importantes para ti</p>
                         </div>
                         <div>
                             {
