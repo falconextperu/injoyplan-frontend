@@ -8,6 +8,7 @@ import { IAuthState, useAuthStore } from '../../zustand/auth';
 import useAlertStore from '../../zustand/alert';
 import Image from 'next/image';
 import useIsMobile from '@/app/hooks/useIsMobile';
+import Alert from '@/app/components/Alert';
 
 interface IProps {
     openAuth: boolean;
@@ -24,7 +25,8 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
 
 
     const [isRegister, setIsRegister] = useState<boolean>(false);
-    const { signIn, login }: IAuthState = useAuthStore();
+    const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(false);
+    const { signIn, login, success }: IAuthState = useAuthStore();
 
     const isMobile = useIsMobile();
 
@@ -58,6 +60,21 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
         }
     };
 
+    const isFormValid = (): boolean => {
+        if (isRegister) {
+            return (
+                nombre.trim() !== "" &&
+                apellido.trim() !== "" &&
+                genero !== "Seleccionar" &&
+                email.trim() !== "" &&
+                password.trim() !== "" &&
+                isTermsAccepted
+            );
+        }
+        return email.trim() !== "" && password.trim() !== "";
+    };
+
+    console.log(isFormValid());
 
     // Función para manejar el envío del formulario
     const handleSubmit = async () => {
@@ -78,7 +95,6 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                 return useAlertStore.getState().alert("Complete los datos obligatorios para crear su cuenta", "error")
             }
             signIn(body)
-            setIsRegister(false)
         } else {
             if (email === "" || password === "") {
                 return useAlertStore.getState().alert("Complete datos obligatorios para iniciar sesion", "error")
@@ -88,9 +104,14 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                 password
             }
             login(data)
-            onCloseModal();
         }
     };
+
+    useEffect(() => {
+        if (success === true) {
+            onCloseModal();
+        }
+    }, [success])
 
     const onCloseModal = () => {
         document.body.classList.remove('ReactModal__Body--open');
@@ -107,12 +128,13 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                 variants={variants}
                 transition={{ duration: 0.3 }}
             >
+                <Alert />
                 <div className={styles.closeModal} onClick={onCloseModal}>
-                    <Icon icon="line-md:close" fontSize={25} />
+                    <Icon icon="line-md:close" fontSize={25} className='relative top-10 md:mt-0' />
                 </div>
                 <div className="px-10 pt-10 pb-5">
                     <div className="py-0">
-                        <div className='text-center mt-14 md:mt-7'>
+                        <div className='text-center mt-20 md:mt-7'>
                             <Image src={logo} className='mx-auto' width={60} height={60} alt="Logo" />
                             <h2 className='font-bold font-sans text-2xl mt-2 text-[#212121] mb-0 md:mt-4'>¡Bienvenido a Injoyplan!</h2>
                             <p className='mt-1 mb-10 font-sans font-thin'>Empieza a explorar los eventos más importantes para ti</p>
@@ -159,7 +181,12 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                 isRegister && (
                                     <>
                                         <div className='flex items-start mt-4'>
-                                            <input type="checkbox" className='relative top-1 mr-1' />
+                                            <input
+                                                type="checkbox"
+                                                className='relative top-1 mr-1'
+                                                checked={isTermsAccepted}
+                                                onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                                            />
                                             <p className='text-sm mt-0'>Al hacer click en <strong>Registrarte</strong>, aceptas los términos y condiciones, nuestra política de privacidad y política de cookies.</p>
                                         </div>
                                         <div className='flex items-start mt-3'>
@@ -170,7 +197,7 @@ const Auth = ({ openAuth, setOpenAuth }: IProps) => {
                                 )
                             }
                             <div>
-                                <button className='bg-[#007FA4] p-3 text-[#Fff] font-sans font-bold rounded w-full mt-4' onClick={handleSubmit}>{isRegister ? "Registrarte" : "Iniciar Sesión"}</button>
+                                <button disabled={!isFormValid()} className='bg-[#007FA4] disabled:bg-[#a8a8a8] p-3 text-[#Fff] font-sans font-bold rounded w-full mt-4' onClick={handleSubmit}>{isRegister ? "Registrarte" : "Iniciar Sesión"}</button>
                             </div>
                             <hr />
                             <div className='mb-4 mt-4 text-center'>

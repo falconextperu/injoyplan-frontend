@@ -10,17 +10,22 @@ export interface IAuthState {
     me: () => void;
     login: (data: any) => void;
     sendEmail: (email: IEmail) => void
+    success: boolean
 }
 
 export const useAuthStore = create<IAuthState>((set, _get) => ({
+    success: false,
     auth: null,
     login:  async (data: any) => {
         try {
             const resp: IResponse = await post(`usuario/login`, data);
             console.log(resp)
+            if (resp.HEADER.CODE === 500) {
+                return useAlertStore.getState().alert("La contraseña o el usuario son incorrectos, intentelo de nuevo porfavor", "error")
+            }
             if (resp.HEADER.CODE === 200) {
                 localStorage.setItem("token", resp.RESPONSE.token);
-                set({ auth: resp.RESPONSE.user });
+                set({ auth: resp.RESPONSE.user, success: true });
             } else {
                 set({ auth: null })
             }
@@ -37,7 +42,7 @@ export const useAuthStore = create<IAuthState>((set, _get) => ({
             if (resp.HEADER.CODE === 200) {
                 localStorage.setItem("token", resp.RESPONSE.token);
                 useAlertStore.getState().alert("Usuario creado correctamente", "success");
-                set({ auth: resp.RESPONSE.user });
+                set({ auth: resp.RESPONSE.user, success: true });
             } 
             if(resp.HEADER.CODE === 500) {
                 useAlertStore.getState().alert(resp.HEADER.MESSAGE, "error");
