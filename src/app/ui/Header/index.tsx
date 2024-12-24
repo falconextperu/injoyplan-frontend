@@ -155,10 +155,15 @@ const Header = () => {
         };
     }, [isOpenFavorite, isOpenEvent]);
 
+    const logout = () => {
+        localStorage.clear();
+        window.location.href = "/"
+    }
+
     return (
         <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
             <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
-            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-6 px-5 mx-auto items-center grid grid-cols-12">
+            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-6 px-1 mx-auto items-center grid grid-cols-12">
                 <Link className='w-48' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
                 {
                     !path.startsWith("/busqueda") && (
@@ -272,7 +277,7 @@ const Header = () => {
 
                                 {
                                     isMobile && isOpenEvent && (
-                                        <ReactModal isOpen ariaHideApp={false}  className={"p-0 bg-[#fff] overflow-y-auto h-[100vh]"}>
+                                        <ReactModal isOpen ariaHideApp={false} className={"p-0 bg-[#fff] overflow-y-auto h-[100vh]"}>
                                             <div ref={refEvent} className={"md:hidden md:max-h-[400px] px-5 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
                                                 {
                                                     isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full icon">
@@ -299,7 +304,7 @@ const Header = () => {
                                                                                         <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
                                                                                     </div>
                                                                                     <div>
-                                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis w-[320px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
+                                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis md:w-[320px] w-[190px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
                                                                                         <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
                                                                                     </div>
                                                                                 </div>
@@ -381,10 +386,18 @@ const Header = () => {
                         </div>
                     ) :
                         <div className="col-start-9 col-end-13 flex justify-end md:relative items-center" ref={favoritesRef}>
-                            {isMobile && auth !== null ? <p className='font-bold text-[#007FA4] bg-[#DBEBF1] rounded-full p-2'>{auth?.nombre[0]} {auth?.Apellido?.[0]}</p> : <p className='font-bold mr-3'>{auth?.nombre} {auth?.Apellido}</p>}
-                            {auth === null && <button onClick={() => setOpenAuth(true)}
-                                className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
-                            >Ingresar</button>}
+                            {isMobile && auth !== null ? <button onClick={logout} className='mr-[10px] text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'><Icon icon="material-symbols:logout" width="24" height="24" /></button> : <p className='font-bold mr-3'>{auth?.nombre} {auth?.Apellido}</p>}
+                            {auth === null && !isMobile ? (
+                                <button onClick={() => setOpenAuth(true)}
+                                    className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
+                                >Ingresar</button>
+                            ) :
+                                auth === null && isMobile && (
+                                    <button onClick={() => setOpenAuth(true)}
+                                        className='mr-[10px] text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
+                                    ><Icon icon="solar:user-bold" width="24" height="24" /></button>
+                                )
+                            }
                             {
                                 isMobile &&
                                 <Image onClick={() => setIsOpenEvent(true)} className='mr-2 ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />

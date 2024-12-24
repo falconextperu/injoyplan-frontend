@@ -142,12 +142,6 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                 </div></div>
     }
 
-    console.log(data)
-    console.log(dataFechaOrdenada?.length)
-
-    console.log(data, initHour)
-    console.log("remaing", daysRemaining?.length)
-
     return (
         <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl lg:max-w-screen-lg mx-auto mb-10 xl:px-10 px-0">
             {/* {showModal && <ModalDates setShowModal={setShowModal} showModal={showModal} dataFechaOrdenada={dataFechaOrdenada} />} */}
@@ -176,10 +170,10 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                                     addFavoritesByUser(data[0]);
                                 }}>
                                     {data[0].favorito > 0 ? <div className='top-3'>
-                                        <Icon color='A3ABCC' width={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
+                                        <Icon className='top-3 relative' color='A3ABCC' width={20} height={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
                                     </div> :
                                         <div className='relative top-3'>
-                                            <Image src={fav} alt="fav" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
+                                            <Image className='relative' src={fav} alt="fav" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
                                         </div>}
                                 </div>
                             </div>
@@ -230,7 +224,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                         </div>
 
                         <div className='mt-8 font-bold'>
-                            <h6>{dataFechaOrdenada.length === 1 ? "Fecha Disponible" : "Otras fechas disponibles"}</h6>
+                            <h6>{dataFechaOrdenada?.length === 1 ? "Fecha Disponible" : "Otras fechas disponibles"}</h6>
                             {dataFechaOrdenada?.length === 0 && <p className='font-normal w-[200px] mt-0'>Aún por confirmar</p>}
                             {
                                 dataFechaOrdenada?.length > 0 && (

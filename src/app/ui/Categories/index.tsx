@@ -33,7 +33,7 @@ const Categories = ({ setOpenCategories, openCategories }: IProps) => {
             right: 'auto',
             bottom: 'auto',
             marginRight: '-50%',
-            borderRadius: "10px",
+            borderRadius: isMobile ? "0px" : "10px",
             boxShadow: "0 0 50px #523f6926",
             border: "none",
             width: isMobile ? "auto" : "720px",
@@ -96,8 +96,8 @@ const Categories = ({ setOpenCategories, openCategories }: IProps) => {
                         <div className={styles.categories}>
                             <div className='p-8 text-center'>
                                 <div>
-                                    <h2 className='text-[#861F21] font-bold text-4xl mt-5'>¡Bienvenido a Injoyplan!</h2>
-                                    <p className='text-[#444] text-[14px] mt-2'>Tus gustos sobre todo, elígelos y te recomendaremos los mejores eventos para tí.</p>
+                                    <h2 className='text-[#861F21] font-bold text-4xl mt-8'>¡Bienvenido a Injoyplan!</h2>
+                                    <p className='text-[#444] text-[14px] mt-10'>Tus gustos sobre todo, elígelos y te recomendaremos los mejores eventos para tí.</p>
                                 </div>
                                 <div className="grid md:grid-cols-4 md:gap-8 md:mt-8 mt-10 grid-cols-2 gap-5">
                                     {
