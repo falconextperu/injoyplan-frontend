@@ -1,6 +1,5 @@
-// Backend nuevo con NestJS
-const BASE_URL = 'http://localhost:4201'
-// const BASE_URL_PROD = 'https://api.injoyplan.com'
+// Backend API URL - uses environment variable in production, localhost in development
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
 
 export async function refreshTokens<T>(token: string, refreshToken: string): Promise<T> {
     const url = `${BASE_URL}/authentication/refresh-token`;
@@ -21,7 +20,7 @@ export async function refreshTokens<T>(token: string, refreshToken: string): Pro
 async function fetchData<T>(url: string, options?: any): Promise<T> {
     try {
         const response = await fetch(url, options);
-        
+
         // Si es 401 y había un token, intentar refresh
         if (response.status === 401) {
             const token = localStorage.getItem('tokenRP');
@@ -32,13 +31,13 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
             if (token && refreshToken && hasAuthHeader) {
                 console.log("Intentando refrescar token...")
                 const refreshResp: any = await refreshTokens(token, refreshToken);
-                
+
                 if (refreshResp.code === 1) {
                     // Token refrescado con éxito
                     const newToken = refreshResp.data.token;
                     localStorage.setItem('tokenRP', newToken);
                     localStorage.setItem('refreshTokenRP', refreshResp.data.refreshToken);
-                    
+
                     // Actualizar header y reintentar
                     if (options && options.headers) {
                         options.headers['Authorization'] = `Bearer ${newToken}`;
@@ -53,7 +52,7 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
             }
             // Si no había token, es un endpoint público que requiere auth - devolver error normal
         }
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             console.log(errorData)
@@ -69,7 +68,7 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
 export async function get<T>(endpoint: string): Promise<T> {
     const token = localStorage.getItem('token');
     const url = `${BASE_URL}/${endpoint}`;
-    if(token) {
+    if (token) {
         const options: RequestInit = {
             method: 'GET',
             headers: {
