@@ -1,6 +1,6 @@
-const BASE_URL = 'https://goldfish-app-zbw3y.ondigitalocean.app/api'
-// const BASE_URL = 'http://119.8.153.52:2065/api/results-patient'
-// const BASE_PROD = 'https://api-dev.suiza-soft.com/results-patient'
+// Backend nuevo con NestJS
+const BASE_URL = 'http://localhost:4201'
+// const BASE_URL_PROD = 'https://api.injoyplan.com'
 
 export async function refreshTokens<T>(token: string, refreshToken: string): Promise<T> {
     const url = `${BASE_URL}/authentication/refresh-token`;
@@ -21,49 +21,39 @@ export async function refreshTokens<T>(token: string, refreshToken: string): Pro
 async function fetchData<T>(url: string, options?: any): Promise<T> {
     try {
         const response = await fetch(url, options);
+        
+        // Si es 401 y había un token, intentar refresh
         if (response.status === 401) {
-            // Token de acceso caducado, intenta actualizarlo
-
             const token = localStorage.getItem('tokenRP');
             const refreshToken = localStorage.getItem('refreshTokenRP');
+            const hasAuthHeader = options?.headers?.['Authorization'];
 
-
-
-            if (token && refreshToken) {
-                console.log("hello")
-                const refreshResp: any =  await refreshTokens(token, refreshToken);
-                console.log(refreshResp)
-                const response = await refreshResp.json()
-                console.log(response)
-                console.log(response)
+            // Solo intentar refresh si había un token en la petición original
+            if (token && refreshToken && hasAuthHeader) {
+                console.log("Intentando refrescar token...")
+                const refreshResp: any = await refreshTokens(token, refreshToken);
+                
                 if (refreshResp.code === 1) {
-                    // Token refrescado con éxito, intenta la solicitud nuevamente con el nuevo token
+                    // Token refrescado con éxito
                     const newToken = refreshResp.data.token;
                     localStorage.setItem('tokenRP', newToken);
                     localStorage.setItem('refreshTokenRP', refreshResp.data.refreshToken);
-                    // Actualiza el encabezado de autorización con el nuevo token
+                    
+                    // Actualizar header y reintentar
                     if (options && options.headers) {
                         options.headers['Authorization'] = `Bearer ${newToken}`;
                     }
-                    // Intenta realizar la solicitud nuevamente con el nuevo token
                     return await fetchData<T>(url, options);
                 } else {
-                
+                    // Refresh falló, limpiar tokens
                     localStorage.removeItem('tokenRP');
                     localStorage.removeItem('refreshTokenRP');
-                    // No se pudo refrescar el token, redirige a la página de inicio o maneja el error de alguna otra manera
                     throw new Error('No se pudo refrescar el token de acceso');
                 }
-            } else {
-              
-                localStorage.removeItem('tokenRP');
-                localStorage.removeItem('refreshTokenRP');
-                // Falta token o refreshToken, redirige a la página de inicio o maneja el error de alguna otra manera
-                throw new Error('Falta token o refreshToken');
             }
+            // Si no había token, es un endpoint público que requiere auth - devolver error normal
         }
         
-        console.log("hello")
         if (!response.ok) {
             const errorData = await response.json();
             console.log(errorData)
@@ -71,10 +61,8 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
         }
         return response.json();
     } catch (error) {
- 
-        console.log("hello")
-        // Maneja cualquier error que ocurra durante la solicitud
-        throw new Error(`Error al realizar la solicitud: ${error}`);
+        console.error('Error en solicitud:', error);
+        throw error;
     }
 }
 
@@ -113,10 +101,43 @@ export async function post<T>(endpoint: string, data: any): Promise<T> {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(data),
     };
+    return await fetchData<T>(url, options);
+}
+
+export async function patch<T>(endpoint: string, data: any): Promise<T> {
+    const token = localStorage.getItem('token');
+    const url = `${BASE_URL}/${endpoint}`;
+    const options: RequestInit = {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(data),
+    };
+    return await fetchData<T>(url, options);
+}
+
+export async function postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const token = localStorage.getItem('token');
+    const url = `${BASE_URL}/${endpoint}`;
+
+    // IMPORTANT: Do NOT set Content-Type here; the browser will set the multipart boundary.
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const options: RequestInit = {
+        method: 'POST',
+        headers,
+        body: formData,
+    };
+
     return await fetchData<T>(url, options);
 }
 
@@ -127,7 +148,7 @@ export async function put<T>(endpoint: string, data: any): Promise<T> {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Agregar el token al encabezado de la solicitud
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(data),
     };
@@ -140,7 +161,7 @@ export async function del<T>(endpoint: string): Promise<T> {
     const options: RequestInit = {
         method: 'DELETE',
         headers: {
-            'Authorization': `Bearer ${token}`, // Agregar el token al encabezado de la solicitud
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
     };
     return await fetchData<T>(url, options);

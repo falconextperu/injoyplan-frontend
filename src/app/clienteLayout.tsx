@@ -6,7 +6,11 @@ import { useEffect, useState } from "react";
 
 import Alert from "./components/Alert";
 
+import { usePathname } from "next/navigation";
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isAdmin = pathname?.startsWith('/admin');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -26,9 +30,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return (
         <div className={isModalOpen ? "blur-background pointer-events-none" : "overflow-hidden"}>
             <Alert />
-            <Header />
+            {!isAdmin && <Header />}
             {children}
-            <Footer />
+            {!isAdmin && <Footer />}
         </div>
     );
 }

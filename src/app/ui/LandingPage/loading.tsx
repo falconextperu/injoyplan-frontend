@@ -20,7 +20,9 @@ const Loading = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="loading-container"
+                    {...({
+                        className: "loading-container",
+                    } as any)}
                     initial={{ opacity: 1 }}       // Estado inicial: completamente visible
                     animate={{ opacity: 1 }}       // Mantener visible durante la carga
                     exit={{ opacity: 0 }}          // Animación de salida: desvanecerse

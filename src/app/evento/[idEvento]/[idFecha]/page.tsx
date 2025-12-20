@@ -25,7 +25,7 @@ const EventoPage = () => {
   }
 
   if (dataEvent?.length > 0) {
-    const [{ data, dataFecha, dataPlataformaVenta }] = dataEvent;
+    const [{ data, dataFecha, dataPlataformaVenta, owner }] = dataEvent;
 
     return (
       <>
@@ -33,6 +33,7 @@ const EventoPage = () => {
           data={data}
           dataFecha={dataFecha}
           dataPlataformaVenta={dataPlataformaVenta}
+          owner={owner}
         />
       </>
     );

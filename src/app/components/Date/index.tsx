@@ -17,7 +17,8 @@ const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/;
 export const DateTime = ({ events, text, onChange, name, right, left, disabled, top, withOutFormat }: any) => {
 
     const [writeDate, setWriteDate] = useState<string>("");
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    // Allow selectedDate to be null initially if no value is passed
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [isOpen, setIsOpen, ref] = useOutsideClick(false);
 
     const daysInMonth = (date: Date): number => {
@@ -43,19 +44,25 @@ export const DateTime = ({ events, text, onChange, name, right, left, disabled, 
         return event ? event.description : null;
     };
 
+    const getDisplayDate = () => {
+        // Use a default date for rendering the calendar grid if selectedDate is null
+        return selectedDate || new Date();
+    }
+
     const renderDays = (): JSX.Element[] => {
+        const displayDate = getDisplayDate();
         const days: JSX.Element[] = [];
-        for (let i = 0; i < firstDayOfMonth(selectedDate); i++) {
+        for (let i = 0; i < firstDayOfMonth(displayDate); i++) {
             days.push(<div key={`empty-${i}`} className={styles.empty}></div>);
         }
-        for (let i = 1; i <= daysInMonth(selectedDate); i++) {
-            let date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), i);
+        for (let i = 1; i <= daysInMonth(displayDate); i++) {
+            let date = new Date(displayDate.getFullYear(), displayDate.getMonth(), i);
             const eventDescription = getEventDescription(date);
             const classNames = [`${styles.day}`];
             if (date.toDateString() === new Date().toDateString()) {
                 classNames.push(`${styles.today}`);
             }
-            if (date.toDateString() === selectedDate.toDateString()) {
+            if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
                 classNames.push(`${styles.selected}`);
             }
             if (eventDescription) {
@@ -98,6 +105,7 @@ export const DateTime = ({ events, text, onChange, name, right, left, disabled, 
     }, [writeDate]);
 
     useEffect(() => {
+        // Only trigger onChange if selectedDate is actually set (not null)
         if (selectedDate) {
             if (withOutFormat) {
                 onChange(selectedDate, name);
@@ -114,7 +122,16 @@ export const DateTime = ({ events, text, onChange, name, right, left, disabled, 
                     <div className={styles.icon__date} >
                         <Icon icon={Icons.calendar} />
                     </div>
-                    <Input disabled={disabled} name={name} isLabel label={text} type='text' onChange={handleChangeDate} value={writeDate ? writeDate : "Desde " + moment(selectedDate).format('DD/MM/YYYY')} />
+                    <Input
+                        disabled={disabled}
+                        name={name}
+                        isLabel
+                        label={text}
+                        type='text'
+                        onChange={handleChangeDate}
+                        // If no selectedDate, show "Desde hoy" or similar, but don't force a value if it's meant to be empty
+                        value={writeDate ? writeDate : (selectedDate ? "Desde " + moment(selectedDate).format('DD/MM/YYYY') : "Desde hoy")}
+                    />
                 </div>
                 {isOpen && (
                     <motion.div
@@ -123,11 +140,17 @@ export const DateTime = ({ events, text, onChange, name, right, left, disabled, 
                     >
                         <div onClick={(e) => handleClickOutsideDate(e)}>
                             <div className={styles.header}>
-                                <button type='reset' onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))}>
+                                <button type='reset' onClick={() => {
+                                    const d = getDisplayDate();
+                                    setSelectedDate(new Date(d.getFullYear(), d.getMonth() - 1, 1))
+                                }}>
                                     <Icon icon={Icons.arrowLeft} />
                                 </button>
-                                <div className={styles.month}>{selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
-                                <button type='reset' onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))}>
+                                <div className={styles.month}>{getDisplayDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                                <button type='reset' onClick={() => {
+                                    const d = getDisplayDate();
+                                    setSelectedDate(new Date(d.getFullYear(), d.getMonth() + 1, 1))
+                                }}>
                                     <Icon icon={Icons.arrowRight} />
                                 </button>
                             </div>

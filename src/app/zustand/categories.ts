@@ -1,12 +1,14 @@
-import {create} from 'zustand';
+import { create } from 'zustand';
 import { get } from '../utils/fetch';
 import { Category, IResponse } from '../interfaces/category';
+import { mapEventFromBackend } from './events';
 
 export interface ICategoriesState {
     getCategories: () => void;
+    isLoading: boolean;
     categories: Category[];
     categoriesRelations: any
-    getCategoriesRelations: (id: number) => void
+    getCategoriesRelations: (id: string | number) => void
     countsCategories: any
     getCategoriesCount: () => void
     categoryInfo: any
@@ -16,6 +18,7 @@ export interface ICategoriesState {
 export const useCategoriesState = create<ICategoriesState>((set, _get) => ({
     categoryInfo: null,
     countsCategories: null,
+    isLoading: false,
     categoriesRelations: [],
     categories: [],
     getValueCategory: (category: any) => {
@@ -25,40 +28,44 @@ export const useCategoriesState = create<ICategoriesState>((set, _get) => ({
     },
     getCategories: async () => {
         try {
-            const resp: IResponse = await get(`eventos/getCantEventXCategoria/true`);
-            if (resp.HEADER.CODE === 200) {
-                set({ categories: resp.RESPONSE });
+            const resp: any = await get(`events/stats/by-category`);
+            if (Array.isArray(resp)) {
+                set({ categories: resp });
             } else {
                 set({ categories: [] })
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Error loading categories:', error);
+            set({ categories: [] })
         }
     },
-    getCategoriesRelations: async (idEvent: number) => {
+    getCategoriesRelations: async (idEvent: string | number) => {
         try {
-            const resp: IResponse = await get(`eventos/listar_evento_relacionado_por_categoria/${idEvent}`);
+            const resp: any = await get(`events/related/${idEvent}?excludeFeatured=true`);
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                set({ categoriesRelations: resp.RESPONSE });
+            if (Array.isArray(resp)) {
+                set({ categoriesRelations: resp.map((item: any) => mapEventFromBackend(item)) });
             } else {
                 set({ categoriesRelations: [] })
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Error loading related events:', error);
+            set({ categoriesRelations: [] })
         }
     },
     getCategoriesCount: async () => {
+        set({ isLoading: true });
         try {
-            const resp: IResponse = await get(`eventos/getCantEventXCategoria/true`);
+            const resp: any = await get(`events/stats/by-category`);
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                set({ countsCategories: resp.RESPONSE });
+            if (Array.isArray(resp)) {
+                set({ countsCategories: resp, isLoading: false });
             } else {
-                set({ countsCategories: [] })
+                set({ countsCategories: [], isLoading: false })
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Error loading category counts:', error);
+            set({ countsCategories: [], isLoading: false })
         }
     },
 }));

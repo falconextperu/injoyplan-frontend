@@ -115,7 +115,11 @@ const SelectUbigeo = ({
 
                 {isOpen && (
                     <motion.div
-                    style={heightDropdown} className={styles.content__listOptions}>
+                    {...({
+                        style: heightDropdown,
+                        className: styles.content__listOptions
+                    } as any)}
+                    >
                         {
                             results && results.length > 0 && results.map((item: IUbigeum) => (
                                 <li key={item.id} onClick={() => {

@@ -21,7 +21,7 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
     const addFavoritesByUser = (item: any) => {
         if (auth) {
             console.log(item)
-            if (item.esfavorito === 1) {
+            if (item.favorito || item.esfavorito === 1) {
                 deleteFavorite(item)
             } else {
                 const data = {
@@ -38,12 +38,10 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
 
     console.log(eventsDestacades)
 
-    const destacades = eventsDestacades?.filter((item: any) => item?.Destacado === 1);
-
     return (
         <>
             {
-                destacades?.length > 0 && (
+                eventsDestacades?.length > 0 && (
                     <div className='bg-[#FAFBFF] pb-[80px]'>
                         <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] mx-auto md:mt-16 mt-8 xl:px-10 px-5">
                             <div className="md:px-0">
@@ -52,7 +50,7 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
                                 </div>
                                 <div className="grid auto-cols-min grid-cols-1 gap-5 2xl:grid-cols-3 xl:grid-cols-3 md:grid-cols-3">
                                     {
-                                        destacades.map((item: any, index: number) => {
+                                        eventsDestacades.map((item: any, index: number) => {
                                             return (
                                                 <Card item={item} key={index} addFavoritesByUser={addFavoritesByUser} />
                                             )

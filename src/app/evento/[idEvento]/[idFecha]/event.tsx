@@ -3,6 +3,7 @@ import useAlertStore from '@/app/zustand/alert';
 import { IAuthState, useAuthStore } from '@/app/zustand/auth';
 import { ICategoriesState, useCategoriesState } from '@/app/zustand/categories';
 import { IFavoriteState, useFavoriteStore } from '@/app/zustand/favorites';
+import { useEventCommentsStore } from '@/app/zustand/eventComments';
 import moment from 'moment';
 import { useEffect, useRef, useState } from 'react';
 import styles from './venta.module.css'
@@ -30,7 +31,150 @@ moment.updateLocale('es', {
     weekdaysMin: 'Do_Lu_Ma_Mi_Ju_Vi_Sá'.split('_')
 });
 
-const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
+const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: string, depth?: number }) => {
+    const { auth } = useAuthStore();
+    const { addComment, deleteComment, editComment, toggleLike } = useEventCommentsStore();
+    const [isReplying, setIsReplying] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(comment.content);
+    const [replyContent, setReplyContent] = useState('');
+
+    const user = comment.user;
+    const name = [user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(' ').trim() || user?.email || 'Usuario';
+    const avatar = user?.profile?.avatar || '/svg/us.svg';
+    const time = comment?.createdAt ? moment(comment.createdAt).fromNow() : '';
+
+    const isOwner = (auth as any)?.id === comment.userId;
+    const likesCount = comment._count?.likes || 0;
+    const isLiked = comment.isLiked;
+
+    const ownerHref = user?.id ? `/usuario/${user.id}` : '#';
+
+    const handleLike = async () => {
+        if (!auth) return; // Add auth check/modal trigger
+        await toggleLike(eventId, comment.id);
+    };
+
+    const handleReply = async () => {
+        if (!replyContent.trim()) return;
+
+        // Flatten logic: If this is already a reply (has parentId), link to the parent.
+        // Otherwise, this is the parent.
+        const targetParentId = comment.parentId || comment.id;
+
+        // If we are replying to a reply, tag the user
+        const finalContent = comment.parentId ? `@${name} ${replyContent}` : replyContent;
+
+        const success = await addComment(eventId, finalContent, targetParentId);
+        if (success) {
+            setReplyContent('');
+            setIsReplying(false);
+        }
+    };
+
+    const handleEdit = async () => {
+        if (!editContent.trim()) return;
+        const success = await editComment(eventId, comment.id, editContent);
+        if (success) setIsEditing(false);
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('¿Estás seguro de eliminar este comentario?')) return;
+        await deleteComment(eventId, comment.id);
+    };
+
+    return (
+        <div className={`flex flex-col gap-3 ${depth > 0 ? 'ml-10 border-l-2 border-[#EDEFF5] pl-4' : ''}`}>
+            <div className="flex items-start gap-3">
+                <Link href={ownerHref} className="block w-10 h-10 rounded-full overflow-hidden border border-[#EDEFF5] bg-[#F7F7F7] flex-shrink-0 hover:opacity-80 transition-opacity">
+                    <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                </Link>
+                <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                        <Link href={ownerHref} className="font-bold text-[#212121] text-sm hover:underline">{name}</Link>
+                        <p className="text-[12px] text-[#999]">{time}</p>
+                    </div>
+
+                    {isEditing ? (
+                        <div className="mt-2">
+                            <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full bg-[#FAFBFF] border border-[#EDEFF5] rounded-xl p-3 outline-none text-sm min-h-[60px]"
+                            />
+                            <div className="flex items-center justify-end gap-2 mt-2">
+                                <button onClick={() => setIsEditing(false)} className="text-xs text-[#666] font-bold px-3 py-1">Cancelar</button>
+                                <button onClick={handleEdit} className="text-xs bg-[#007FA4] text-white font-bold px-4 py-1.5 rounded-full">Guardar</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-sm text-[#444] mt-1 whitespace-pre-line">{comment.content}</p>
+                    )}
+
+                    <div className="flex items-center gap-4 mt-2">
+                        <button
+                            onClick={handleLike}
+                            className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${isLiked ? 'text-[#861F21]' : 'text-[#666] hover:text-[#861F21]'}`}
+                        >
+                            <Icon icon={isLiked ? "solar:heart-bold" : "solar:heart-linear"} width={16} />
+                            <span>{likesCount > 0 ? likesCount : 'Me gusta'}</span>
+                        </button>
+
+                        {auth && (
+                            <button
+                                onClick={() => setIsReplying(!isReplying)}
+                                className="flex items-center gap-1.5 text-xs font-bold text-[#666] hover:text-[#007FA4] transition-colors"
+                            >
+                                <Icon icon="solar:reply-outline" width={16} />
+                                <span>Responder</span>
+                            </button>
+                        )}
+
+                        {isOwner && !isEditing && (
+                            <>
+                                <button onClick={() => setIsEditing(true)} className="text-xs font-bold text-[#666] hover:text-[#007FA4]">Editar</button>
+                                <button onClick={handleDelete} className="text-xs font-bold text-[#666] hover:text-[#861F21]">Eliminar</button>
+                            </>
+                        )}
+                    </div>
+
+                    {isReplying && (
+                        <div className="mt-3 flex items-start gap-3">
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    value={replyContent}
+                                    onChange={(e) => setReplyContent(e.target.value)}
+                                    placeholder="Escribe una respuesta..."
+                                    className="w-full bg-[#FAFBFF] border border-[#EDEFF5] rounded-xl px-4 py-2 text-sm outline-none focus:border-[#007FA4]"
+                                    autoFocus
+                                />
+                            </div>
+                            <button
+                                onClick={handleReply}
+                                disabled={!replyContent.trim()}
+                                className="bg-[#007FA4] text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-[#006080] disabled:opacity-50"
+                            >
+                                Responder
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Nested Replies */}
+            {comment.replies && comment.replies.length > 0 && (
+                <div className="flex flex-col gap-3 mt-1">
+                    {comment.replies.map((reply: any) => (
+                        <CommentItem key={reply.id} comment={reply} eventId={eventId} depth={depth + 1} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
     const isMobile = useIsMobile();
     const [date, setDate] = useState<string>("");
@@ -43,6 +187,36 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
     const { categoriesRelations }: ICategoriesState = useCategoriesState();
     const { auth }: IAuthState = useAuthStore();
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
+
+    // Comments
+    const {
+        commentsByEvent,
+        totalByEvent,
+        isLoadingByEvent,
+        errorByEvent,
+        loadComments,
+        addComment,
+    } = useEventCommentsStore();
+
+    const eventId = String(data?.[0]?.idEventos || data?.[0]?.ideventos || '');
+    const comments = (eventId && commentsByEvent[eventId]) ? commentsByEvent[eventId] : [];
+    const totalComments = eventId ? (totalByEvent[eventId] ?? comments.length) : 0;
+    const isLoadingComments = eventId ? isLoadingByEvent[eventId] === true : false;
+    const commentsError = eventId ? errorByEvent[eventId] : null;
+    const [commentText, setCommentText] = useState('');
+
+    const ownerName = [owner?.profile?.firstName, owner?.profile?.lastName].filter(Boolean).join(' ').trim() || owner?.email || 'Organizador';
+    const ownerAvatar = owner?.profile?.avatar || '/svg/us.svg';
+    const ownerHref = owner?.id ? `/usuario/${owner.id}` : '#';
+
+    const fuente = data?.[0]?.urlFuente;
+    const fuenteHref = fuente ? (String(fuente).startsWith('http') ? String(fuente) : `https://${fuente}`) : '#';
+
+    useEffect(() => {
+        if (!eventId) return;
+        window.scrollTo(0, 0); // Scroll to top when event changes
+        loadComments(eventId);
+    }, [eventId]);
 
     useEffect(() => {
         if (data !== undefined) {
@@ -130,11 +304,11 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
 
     if (data === undefined || data.length === 0) {
         return <div>
-                <div className="text-center mt-32 mb-32">
-                    <Image className="mx-auto grayscale" width={100} height={100} alt="No encontrados" src={ticket} />
-                    <label htmlFor="" className={quicksand.className + ' font-bold text-[#4a4a4a] mb-5'}>El evento a terminado</label>
-                    <p className={sans.className + ' font-normal text-[#4a4a4a] text-[14px] mt-3'} >Al parecer no hay información sobre este evento</p>
-                </div></div>
+            <div className="text-center mt-32 mb-32">
+                <Image className="mx-auto grayscale" width={100} height={100} alt="No encontrados" src={ticket} />
+                <label htmlFor="" className={quicksand.className + ' font-bold text-[#4a4a4a] mb-5'}>El evento a terminado</label>
+                <p className={sans.className + ' font-normal text-[#4a4a4a] text-[14px] mt-3'} >Al parecer no hay información sobre este evento</p>
+            </div></div>
     }
 
     return (
@@ -146,15 +320,25 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                         <h2 className='text-[#007FA4] text-3xl font-bold'>{data[0]?.titulo}</h2>
                         <div>
                             <div className=''>
-                               {daysRemaining?.length > 0 ?  <span className='font-sans text-md'>{date}<strong className='font-thin ml-2'>({daysRemaining})</strong></span> : <p>Aún por confirmar</p>}
+                                {daysRemaining?.length > 0 ? <span className='font-sans text-md'>{date}<strong className='font-thin ml-2'>({daysRemaining})</strong></span> : <p>Aún por confirmar</p>}
                             </div>
                         </div>
+
+
                     </div>
                     <div className={styles.fuent}>
                         <img className={styles.logmagen} src={data[0]?.url} alt="bitimg" />
                         <div className='flex justify-between items-center'>
-                            {/* href={`https://${item.urlFuente}`} */}
-                            <Link className='relative xl:bottom-0 bottom-[-3px]' target='_blank' href={`https://${data[0]?.urlFuente}`}>VER FUENTE <Image src={flechaceleste} alt="flechaceleste" /></Link>
+                            <Link
+                                className='relative xl:bottom-0 bottom-[-3px]'
+                                target='_blank'
+                                href={fuenteHref}
+                                onClick={(e) => {
+                                    if (fuenteHref === '#') e.preventDefault();
+                                }}
+                            >
+                                VER FUENTE <Image src={flechaceleste} alt="flechaceleste" />
+                            </Link>
                             <div className="xl:hidden flex items-center">
                                 <div className='flex' onClick={handleCopyLink}>
                                     <Image src={compartir} width={20} alt="compartir" /><span className='text-[#A3ABCC] ml-4 font-bold text-md'></span>
@@ -174,6 +358,30 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Organizador */}
+                    {owner?.id && (
+                        <div className="mt-5 bg-white border border-solid border-[#EDEFF5] rounded-2xl p-4 shadow-sm">
+                            <div className="flex items-center justify-between gap-3">
+                                <Link href={ownerHref} className="flex items-center gap-3 min-w-0">
+                                    <div className="w-11 h-11 rounded-full overflow-hidden border border-solid border-[#EDEFF5] bg-[#F7F7F7] flex-shrink-0">
+                                        <img src={ownerAvatar} alt={ownerName} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-[12px] text-[#666] font-bold">Organizador</p>
+                                        <p className="font-black text-[#212121] truncate">{ownerName}</p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    href={ownerHref}
+                                    className="bg-[#007FA4] text-white font-bold px-5 py-2 rounded-full hover:bg-[#006080] transition-colors text-sm"
+                                >
+                                    Ver perfil
+                                </Link>
+                            </div>
+                        </div>
+                    )}
 
                     {
                         // !isMobile && (
@@ -253,16 +461,33 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                         </div>
                         <div className="mt-7">
                             <h6 className='font-bold mb-2'>{Number(data[0]?.Monto) > 0 ? "Entradas desde" : "Entradas"}</h6>
-                            <strong className='text-3xl'>{Number(data[0]?.Monto) === 0  ? "¡Gratis!" : 'S/ ' + Number(data[0]?.Monto).toFixed(2)}</strong>
+                            <strong className='text-3xl'>{Number(data[0]?.Monto) === 0 ? "¡Gratis!" : 'S/ ' + Number(data[0]?.Monto).toFixed(2)}</strong>
                         </div>
                         <div className="mt-10">
                             <h6 className='font-bold'>Consigue tus entradas aquí</h6>
                             {
-                                dataPlataformaVenta?.map((item: any, index: number) => (
-                                    <div className='bg-[#9B292B] mt-6 p-4 text-center rounded-full' key={index}>
-                                        <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={`https://${item.urlWebLugar}`}><button className='flex items-center'><Image width={20} height={20} className='mr-3' src={item.iconos} alt="loguito" />{item.nombrePlataforma}</button></Link>
-                                    </div>
-                                ))
+                                dataPlataformaVenta?.map((item: any, index: number) => {
+                                    const url = item.urlWebLugar ? (String(item.urlWebLugar).startsWith('http') ? String(item.urlWebLugar) : `https://${item.urlWebLugar}`) : '#';
+                                    return (
+                                        <div className='bg-[#9B292B] mt-6 p-4 text-center rounded-full' key={index}>
+                                            <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}><button className='flex items-center'><Image width={20} height={20} className='mr-3' src={item.iconos} alt="loguito" />{item.nombrePlataforma}</button></Link>
+                                        </div>
+                                    )
+                                })
+                            }
+                            {/* New ticketUrls from modern events */}
+                            {
+                                data[0]?.ticketUrls && Array.isArray(data[0].ticketUrls) && data[0].ticketUrls.map((link: { name: string; url: string }, idx: number) => {
+                                    const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+                                    return (
+                                        <div className='bg-[#007FA4] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
+                                            <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
+                                                <Icon icon="solar:ticket-bold" width={20} className='mr-3' />
+                                                {link.name || 'Comprar entradas'}
+                                            </Link>
+                                        </div>
+                                    );
+                                })
                             }
                         </div>
 
@@ -285,6 +510,71 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta }: any) => {
                     }
                 </div>
             </div>
+
+            {/* Comments */}
+            {eventId && (
+                <div className="mt-10 px-5 xl:px-0">
+                    <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl p-6 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <h3 className="text-lg font-black text-[#212121]">Comentarios</h3>
+                                <p className="text-sm text-[#666]">{totalComments} comentario{totalComments === 1 ? '' : 's'}</p>
+                            </div>
+                            <button
+                                onClick={() => loadComments(eventId)}
+                                className="text-[#007FA4] font-bold text-sm hover:underline"
+                            >
+                                Actualizar
+                            </button>
+                        </div>
+
+                        {commentsError && (
+                            <p className="mt-4 text-sm font-bold text-[#861F21]">{commentsError}</p>
+                        )}
+
+                        <div className="mt-6 space-y-6">
+                            {isLoadingComments ? (
+                                <div className="text-sm text-[#666]">Cargando comentarios...</div>
+                            ) : comments.length > 0 ? (
+                                comments.map((c: any) => (
+                                    <CommentItem key={c.id} comment={c} eventId={eventId} />
+                                ))
+                            ) : (
+                                <div className="text-sm text-[#666]">Aún no hay comentarios. Sé el primero en comentar.</div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t border-[#EDEFF5]">
+                            {auth ? (
+                                <div className="flex items-end gap-3">
+                                    <div className="flex-1">
+                                        <label className="text-[12px] font-bold text-[#666]">Escribe un comentario</label>
+                                        <textarea
+                                            value={commentText}
+                                            onChange={(e) => setCommentText(e.target.value)}
+                                            placeholder="Comparte tu opinión..."
+                                            className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl min-h-[90px]"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const ok = await addComment(eventId, commentText);
+                                            if (ok) setCommentText('');
+                                        }}
+                                        className="bg-[#007FA4] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#006080] transition-colors"
+                                    >
+                                        Publicar
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="bg-[#FAFBFF] border border-[#EDEFF5] rounded-xl p-4 text-sm text-[#666]">
+                                    Inicia sesión para comentar este evento.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {categoriesRelations?.code ? "" : <RelatedEvents data={data} />}
         </div >

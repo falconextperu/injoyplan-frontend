@@ -2,7 +2,7 @@
 import { ICategoriesState, useCategoriesState } from "@/app/zustand/categories";
 import { IEventsState, useEventStore } from "@/app/zustand/events";
 import moment from "moment";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import ticket from '../../../../public/svg/tickets_gray.svg'
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -24,9 +24,11 @@ import { IAuthState, useAuthStore } from "@/app/zustand/auth";
 import Auth from "@/app/ui/Auth";
 import useAlertStore from "@/app/zustand/alert";
 import useDebounce from "@/app/hooks/useDebounce";
+import MoreFilters from "@/app/ui/MoreFilters";
 
 
 const BusquedaEvento = () => {
+    const params = useParams();
 
     moment.updateLocale('es', {
         months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
@@ -37,10 +39,19 @@ const BusquedaEvento = () => {
     });
 
     const { getEventSearchByFilters, eventSearchByFilters, total, valueSearch }: IEventsState = useEventStore();
-    const [search, setSearch] = useState<any>(valueSearch);
+
+    // If navigating via category ID (params.value exists), reset search text to empty
+    // Otherwise, use the stored valueSearch from header search
+    const paramValue = Array.isArray(params?.value) ? params.value[0] : params?.value;
+    const isNavigatingByCategory = paramValue && Number(paramValue) !== 0;
+    const [search, setSearch] = useState<any>(isNavigatingByCategory ? '' : valueSearch);
 
     const { countsCategories, getCategoriesCount, categoryInfo }: ICategoriesState = useCategoriesState();
-    const [category, setCategory] = useState<number>(categoryInfo !== null ? categoryInfo?.idCategorias : 0)
+
+    // Initialize category from URL params if available, otherwise fallback to store or 0
+    // paramValue is already declared above
+    const initialCategory = paramValue ? Number(paramValue) : (categoryInfo !== null ? categoryInfo?.idCategorias : 0);
+    const [category, setCategory] = useState<number>(initialCategory);
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
     const { auth }: IAuthState = useAuthStore();
     const [openAuth, setOpenAuth] = useState<boolean>(false);
@@ -88,8 +99,17 @@ const BusquedaEvento = () => {
 
     const navigate = useRouter();
 
-    const [date, setDate] = useState(moment(new Date(), 'DD/MM/YYYY').format('DD-MM-YYYY'));
+    const [date, setDate] = useState('');
     const [limit, setLimit] = useState(12);
+    const [distrito, setDistrito] = useState<string | undefined>(undefined);
+
+    // New validation filters state
+    const [filtersMore, setFiltersMore] = useState({
+        esGratis: false,
+        enCurso: false,
+        horaInicio: "",
+        horaFin: ""
+    });
 
     const handleDate = (value: string, _name: string) => {
         // setSearch("");
@@ -106,33 +126,47 @@ const BusquedaEvento = () => {
 
     // fijate que puedo hacer para que getEventSearchByFilters se llame solo cuando el usuario haga una busqueda    
     // por ahora se llama cada vez que el usuario cambia el valor de searchDebounce, category, limit o date
+
+    const buildSearchData = () => {
+        const categoryName = countsCategories?.find((c: any) => Number(c.idCategorias) === Number(category))?.nombreCategoria || '';
+        const formattedDate = date ? moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD') : '';
+
+        return {
+            "categoria": Number(category) !== 0 ? categoryName : undefined,
+            "distrito": distrito,
+            "fechaInicio": formattedDate,
+            "busqueda": searchDebounce,
+            "limit": limit,
+            "page": 1, // Backend uses 1-based index or skip/limit? Controller says skip = (page - 1) * limit. So Page 1 is start.
+            "esGratis": filtersMore.esGratis ? true : undefined,
+            "enCurso": filtersMore.enCurso ? true : undefined,
+            "horaInicio": filtersMore.horaInicio || undefined,
+            "horaFin": filtersMore.horaFin || undefined
+        };
+    }
+
     useEffect(() => {
-        if (search !== "" || category !== 0 || limit > 0) {
-            let data = {
-                "categoria": category,
-                "TipoEvento": 0,
-                "Ubicacion": "",
-                "horaInicioFin": "",
-                "fecha": date,
-                "busqueda": searchDebounce,
-                "cantPage": limit,
-                "page": 0
-            }
-            getEventSearchByFilters(data);
+        // If searching by category (value !== 0), wait for categories list to be loaded
+        // so we can resolve the name. 
+        // IF category is 0, we do NOT need to wait, we search immediately.
+
+        const categorySelected = Number(category) !== 0; // Ensure number comparison
+        const categoriesLoaded = countsCategories && countsCategories.length > 0;
+
+        if (categorySelected && !categoriesLoaded) {
+            // Wait for categories to load only if we need to resolve a name
+            return;
         }
-    }, [searchDebounce, category, limit, date])
+
+        // Debounce effect is already handled by useDebounce hook producing 'searchDebounce'
+        // We trigger search when any filter changes
+        const data = buildSearchData();
+        getEventSearchByFilters(data);
+
+    }, [searchDebounce, category, limit, date, countsCategories, filtersMore, distrito])
 
     const searchDataFilter = () => {
-        let data = {
-            "categoria": category,
-            "TipoEvento": 0,
-            "Ubicacion": "",
-            "horaInicioFin": "",
-            "fecha": date,
-            "busqueda": searchDebounce,
-            "cantPage": limit,
-            "page": 0
-        }
+        const data = buildSearchData();
         setIsOpenFilter(false)
         getEventSearchByFilters(data);
     }
@@ -142,6 +176,12 @@ const BusquedaEvento = () => {
     const handleSelectCategory = (_id: number) => {
         // setSearch("");
         setCategory(_id)
+    }
+
+    const handleSelectDistrict = (_id: number, value: string) => {
+        // SelectPro passes (id, value, name, ...) to onChange
+        // We use the value directly as district name for the backend filter
+        setDistrito(value);
     }
 
     const navigateEvent = (item: any) => {
@@ -213,16 +253,19 @@ const BusquedaEvento = () => {
                 <div>
                     <div className="hidden md:grid md:grid-cols-4 xl:gap-x-32 lg:gap-x-64 gap-5 mt-10 2xl:max-w-screen-2xl xl:max-w-screen-xl mx-auto lg:max-w-screen-lg relative max-x-screen-md px-3 lg:px-4 xl:px-32">
                         <div className="md:col-auto sm:col-start-1 sm:col-end-5">
-                            <SelectPro isIconLeft={true} options={distritos} placeholder={`Explora en Lima, Peru`} name='distrito' onChange={() => { }} />
+                            <SelectPro isIconLeft={true} options={distritos} placeholder={`Explora en Lima, Peru`} name='distrito' onChange={handleSelectDistrict} />
                         </div>
-                        <div className="md:col-auto col-start-1 col-end-5">
+                        <div className="md:col-auto col-start-1 col-end-5 z-20">
                             <DateTime onChange={handleDate} name="dateStart" placeholder="desde hoy" />
                         </div>
-                        <div className="md:col-auto col-start-1 col-end-5">
+                        <div className="md:col-auto col-start-1 col-end-5 z-20">
                             <SelectPro isIconLeft={false} options={[{ id: 0, value: "Todas las categorías" }, ...(countsCategories?.map((item: any) => ({
                                 id: item?.idCategorias,
                                 value: item?.nombreCategoria
                             })) || [])]} defaultValue={categoryInfo?.nombreCategoria} placeholder={`Todas las categorías`} name='categoria' onChange={handleSelectCategory} />
+                        </div>
+                        <div className="md:col-auto col-start-1 col-end-5 flex items-center">
+                            <MoreFilters onApply={(data: any) => setFiltersMore({ ...filtersMore, ...data })} />
                         </div>
 
                     </div>
@@ -295,8 +338,8 @@ const BusquedaEvento = () => {
                                             </div>
                                             <div className="col-start-2 col-end-6 max-h-[200px]">
                                                 <div className="max-h-[200px] w-full">
-                                                    {item?.imagen ? (
-                                                        <Image width={250} height={200} className="h-[revert-layer] w-full object-fill" src={item.imagen} alt="imagenes1" />
+                                                    {item?.url ? (
+                                                        <Image width={250} height={200} className="h-[revert-layer] w-full object-fill" src={item.url} alt="imagenes1" />
                                                     ) : (
                                                         <div className="h-[200px] w-full bg-[#f2f2f2]" />
                                                     )}

@@ -9,21 +9,29 @@ export interface Event {
     HoraInicio: string;
     HoraFinal: string;
     FechaInicio: string;
-    idEventos: number;
-    ideventos: number;
+    idEventos: string | number;
+    ideventos: string | number;
     titulo: string;
     NombreLocal: string;
     urlFuente: string;
     url: string;
     Monto: number;
     Destacado: number;
-    categoria_id: number;
+    categoria_id: string | number;
     EsGratis: number;
     Distrito: string;
     estado: string | null;
-    idfecha: number;
-    usuario_id: number;
-    favorito: number
+    idfecha: string | number;
+    usuario_id: string | number;
+    favorito: number;
+
+    // Optional extra fields used in some UI screens
+    direccion?: string;
+    latitud_longitud?: string;
+    descripcionEvento?: string;
+    createdAt?: string | Date;
+    imageUrl?: string;
+    id?: string;
 }
 
 export interface IResponse {

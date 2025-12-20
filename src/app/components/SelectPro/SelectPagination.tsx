@@ -78,7 +78,12 @@ const SelectPagination = ({
                 </div>
 
                 {isOpen && (
-                    <motion.div style={menuLeftStyle} className={styles.content__listOptions}>
+                    <motion.div
+                        {...({
+                            style: menuLeftStyle,
+                            className: styles.content__listOptions
+                        } as any)}
+                    >
                         {
                             options && options.length > 0 && options.map((item: IOption) => (
                                 <li className={styles.options__selectTotal} key={item.id} onClick={() => {

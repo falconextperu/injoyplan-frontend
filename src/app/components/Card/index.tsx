@@ -36,17 +36,24 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
                 href={`/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`}
                 className='h-full w-full relative'>
                 <div className={heartDisabled ? "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2" : "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 group"}>
-                    
+
                     <div className='w-full h-56 relative rounded-t-2xl'>
                         {
-                        item?.Destacado === 1 && (
-                            <div className="uppercase absolute p-1 px-4 left-3 bottom-[-12px] bg-[#007FA4] rounded-full text-sm text-[#fff] font-bold">
-                                <p>Destacado</p>
-                            </div>
-                        )
-                    }
+                            item?.Destacado === 1 && (
+                                <div className="uppercase absolute p-1 px-4 left-3 bottom-[-12px] bg-[#007FA4] rounded-full text-sm text-[#fff] font-bold">
+                                    <p>Destacado</p>
+                                </div>
+                            )
+                        }
                         {item?.url ? (
-                            <Image src={item.url} alt="img2" width={400} height={400} className='h-full w-full object-fill rounded-t-2xl' />
+                            <Image
+                                src={item.url}
+                                alt={item.titulo || "Evento"}
+                                width={400}
+                                height={400}
+                                className='h-full w-full object-fill rounded-t-2xl'
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
                         ) : (
                             <div className='h-full w-full bg-[#f2f2f2] rounded-t-2xl' />
                         )}
@@ -61,9 +68,9 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
                                 width={30}
                                 height={30}
                                 className={`absolute right-3 bg-[rgba(255,255,255,0.8)] rounded-full top-3 p-1 
-               opacity-100 md:opacity-0 ${item?.esfavorito === 1 ? "md:opacity-100" : "md:opacity-0 md:group-hover:opacity-100"}  
+               opacity-100 md:opacity-0 ${(item?.favorito || item?.esfavorito === 1) ? "md:opacity-100" : "md:opacity-0 md:group-hover:opacity-100"}  
                transition-opacity duration-300 cursor-pointer`}
-                                src={item?.esfavorito === 1 ? heart : heartOutline} alt="" />
+                                src={(item?.favorito || item?.esfavorito === 1) ? heart : heartOutline} alt="" />
                         </div>
 
                     </div>
@@ -80,7 +87,12 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
                     </div>
                 </div>
             </Link>
-            <Link className='flex text-[11px] mt-2 text-[#A3ABCC] font-bold' href={`https://${item?.urlFuente}`} target="_blank" rel="noopener noreferrer">
+            <Link className='flex text-[11px] mt-2 text-[#A3ABCC] font-bold'
+                href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => !item?.urlFuente && e.preventDefault()}
+            >
                 VER FUENTE
                 <Image className='ml-1' src={Angle} height={10} width={10} alt='Angulo' />
             </Link>

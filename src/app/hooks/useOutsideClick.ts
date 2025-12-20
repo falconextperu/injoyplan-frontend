@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 
-type UseDropdownReturnType = [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<HTMLDivElement>];
+type UseDropdownReturnType = [
+  boolean,
+  React.Dispatch<React.SetStateAction<boolean>>,
+  React.RefObject<HTMLDivElement | null>
+];
 
 function useOutsideClick(initialIsOpen: boolean): UseDropdownReturnType {
 
   const [isOpen, setIsOpen] = useState(initialIsOpen);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

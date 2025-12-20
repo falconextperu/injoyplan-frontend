@@ -36,6 +36,7 @@ const Header = () => {
     const { getFavorites, deleteFavorite, favorites }: IFavoriteState = useFavoriteStore();
     const [isOpenEvent, setIsOpenEvent, refEvent] = useOutsideClick(false);
     const [isOpenFavorite, setIsOpenFavorite, refFavorite] = useOutsideClick(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen, refUserDropdown] = useOutsideClick(false);
     const [openAuth, setOpenAuth] = useState<boolean>(false);
     const navigation = useRouter()
     const path = usePathname();
@@ -61,6 +62,8 @@ const Header = () => {
             setToken(t);
         }
     }, []);
+
+
 
     useEffect(() => {
         if (debounceSearch.length <= 3) {
@@ -134,11 +137,11 @@ const Header = () => {
 
         // Crear una expresión regular para buscar el texto que coincide, ignorando mayúsculas/minúsculas
         const regex = new RegExp(`(${highlight})`, 'gi');
-        const parts = text.split(regex);
+        const parts = text?.split(regex);
 
         return (
             <span>
-                {parts.map((part, index) =>
+                {parts?.map((part, index) =>
                     regex.test(part) ? (
                         <b key={index} className="font-black text-black">
                             {part}
@@ -167,6 +170,7 @@ const Header = () => {
             localStorage.removeItem("token");
         }
         logout();
+        navigation.push('/');
     };
 
     useEffect(() => {
@@ -174,6 +178,9 @@ const Header = () => {
     }, [])
 
     console.log(eventsOnlyFavorites)
+
+    // Hide Header on Admin routes
+    if (path?.startsWith('/admin')) return null;
 
     return (
         <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
@@ -224,10 +231,10 @@ const Header = () => {
                                                                         <div className='flex justify-between md:p-5 pb-3 pt-2 md:pt-5'>
                                                                             <div className='flex items-center'>
                                                                                 <div className="w-[40px] h-[40px] mr-4">
-                                                                                    <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
+                                                                                    <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url || item.imageUrl} alt="" />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <h3 className='font-normal text-md text-[#444] text-ellipsis w-[320px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
+                                                                                    <h3 className='font-normal text-md text-black text-ellipsis w-[320px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
                                                                                     <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
                                                                                 </div>
                                                                             </div>
@@ -316,7 +323,7 @@ const Header = () => {
                                                                             <div className='flex justify-between md:p-5 pb-3 pt-2 md:pt-5'>
                                                                                 <div className='flex items-center'>
                                                                                     <div className="w-[40px] h-[40px] mr-4">
-                                                                                        <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url} alt="" />
+                                                                                        <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url || item.imageUrl} alt="" />
                                                                                     </div>
                                                                                     <div>
                                                                                         <h3 className='font-normal text-md text-[#444] text-ellipsis md:w-[320px] w-[190px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
@@ -400,32 +407,146 @@ const Header = () => {
                             </div>
                         </div>
                     ) :
-                        <div className="col-start-9 col-end-13 flex justify-end md:relative items-center" ref={favoritesRef}>
-                            {isMobile && auth !== null ? <button onClick={logout} className='mr-[10px] text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'><Icon icon="material-symbols:logout" width="24" height="24" /></button> : <p className='font-bold mr-3'>{auth?.nombre} {auth?.Apellido}</p>}
-                            {auth === null && !isMobile ? (
-                                <>
+                        <div className="col-start-9 col-end-13 flex justify-end md:relative items-center gap-2" ref={favoritesRef}>
+                            {/* User Section - Avatar Dropdown (Desktop) */}
+                            {auth !== null && !isMobile && (
+                                <div className="relative" ref={refUserDropdown}>
+                                    <button
+                                        onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                                    >
+                                        {/* Avatar */}
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#007FA4] to-[#00DFD1] flex items-center justify-center text-white font-bold text-sm overflow-hidden border-2 border-white shadow-md">
+                                            {(() => {
+                                                const a: any = auth;
+                                                const avatarUrl = a?.profile?.avatar || a?.imagenPerfil;
+                                                if (avatarUrl) {
+                                                    return <Image src={avatarUrl} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />;
+                                                }
+                                                const initials = [a?.profile?.firstName?.[0], a?.profile?.lastName?.[0]]
+                                                    .filter(Boolean)
+                                                    .join('')
+                                                    .toUpperCase() || a?.nombre?.[0]?.toUpperCase() || a?.email?.[0]?.toUpperCase() || 'U';
+                                                return initials;
+                                            })()}
+                                        </div>
+                                        {/* User Name */}
+                                        {/* <span className="font-bold text-[#212121] text-sm hidden lg:block max-w-[150px] truncate">
+                                            {(() => {
+                                                const a: any = auth;
+                                                const fullName = [a?.profile?.firstName, a?.profile?.lastName]
+                                                    .filter(Boolean)
+                                                    .join(' ')
+                                                    .trim();
+                                                const legacy = `${a?.nombre ?? ''} ${a?.Apellido ?? ''}`.trim();
+                                                return fullName || legacy || 'Usuario';
+                                            })()}
+                                        </span> */}
+                                        {/* <Icon icon="solar:alt-arrow-down-linear" className={`text-[#666] transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} width={16} /> */}
+                                    </button>
 
-                                    <button onClick={() => setOpenAuth(true)}
-                                        className='mr-[10px] text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
-                                    >Ingresar</button></>
-                            ) :
-                                auth === null && isMobile && (
-                                    <>
+                                    {/* Dropdown Menu */}
+                                    {isUserDropdownOpen && (
+                                        <div className="absolute right-0 top-14 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
+                                            {/* <div className="px-4 py-3 border-b border-gray-100">
+                                                <p className="font-bold text-[#212121] text-sm truncate">
+                                                    {(() => {
+                                                        const a: any = auth;
+                                                        return a?.email || 'usuario@email.com';
+                                                    })()}
+                                                </p>
+                                            </div> */}
 
-                                        <button onClick={() => setOpenAuth(true)}
-                                            className='mr-[10px] text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
-                                        ><Icon icon="solar:user-bold" width="24" height="24" /></button>
-                                    </>
+                                            <Link href="/explorar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={20} />
+                                                <span className="text-[#212121] text-sm">Explorar</span>
+                                            </Link>
 
-                                )
-                            }
-                            {
-                                isMobile &&
-                                <Image onClick={() => setIsOpenEvent(true)} className='mr-2 ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />
-                            }
-                            {
-                                auth !== null && !isMobile && <button onClick={logoutUser} className='mr-[10px] text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'><Icon icon="material-symbols:logout" width="24" height="24" /></button>
-                            }
+                                            {/* My Events - Only for COMPANY type */}
+                                            {(() => {
+                                                const a: any = auth;
+                                                if (a?.userType === 'COMPANY') {
+                                                    return (
+                                                        <Link href="/mis-eventos" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                            <Icon icon="solar:calendar-bold" className="text-[#007FA4]" width={20} />
+                                                            <span className="text-[#212121] text-sm">Mis Eventos</span>
+                                                        </Link>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            <Link href="/mensajes" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                <Icon icon="solar:chat-round-dots-bold" className="text-[#007FA4]" width={20} />
+                                                <span className="text-[#212121] text-sm">Mis Mensajes</span>
+                                            </Link>
+                                            <Link href="/perfil/editar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                <Icon icon="solar:settings-bold" className="text-[#007FA4]" width={20} />
+                                                <span className="text-[#212121] text-sm">Configuración</span>
+                                            </Link>
+
+                                            {/* Admin Link - Only for ADMIN role */}
+                                            {(() => {
+                                                const a: any = auth;
+                                                if (a?.role === 'ADMIN') {
+                                                    return (
+                                                        <Link href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
+                                                            <Icon icon="solar:widget-bold" className="text-purple-600" width={20} />
+                                                            <span className="text-purple-600 text-sm font-medium">Ir Administrador</span>
+                                                        </Link>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            <div className="border-t border-gray-100 mt-2 pt-2">
+                                                <button
+                                                    onClick={logoutUser}
+                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors w-full text-left"
+                                                >
+                                                    <Icon icon="solar:logout-2-bold" className="text-red-500" width={20} />
+                                                    <span className="text-red-500 text-sm font-medium">Cerrar Sesión</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Mobile: Logout Button */}
+                            {isMobile && auth !== null && (
+                                <button onClick={logout} className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'>
+                                    <Icon icon="material-symbols:logout" width="24" height="24" />
+                                </button>
+                            )}
+
+                            {/* Login Button (Not Authenticated) */}
+                            {auth === null && !isMobile && (
+                                <button onClick={() => setOpenAuth(true)}
+                                    className='text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
+                                >Ingresar</button>
+                            )}
+                            {auth === null && isMobile && (
+                                <button onClick={() => setOpenAuth(true)}
+                                    className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
+                                ><Icon icon="solar:user-bold" width="24" height="24" /></button>
+                            )}
+
+                            {/* Explore Icon (Desktop) */}
+                            {!isMobile && (
+                                <Link
+                                    href="/explorar"
+                                    className="hidden md:flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                    title="Explorar"
+                                >
+                                    <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
+                                </Link>
+                            )}
+
+                            {/* Mobile Search */}
+                            {isMobile && (
+                                <Image onClick={() => setIsOpenEvent(true)} className='ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />
+                            )}
                             {
                                 isOpenFavorite ? (
                                     <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />

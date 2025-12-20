@@ -37,8 +37,9 @@ const Toast = ({
          <motion.div
             initial={{ opacity: 0, y: -30, x: 0 }}
             animate={{ opacity: 1, y: 0 }}
-
-            className={`${styles.wrapper__toast} ${styles[type]}`}>
+            {...({
+               className: `${styles.wrapper__toast} ${styles[type]}`
+            } as any)}>
             <div className={styles.content__toast}>
                {type === "success" && <Svg icon={Icons.msgSuccess} />}
                {type === "error" && <Svg icon={Icons.msgError} />}

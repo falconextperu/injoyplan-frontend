@@ -5,11 +5,14 @@ interface Header {
 }
 
 export interface Banner {
-    cantidad: number;
-    idCategorias: number;
-    nombreCategoria: string;
-    estado: number;
-    iconos: string;
+    id: string;
+    title: string;
+    imageUrl: string;
+    link?: string;
+    isActive: boolean;
+    order: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface IResponse {

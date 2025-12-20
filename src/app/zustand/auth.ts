@@ -5,81 +5,86 @@ import { IUser } from '../interfaces/auth';
 import useAlertStore from './alert';
 
 export interface IAuthState {
-    signIn: (data: any) => void;
+    signIn: (data: any) => Promise<any>;
     auth: IUser | null;
-    me: () => void;
+    me: () => Promise<void>;
     logout: () => void;
-    login: (data: any) => void;
-    sendEmail: (email: IEmail) => void
+    login: (data: any) => Promise<{ success: boolean; message?: string }>;
+    sendEmail: (email: IEmail) => Promise<void>
+    verifyCode: (email: string, code: string) => Promise<boolean>;
     success: boolean
 }
 
 export const useAuthStore = create<IAuthState>((set, _get) => ({
     success: false,
     auth: null,
-    login:  async (data: any) => {
+    login: async (data: any) => {
         try {
-            const resp: IResponse = await post(`usuario/login`, data);
+            const resp: any = await post(`auth/login`, data);
             console.log(resp)
-            if (resp.HEADER.CODE === 500) {
-                return useAlertStore.getState().alert("La contraseña o el usuario son incorrectos, intentelo de nuevo porfavor", "error")
-            }
-            if (resp.HEADER.CODE === 200) {
-                localStorage.setItem("token", resp.RESPONSE.token);
-                set({ auth: resp.RESPONSE.user, success: true });
+            if (resp.accessToken && resp.user) {
+                localStorage.setItem("token", resp.accessToken);
+                set({ auth: resp.user, success: true });
+                return { success: true };
             } else {
                 set({ auth: null })
+                return { success: false, message: "La contraseña o el usuario son incorrectos" };
             }
-           
-        } catch (error) {
-            return useAlertStore.getState().alert("El usuario o contraseña son incorrectas", "error")
-            // console.error('Error during login:', error);
+        } catch (error: any) {
+            return { success: false, message: error?.message || "El usuario o contraseña son incorrectas" };
         }
     },
     signIn: async (data: any) => {
         try {
-            const resp: IResponse = await post(`usuario/create`, data);
+            const resp: any = await post(`auth/register`, data);
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                localStorage.setItem("token", resp.RESPONSE.token);
-                useAlertStore.getState().alert("Usuario creado correctamente", "success");
-                set({ auth: resp.RESPONSE.user, success: true });
-            } 
-            if(resp.HEADER.CODE === 500) {
-                useAlertStore.getState().alert(resp.HEADER.MESSAGE, "error");
-                // set({ auth: resp.RESPONSE.user });
+            if (resp.userId) {
+                // Return response to allow component to handle step change
+                return resp;
             }
-        } catch (error) {
-            console.log(error)
-            console.error('Error during login:', error);
+        } catch (error: any) {
+            useAlertStore.getState().alert(error?.message || "Error al registrar usuario", "error");
+            throw error;
         }
     },
     me: async () => {
         try {
-            const resp: IResponse = await get(`usuario/auth/@me`);
-            if (resp.HEADER.CODE === 200) {
-                console.log(resp)
-                set({ auth: resp.RESPONSE.user });
+            const user: any = await get(`auth/me`);
+            console.log(user)
+            if (user && user.id) {
+                set({ auth: user });
             } else {
                 set({ auth: null })
             }
         } catch (error) {
             set({ auth: null })
-            // console.error('Error during login:', error);
         }
     },
-    sendEmail: async (email: IEmail ) => {
+    sendEmail: async (email: IEmail) => {
         try {
-            const resp: any = await post(`eventos/guardar_correo_para_enviar_mejores_eventos`, email);
+            const resp: any = await post(`newsletter/subscribe`, email);
             console.log(resp)
-            if (resp.message !== "") {
+            if (resp.message) {
                 useAlertStore.getState().alert(resp.message, "success");
-                // set({ auth: resp.RESPONSE.user });
-            } else {
-                // set({ auth: null })
             }
-        } catch (error) {
-            console.error('Error during login:', error);
+        } catch (error: any) {
+            useAlertStore.getState().alert(error?.message || "Error al suscribir", "error");
+        }
+    },
+    verifyCode: async (email: string, code: string) => {
+        try {
+            const resp: any = await post(`auth/verify-code`, { email, code });
+
+            // Backend returns { accessToken, refreshToken } on success, no "user" object
+            if (resp.accessToken) {
+                localStorage.setItem("token", resp.accessToken);
+                set({ success: true });
+                return true;
+            }
+            return false;
+        } catch (error: any) {
+            useAlertStore.getState().alert(error?.message || "Código inválido", "error");
+            throw error;
         }
     },
     logout: () => {
@@ -89,5 +94,3 @@ export const useAuthStore = create<IAuthState>((set, _get) => ({
         }
     },
 }));
-
-

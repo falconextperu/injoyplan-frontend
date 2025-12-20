@@ -1,24 +1,23 @@
-
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { IEventsState, useEventStore } from '../../zustand/events'
 import { IAuthState, useAuthStore } from '../../zustand/auth'
 import { IFavoriteState, useFavoriteStore } from '../../zustand/favorites'
 import Card from '@/app/components/Card'
+import CardSkeleton from '@/app/components/CardSkeleton'
 import { Event } from '@/app/interfaces/event'
 
 const Events = ({ setLimit, setOpenAuth }: any) => {
+    const router = useRouter();
+    const [clickCount, setClickCount] = useState(0);
 
-    const { events
-     }: IEventsState = useEventStore();
+    const { events, isLoading }: IEventsState = useEventStore();
     const { auth }: IAuthState = useAuthStore();
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
 
-    const eventsNoDestacades = events.length > 0 ? events?.filter((item: any) => item?.Destacado === 0) : [];
-
     const addFavoritesByUser = (item: any) => {
-        console.log(item)
         if (auth) {
-            console.log(item)
-            if (item.esfavorito === 1) {
+            if (item.favorito || item.esfavorito === 1) {
                 deleteFavorite(item)
             } else {
                 const data = {
@@ -33,6 +32,15 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
         }
     }
 
+    const handleLoadMore = () => {
+        if (clickCount >= 2) {
+            router.push('/busqueda/0');
+        } else {
+            setClickCount(prev => prev + 1);
+            setLimit((page: any) => page + 12);
+        }
+    };
+
     return (
         <div className='bg-[#fff]'>
 
@@ -43,15 +51,35 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
                     </div>
                     <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-4">
                         {
-                            eventsNoDestacades.map((item: Event, index: number) => {
-                                return (
-                                    <Card item={item} key={`${item?.idEventos || item?.ideventos}-${item?.idfecha}`} addFavoritesByUser={addFavoritesByUser} />
-                                )
-                            })
+                            isLoading && events.length === 0 ? (
+                                // Show skeletons on initial load (or if cache empty)
+                                Array.from({ length: 8 }).map((_, i) => <CardSkeleton key={i} />)
+                            ) : events.length === 0 ? (
+                                // No events
+                                <div className="col-span-full text-center py-10 text-gray-500">No hay eventos disponibles.</div>
+                            ) : (
+                                events.map((item: Event, index: number) => {
+                                    return (
+                                        <Card item={item} key={`${item?.idEventos || item?.ideventos}-${item?.idfecha}`} addFavoritesByUser={addFavoritesByUser} />
+                                    )
+                                })
+                            )
                         }
                     </div>
+                    {/* Append Skeletons when loading more data (if we want that effect, but store clears events currently so skeletons replace list. 
+                        Ideally we append skeletons to list. But current logic replaces array. Keep it simple: Skeletons show when loading. 
+                    */}
+                    {isLoading && events.length > 0 && (
+                        // If we are loading MORE events effectively
+                        <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-4 mt-5">
+                            {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={`skeleton-append-${i}`} />)}
+                        </div>
+                    )}
+
                     <div className='text-[#007fa4] font-bold flex justify-center mt-10 mb-10 border-2 border-solid border-[#007FA4] p-2 w-fit mx-auto rounded-full px-16'>
-                        <button onClick={() => setLimit((page: any) => page + 12)} type="submit">VER MÁS EVENTOS</button>
+                        <button onClick={handleLoadMore} disabled={isLoading} type="submit">
+                            {isLoading ? 'CARGANDO...' : 'VER MÁS EVENTOS'}
+                        </button>
                     </div>
                 </div>
             </div>

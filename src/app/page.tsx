@@ -7,9 +7,13 @@ import { ICategoriesState, useCategoriesState } from "./zustand/categories";
 import LoadingPage from "./ui/LandingPage";
 import Events from "./ui/Events";
 import EventsFeatured from "./ui/EventsFeatured";
-import MailBox from "./ui/MainBox";
-import Auth from "./ui/Auth";
+// import MailBox from "./ui/MainBox";
+// import Auth from "./ui/Auth";
 import Categories from "./ui/Categories";
+import dynamic from "next/dynamic";
+
+const Auth = dynamic(() => import("./ui/Auth"), { ssr: false });
+const MailBox = dynamic(() => import("./ui/MainBox"));
 
 export default function Home() {
   const [openAuth, setOpenAuth] = useState<boolean>(false);

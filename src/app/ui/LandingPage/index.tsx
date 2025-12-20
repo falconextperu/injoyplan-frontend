@@ -21,7 +21,9 @@ const LoadingPage = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="fixed w-full h-[100vh] z-50 top-0 left-0 bg-[#fff]"
+                    {...({
+                        className: "fixed w-full h-[100vh] z-50 top-0 left-0 bg-[#fff]",
+                    } as any)}
                     initial={{ opacity: 1 }}       // Estado inicial: completamente visible
                     animate={{ opacity: 1 }}       // Mantener visible durante la carga
                     exit={{ opacity: 1 }}          // Animación de salida: desvanecerse

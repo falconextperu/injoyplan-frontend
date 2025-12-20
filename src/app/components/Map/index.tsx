@@ -6,38 +6,54 @@ const Map = ({ location }: any) => {
 
     const INITIAL_ZOOM = 15.12
     const [zoom, _setZoom] = useState(INITIAL_ZOOM)
-    const mapRef: any = useRef()
-    const mapContainerRef: any = useRef()
+    const mapRef = useRef<mapboxgl.Map | null>(null)
+    const mapContainerRef = useRef<HTMLDivElement | null>(null)
 
-    let locations = location?.split(",")
-    console.log(locations)
+    const parts = typeof location === 'string' ? location.split(',') : [];
+    const lat = parts.length >= 2 ? parseFloat(parts[0]) : NaN;
+    const lng = parts.length >= 2 ? parseFloat(parts[1]) : NaN;
+    const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
 
     useEffect(() => {
-        if (location !== undefined) {
+        if (!hasCoords) {
+            // If no coords, ensure map instance is cleaned up
+            mapRef.current?.remove();
+            mapRef.current = null;
+            return;
+        }
+
+        if (mapContainerRef.current) {
             mapboxgl.accessToken = 'pk.eyJ1IjoiZGV2Y29kZXgiLCJhIjoiY20xaDRoN2c2MDA4aDJtb2I3bW85dmk1aSJ9.rCfKcWomIv7qTwNwKyniAA'
             mapRef.current = new mapboxgl.Map({
                 container: mapContainerRef.current,
-                center: [parseFloat(locations[1]), parseFloat(locations[0])],
+                center: [lng, lat],
                 zoom: zoom
             });
 
-            // Añade un marcador en la ubicación especificada
-            new mapboxgl.Marker()
-                .setLngLat([parseFloat(locations[1]), parseFloat(locations[0])])
-                .addTo(mapRef.current);
+            if (mapRef.current) {
+                new mapboxgl.Marker()
+                    .setLngLat([lng, lat])
+                    .addTo(mapRef.current);
+            }
 
-            // Limpiar el mapa cuando el componente se desmonta
             return () => {
-                mapRef.current.remove();
+                mapRef.current?.remove();
+                mapRef.current = null;
             };
         }
-    }, [location])
+    }, [hasCoords, lat, lng, zoom])
+
+    if (!hasCoords) {
+        return (
+            <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl p-6 text-center text-[#666]">
+                <p className="font-bold text-[#212121]">Ubicación no disponible</p>
+                <p className="text-sm mt-1">Este evento no tiene coordenadas para mostrar el mapa.</p>
+            </div>
+        );
+    }
 
     return (
         <div style={{ position: "relative" }}>
-            {/* <div className="sidebar">
-                Longitude: {locations[1]} | Latitude: {locations[0]} | Zoom: {zoom}
-            </div> */}
             <div id='map-container' ref={mapContainerRef} />
         </div>
     );

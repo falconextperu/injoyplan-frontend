@@ -9,7 +9,7 @@ import BannerSkeleton from "@/app/components/Skeletons/banner";
 moment.locale('es');
 
 const Slide = () => {
-    const { getBanners, banners }: IBannersState = useBannersStore();
+    const { getBanners, banners, isLoading }: IBannersState = useBannersStore();
 
     const settings = {
         dots: true,
@@ -54,34 +54,62 @@ const Slide = () => {
         getBanners();
     }, []);
 
+    console.log(banners)
+
+    if (isLoading) return <BannerSkeleton />
+
     return (
         <Slider className="slide" {...settings}>
             {banners?.length > 0 ? (
-                banners.map((item: any, index: number) => (
-                    <div key={index} className="h-full">
-                        <div className="h-full relative">
-                            <Image src={item.url} alt="banner" width={100} height={100} className="w-full h-full object-cover" />
-                            <div className="absolute md:top-36 top-24 left-10">
-                                <div>
-                                    <h4 className="bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-2xl md:text-3xl p-2 w-fit">{item.titulo}</h4>
-                                    <div className="flex items-center w-fit bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-md p-2">
-                                        <p className="ml-2">VIE <strong className="font-normal block">15 ENE</strong></p>
-                                        <div className="border-l border-solid border-[#fff] ml-4">
-                                            <p className="ml-3">20:00 - 21:00 Joinnus Live</p>
-                                        </div>
+                banners.map((item: any, index: number) => {
+                    const date = item.fecha ? moment(item.fecha) : null;
+                    const dayName = date ? date.format('ddd').toUpperCase().replace('.', '') : '';
+                    const dayNumber = date ? date.format('D') : '';
+                    const monthName = date ? date.format('MMM').toUpperCase().replace('.', '') : '';
+
+                    return (
+                        <div key={index} className="h-full">
+                            <div className="h-full relative">
+                                <Image src={item.imageUrl} alt="banner" width={2000} height={1000} className="w-full h-full object-fill" />
+                                <div className="absolute md:top-36 top-24 left-10">
+                                    <div>
+                                        <h4 className="bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-2xl md:text-3xl p-2 w-fit font-bold">{item.title}</h4>
+
+                                        {(item.fecha || item.horaInicio || item.categoria) && (
+                                            <div className="flex items-center w-fit bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-md p-2 mt-1">
+                                                {date && (
+                                                    <p className="ml-2 leading-tight">
+                                                        {dayName} <strong className="font-normal block text-xl">{dayNumber} {monthName}</strong>
+                                                    </p>
+                                                )}
+                                                {(item.horaInicio || item.categoria) && (
+                                                    <div className={`border-l border-solid border-[#fff] ml-4 pl-3 flex flex-col justify-center ${!date ? 'border-none ml-0 pl-2' : ''}`}>
+                                                        {item.horaInicio && (
+                                                            <p className="">{item.horaInicio} {item.horaFin ? `- ${item.horaFin}` : ''}</p>
+                                                        )}
+                                                        {item.direccion && (
+                                                            <p className="font-bold opacity-90">{item.direccion}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <a className="bg-customText transition-colors p-3 px-6 text-md relative top-4 rounded uppercase text-[#fff] font-bold inline-block" rel="noopener noreferrer" target="_blank" href={item.link || item.urlFuente || "#"}>
+                                            Conoce más
+                                        </a>
                                     </div>
-                                    <a className="bg-customText p-3 text-md relative top-2 rounded uppercase text-[#fff]" rel="noopener noreferrer" target="_blank" href={item.urlFuente || "#"}>
-                                        Conoce más
-                                    </a>
                                 </div>
                             </div>
+                            {item.urlFuente && (
+                                <Link className="absolute md:bottom-2 bottom-1 z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center hover:text-white transition-colors" href={item.urlFuente} target="_blank" rel="noopener noreferrer">
+                                    VER FUENTE
+                                    <Image className="ml-1 relative top-0.5" src={Angle} height={10} width={10} alt="Angulo" />
+                                </Link>
+                            )}
                         </div>
-                        <Link className="absolute md:bottom-[-0px] bottom-[-5px] z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center" href={item.urlFuente || "#"} target="_blank" rel="noopener noreferrer">
-                            VER FUENTE
-                            <Image className="ml-1 relative top-0.5" src={Angle} height={10} width={10} alt="Angulo" />
-                        </Link>
-                    </div>
-                ))
+                    );
+                })
             ) : (
                 <BannerSkeleton />
             )}

@@ -273,8 +273,10 @@ const SelectPro = ({
 
         {isOpen && (
           <motion.div
-            style={optionsHeigth}
-            className={`${styles.content__listOptions} ${getClassPosition(position, label)}`}
+            {...({
+              style: optionsHeigth,
+              className: `${styles.content__listOptions} ${getClassPosition(position, label)}`
+            } as any)}
           >
             {resultsOptions && resultsOptions?.length > 0 ? (
               resultsOptions?.map((item: IOption, index: number) => (

@@ -14,50 +14,110 @@ export const useFavoriteStore = create<IFavoriteState>((set, _get) => ({
     favorites: [],
     addFavorite: async (data: any) => {
         try {
-            const resp: IResponse = await post(`usuario/createFavoritos`, data);
+            const resp: any = await post(`favorites`, { eventId: data.idEvento });
             console.log(data)
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                useEventStore.getState().setEventsAsFavorite(data.idEvento, resp.RESPONSE);
-                useEventStore.getState().setEventDataFavorite(data.idEvento,resp.RESPONSE);
-                useEventStore.getState().setEventFiltersFavorite(data.idEvento,resp.RESPONSE);
-                useEventStore.getState().setEventDataFavorite(data.idEvento,resp.RESPONSE)
+            if (resp && resp.id) {
+                useEventStore.getState().setEventsAsFavorite(data.idEvento, resp.id);
+                useEventStore.getState().setEventDataFavorite(data.idEvento, resp.id);
+                useEventStore.getState().setEventFiltersFavorite(data.idEvento, resp.id);
                 // refresh favorites list so UI (Header) picks up changes
                 await _get().getFavorites();
             } 
         } catch (error: any) {
-            console?.error('Error during login:', error);
+            console?.error('Error adding favorite:', error);
         }
     },
     deleteFavorite: async (event: any) => {
         console.log(event)
         try {
-            // console.log(id);
-            const resp: IResponse = await del(`usuario/eliminar_favoritos/${event.idfavoritos}`);
+            const favoriteId = event?.idfavoritos ?? event?.favorito;
+            const eventId = event?.idEvento ?? event?.idEventos ?? event?.ideventos;
+
+            if (!favoriteId && !eventId) {
+                console.error('No favoriteId or eventId provided for deletion');
+                return;
+            }
+
+            // Prefer deleting by favoriteId (legacy behavior). Fallback to deleting by eventId.
+            const endpoint = favoriteId
+                ? `favorites/${favoriteId}`
+                : `favorites/event/${eventId}`;
+
+            const resp: any = await del(endpoint);
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                useEventStore.getState().setEventsDeleteFavorite(event.favorito);
-                useEventStore.getState().setEventDataDeleteDFavorite(event.favorito);
-                useEventStore.getState().setEventDeleteFiltersFavorite(event.favorito);
+
+            // On errors, backend returns { statusCode, message, error }
+            if (resp && resp.message && !resp.statusCode) {
+                const favIdForState = favoriteId ?? event?.favorito;
+                if (favIdForState) {
+                    useEventStore.getState().setEventsDeleteFavorite(favIdForState);
+                    useEventStore.getState().setEventDataDeleteDFavorite(favIdForState);
+                    useEventStore.getState().setEventDeleteFiltersFavorite(favIdForState);
+                }
                 // refresh favorites list after deletion
                 await _get().getFavorites();
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Error deleting favorite:', error);
         }
     },
     getFavorites: async () => {
         try {
-            const resp: IResponse = await get(`usuario/consultarfavoritos`);
+            const resp: any = await get(`favorites`);
             console.log(resp)
-            if (resp.HEADER.CODE === 200) {
-                console.log(resp)
-                set({ favorites: resp.RESPONSE })
+            // Backend returns { data: favorites[], total, page, totalPages }
+            if (resp?.data && Array.isArray(resp.data)) {
+                // Map each favorite to legacy format
+                const mappedFavorites = resp.data.map((fav: any) => {
+                    const event = fav.event;
+                    const firstDate = event?.dates?.[0];
+                    const location = event?.location;
+                    
+                    return {
+                        idfavoritos: fav.id, // Favorite ID for deletion
+                        favorito: fav.id,
+                        esfavorito: 1,
+                        
+                        // Event IDs
+                        ideventos: event?.id,
+                        idEventos: event?.id,
+                        idfecha: firstDate?.id || event?.id,
+                        
+                        // Event data
+                        titulo: event?.title,
+                        url: event?.imageUrl,
+                        Destacado: event?.isFeatured ? 1 : 0,
+                        
+                        // Date/time
+                        FechaInicio: firstDate?.date || event?.createdAt,
+                        HoraInicio: firstDate?.startTime || '',
+                        HoraFinal: firstDate?.endTime || '',
+                        
+                        // Price
+                        Monto: firstDate?.price || 0,
+                        EsGratis: (firstDate?.price === 0 || !firstDate?.price) ? 1 : 0,
+                        
+                        // Location
+                        NombreLocal: location?.address || (location?.district && location?.province ? `${location.district}, ${location.province}` : '') || '',
+                        Distrito: location?.district || '',
+                        direccion: location?.address || '',
+                        
+                        // Other
+                        categoria_id: 0,
+                        urlFuente: event?.websiteUrl || event?.link || '',
+                        estado: event?.isActive ? '1' : '0',
+                        usuario_id: 0,
+                    };
+                });
+                
+                set({ favorites: mappedFavorites });
             } else {
-
+                set({ favorites: [] })
             }
         } catch (error) {
-            // console.error('Error during login:', error);
+            console.error('Error loading favorites:', error);
+            set({ favorites: [] })
         }
     },
 }));

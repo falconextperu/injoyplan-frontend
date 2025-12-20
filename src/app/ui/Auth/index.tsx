@@ -1,275 +1,734 @@
-import { Icon } from '@iconify/react/dist/iconify.js';
+"use client";
+
+import { useState, useRef, useEffect } from 'react';
 import ReactModal from 'react-modal';
-import styles from './auth.module.css';
-import logo from '../../../../public/svg/logo.svg';
-import { Dispatch, useEffect, useState } from 'react';
-import { m, motion } from 'framer-motion';
-import { IAuthState, useAuthStore } from '../../zustand/auth';
-import useAlertStore from '../../zustand/alert';
+import { Icon } from '@iconify/react';
+import { useAuthStore } from '@/app/zustand/auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import Confetti from 'react-confetti';
 import Image from 'next/image';
-import useIsMobile from '@/app/hooks/useIsMobile';
-import Alert from '@/app/components/Alert';
+import logo from '../../../../public/svg/logo.svg';
+import { ICategoriesState, useCategoriesState } from '@/app/zustand/categories';
+import { Category } from '@/app/interfaces/category';
+import { ReactSVG } from 'react-svg';
 
-interface IProps {
-    openAuth: boolean;
-    setOpenAuth: Dispatch<boolean>;
-}
-
-const variants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 }
+const customStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        padding: '0',
+        border: 'none',
+        borderRadius: '24px',
+        maxWidth: '1000px',
+        width: '95%',
+        maxHeight: '90vh',
+        overflow: 'hidden',
+        background: '#fff',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        zIndex: 1001,
+    },
+    overlay: {
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 1000,
+    }
 };
 
-const Auth = ({ openAuth, setOpenAuth }: IProps) => {
+interface Props {
+    openAuth: boolean;
+    setOpenAuth: (open: boolean) => void;
+    isRegister?: boolean;
+    setIsRegister?: (isRegister: boolean) => void;
+}
 
+export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp, setIsRegister: setIsRegisterProp }: Props) {
+    const [localIsRegister, setLocalIsRegister] = useState(false);
+    const isRegister = isRegisterProp ?? localIsRegister;
+    const setIsRegister = setIsRegisterProp ?? setLocalIsRegister;
+    const { login, signIn, verifyCode } = useAuthStore();
 
-    const [isRegister, setIsRegister] = useState<boolean>(false);
-    const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(false);
-    const { signIn, login, success }: IAuthState = useAuthStore();
-    const [isToogleViewPassword, setIsToggleViewPassword] = useState<boolean>(false)
+    // Internal state
+    const [step, setStep] = useState(0); // 0: Form, 1: Verify, 2: Success
 
-    const isMobile = useIsMobile();
+    // Form fields
+    const [nombre, setNombre] = useState('');
+    const [apellido, setApellido] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [genero, setGenero] = useState<string | undefined>("Seleccionar");
+    const [f_nacimiento, setF_nacimiento] = useState('');
+    const [terminoCondiciones, setTerminoCondiciones] = useState(false);
+    const [politica, setPolitica] = useState(false);
 
-    // Estados para controlar los valores del formulario
-    const [nombre, setNombre] = useState<string>("");
-    const [apellido, setApellido] = useState<string>("");
-    const [genero, setGenero] = useState<string>("Seleccionar");
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-    const [emailError, setEmailError] = useState<string>("");
-    const [passwordError, setPasswordError] = useState<string>("");
-    const customStyles = {
-        content: {
-            top: isMobile ? '50%' : '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            borderRadius: isMobile ? "0px" : "10px",
-            boxShadow: "0 0 50px #523f6926",
-            border: "none",
-            width: isMobile ? "100%" : "550px",
-            padding: isMobile ? "0px" : "0px",
-            maxHeight: isMobile ? "100vh" : "880px",
-            height: isMobile ? "100vh" : "",
-            background: isMobile ? "#FFF" : "transparent",
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000
-        },
-        overlay: {
-            zIndex: 999, // Ensure the overlay is above the blurred content
-        }
-    };
-
-    const validateEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    const validatePassword = (password: string): boolean => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        return passwordRegex.test(password);
-    };
+    // Categories Step
+    const { categories, getCategories }: ICategoriesState = useCategoriesState();
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     useEffect(() => {
-        if (email.trim() !== "") {
-            setEmailError(validateEmail(email) ? "" : "Por favor, ingresa un correo electrónico válido.");
-        }
-    }, [email]);
-
-    useEffect(() => {
-        // valida la contrasena que tenga un minimo de 8 caracteres tambien que tenga una mayuscula, una minuscula, un numero y un simbolo
-        if (password.trim() !== "") {
-            if (password.length < 8) {
-                setPasswordError("Por favor, ingresa una contraseña con al menos 8 caracteres.");
-            } else {
-                setPasswordError("");
-            }
-        }
-    }, [password]);
-
-    const isFormValid = (): boolean => {
         if (isRegister) {
-            return (
-                nombre.trim() !== "" &&
-                apellido.trim() !== "" &&
-                genero !== "Seleccionar" &&
-                email.trim() !== "" &&
-                password.trim() !== "" &&
-                isTermsAccepted
-            );
+            getCategories();
         }
-        return email.trim() !== "" && password.trim() !== "";
-    };
+    }, [isRegister]);
 
-    console.log(isFormValid());
-
-    // Función para manejar el envío del formulario
-    const handleSubmit = async () => {
-        const body = {
-            nombre,
-            apellido,
-            genero,
-            f_nacimiento: "",
-            imagenPerfil: "",
-            password,
-            email,
-            terminoCondiciones: 1,
-            politica: 1
-        };
-
-        if (isRegister) {
-            if (nombre === "" || apellido === "" || genero === "" || email === "" || password === "") {
-                return useAlertStore.getState().alert("Complete los datos obligatorios para crear su cuenta", "error")
-            }
-            signIn(body)
+    const handleSelectCategory = (categoryId: string) => {
+        let updatedCategories;
+        if (selectedCategories?.includes(categoryId)) {
+            updatedCategories = selectedCategories?.filter(id => id !== categoryId);
         } else {
-            if (email === "" || password === "") {
-                return useAlertStore.getState().alert("Complete datos obligatorios para iniciar sesion", "error")
-            }
-            let data = {
-                email,
-                password
-            }
-            login(data)
+            updatedCategories = [...selectedCategories, categoryId];
+        }
+        setSelectedCategories(updatedCategories);
+    };
+
+    const handleFinishOnboarding = () => {
+        localStorage.setItem("selectedCategories", JSON.stringify(selectedCategories));
+        setOpenAuth(false);
+        window.location.reload();
+    };
+
+    // Verification
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    // Confetti
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+    // Slider state
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const slides = [
+        {
+            image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2940&auto=format&fit=crop',
+            title: '¡Crea y vende tu evento con IA!',
+            subtitle: '+800 organizadores venden en Injoyplan y confían en nuestra tecnología.'
+        },
+        {
+            image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=2940&auto=format&fit=crop',
+            title: 'Conciertos increíbles',
+            subtitle: 'Descubre los mejores eventos musicales cerca de ti.'
+        },
+        {
+            image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=2940&auto=format&fit=crop',
+            title: 'Experiencias únicas',
+            subtitle: 'Teatro, deportes, festivales y mucho más en un solo lugar.'
+        }
+    ];
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+        }
+        ReactModal.setAppElement('body');
+    }, []);
+
+    // Auto-slide effect
+    useEffect(() => {
+        if (!openAuth) return;
+        const interval = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [openAuth, slides.length]);
+
+    // Reset state when closing or switching modes
+    useEffect(() => {
+        if (!openAuth) {
+            handleReset();
+        }
+    }, [openAuth]);
+
+    useEffect(() => {
+        handleReset();
+    }, [isRegister]);
+
+    const handleReset = () => {
+        setStep(0);
+        setNombre('');
+        setApellido('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setGenero('Seleccionar');
+        setF_nacimiento('');
+        setTerminoCondiciones(false);
+        setPolitica(false);
+        setOtp(['', '', '', '', '', '']);
+    };
+
+    // Error state
+    const [loginError, setLoginError] = useState<string | null>(null);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoginError(null);
+        const result = await login({ email, password });
+
+        if (result && !result.success) {
+            setLoginError(result.message || "Error al iniciar sesión");
+            return;
+        }
+
+        if (useAuthStore.getState().auth) {
+            setOpenAuth(false);
+            window.location.reload();
         }
     };
 
-    console.log(success)
+    const handleRegisterSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoginError(null);
 
-    useEffect(() => {
-        if (success === true) {
-            onCloseModal();
-            setApellido("")
-            setEmail("")
-            setGenero("Seleccionar")
-            setNombre("")
-            setPassword("")
+        if (password !== confirmPassword) {
+            setLoginError('Las contraseñas no coinciden');
+            return;
         }
-    }, [success])
-
-    const onCloseModal = () => {
-        document.body.classList.remove('ReactModal__Body--open');
-        setOpenAuth(false)
-    }
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
-        if (e.key === 'Enter' && isFormValid()) {
-            handleSubmit();
+        if (!terminoCondiciones) {
+            setLoginError('Debes aceptar los términos y condiciones');
+            return;
         }
+        if (!politica) {
+            setLoginError('Debes aceptar la política de privacidad');
+            return;
+        }
+
+        try {
+            const resp = await signIn({
+                nombre,
+                apellido,
+                email,
+                password,
+                userType: "NORMAL",
+                genero: genero === "Seleccionar" ? undefined : genero,
+                f_nacimiento,
+                terminoCondiciones,
+                politica
+            });
+
+            if (resp && resp.userId) {
+                setStep(1); // Move to verification
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleVerifyCode = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const code = otp.join('');
+        if (code.length !== 6) return;
+
+        try {
+            const success = await verifyCode(email, code);
+            if (success) {
+                setStep(2); // Go to Success View
+                setShowConfetti(true);
+                // Do not close modal or reload here. User chooses next action in UI.
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleOtpChange = (index: number, value: string) => {
+        if (isNaN(Number(value))) return;
+
+        const newOtp = [...otp];
+        newOtp[index] = value;
+        setOtp(newOtp);
+
+        // Auto focus next
+        if (value && index < 5) {
+            otpRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+        if (e.key === 'Backspace' && !otp[index] && index > 0) {
+            otpRefs.current[index - 1]?.focus();
+        }
+    };
+
+    const handleOtpPaste = (e: React.ClipboardEvent) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').slice(0, 6);
+        if (!pastedData) return;
+
+        const newOtp = [...otp];
+        pastedData.split('').forEach((char, i) => {
+            if (i < 6) newOtp[i] = char;
+        });
+        setOtp(newOtp);
+
+        // Focus last filled
+        const nextIndex = Math.min(pastedData.length, 5);
+        otpRefs.current[nextIndex]?.focus();
     };
 
     return (
-        <ReactModal ariaHideApp={false} isOpen={openAuth} style={customStyles}>
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                style={{ background: "#fff" }}
-                exit="exit"
-                variants={variants}
-                transition={{ duration: 0.3 }}
-            >
-                <Alert />
-                <div className={styles.closeModal} onClick={onCloseModal}>
-                    <Icon icon="line-md:close" fontSize={25} className='relative top-10 md:mt-0' />
-                </div>
-                <div className="px-10 pt-10 pb-5">
-                    <div className="py-0">
-                        <div className='text-center mt-20 md:mt-7'>
-                            <Image src={logo} className='mx-auto' width={60} height={60} alt="Logo" />
-                            <h2 className='font-bold font-sans text-2xl mt-2 text-[#212121] mb-0 md:mt-4'>¡Bienvenido a Injoyplan!</h2>
-                            <p className='mt-1 mb-10 font-sans font-thin'>Empieza a explorar los eventos más importantes para ti</p>
-                        </div>
-                        <div>
-                            {
-                                isRegister && (
-                                    <div className="grid grid-cols-2 gap-4 mt-8">
-                                        <div>
-                                            <label className='font-normal font-sans' htmlFor="nombre">Nombres</label>
-                                            <input onKeyDown={handleKeyDown} className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="text" name='nombre' value={nombre} onChange={(e) => setNombre(e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className='font-normal font-sans' htmlFor="apellido">Apellidos</label>
-                                            <input onKeyDown={handleKeyDown} className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="text" name='apellido' value={apellido} onChange={(e) => setApellido(e.target.value)} />
-                                        </div>
-                                        
-                                        
-                                    </div>
-                                )
-                            }
-                            <div>
-                                <label className='font-normal block mt-3 font-sans' htmlFor="email">Email</label>
-                                {/* Implementa en este input que solo acepte correo y que muestre un error si no es un correo utlizando hook */}
-                                <input pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" onKeyDown={handleKeyDown} className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type="email" name='email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                                <p className="text-red-500 text-[12px] font-bold mt-2">{emailError}</p>
+        <>
+            {showConfetti && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2000 }}>
+                    <Confetti width={windowSize.width} height={windowSize.height} />
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            {...({
+                                className: "bg-white p-8 rounded-3xl shadow-2xl",
+                            } as any)}
+                        >
+                            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Icon icon="solar:check-circle-bold" className="text-green-500 text-6xl" />
                             </div>
-                            <div className={isRegister ? "grid grid-cols-2 gap-4 " : ""}>
-                                <div className='relative'>
-                                    {
-                                        isToogleViewPassword ? <Icon onClick={() => setIsToggleViewPassword(false)} className='absolute right-3 top-8 cursor-pointer' icon="lucide:eye-off" width="25" height="25" /> :
-                                            <Icon onClick={() => setIsToggleViewPassword(true)} className='absolute right-3 top-8 cursor-pointer' icon="icon-park-outline:eyes" width="25" height="25" />
-                                    }
-                                    <label className='font-normal block mt-3 font-sans' htmlFor="password">Contraseña</label>
-                                    <input onKeyDown={handleKeyDown} className='bg-[#F7F7F7] outline-none border border-solid border-[#ddd] w-full p-2 rounded-md' type={isToogleViewPassword ? "text" : "password"} name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                                    <p className="text-red-500 text-[12px] font-bold mt-2">{passwordError}</p>
-                                    {/* Agregar olvidar contrasena */}
-                                    <div className="flex justify-end">
-                                        <p className="text-[#007FA4] mt-3 text-sm cursor-pointer font-bold" onClick={() => setOpenAuth(false)}>¿Olvidaste tu contrasena?</p>
-                                    </div>
+                            <h2 className="text-2xl font-bold text-gray-800">¡Bienvenido!</h2>
+                            <p className="text-gray-500">Tu cuenta ha sido verificada correctamente.</p>
+                        </motion.div>
+                    </div>
+                </div>
+            )}
+
+            <ReactModal
+                isOpen={openAuth}
+                onRequestClose={() => setOpenAuth(false)}
+                style={customStyles}
+                ariaHideApp={false}
+            >
+                <div className="flex min-h-[600px] font-sans">
+                    {/* LEFT PANEL (Slider) - Hidden on Step 2 (Success) */}
+                    {(!isRegister || step !== 2) && (
+                        <div className="hidden md:flex w-1/2 text-white relative bg-[#000] overflow-hidden">
+                            {/* Slider Images */}
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentSlide}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    {...({ className: "absolute inset-0" } as any)}
+                                >
+                                    <Image
+                                        src={slides[currentSlide].image}
+                                        alt={slides[currentSlide].title}
+                                        layout="fill"
+                                        objectFit="cover"
+                                        className="opacity-70"
+                                    />
+                                </motion.div>
+                            </AnimatePresence>
+
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40"></div>
+
+                            <div className="absolute bottom-12 left-8 right-8 z-10">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={currentSlide}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <h2 className="text-3xl font-bold mb-3 leading-tight">
+                                            {slides[currentSlide].title}
+                                        </h2>
+                                        <p className="text-white/80 text-sm">
+                                            {slides[currentSlide].subtitle}
+                                        </p>
+                                    </motion.div>
+                                </AnimatePresence>
+
+                                {/* Pagination Dots */}
+                                <div className="flex gap-2 mt-6">
+                                    {slides.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentSlide(idx)}
+                                            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/50'
+                                                }`}
+                                        />
+                                    ))}
                                 </div>
-                                {
-                                    isRegister && (
-                                        <div>
-                                            <label className='font-normal block mt-3 font-sans' htmlFor="genero">Sexo</label>
-                                            <select className='bg-[#F7F7F7] border border-solid border-[#ddd] w-full p-2 rounded-md py-[9px]' value={genero} onChange={(e) => setGenero(e.target.value)}>
-                                                <option value="Seleccionar">Seleccionar</option>
-                                                <option value="No especificar">No Especificar</option>
-                                                <option value="Masculino">Masculino</option>
-                                                <option value="Femenino">Femenino</option>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* RIGHT PANEL (Form) - Full width on Step 2 */}
+                    <div className={`w-full ${(!isRegister || step !== 2) ? 'md:w-1/2' : ''} p-8 md:p-12 relative flex flex-col justify-center overflow-y-auto max-h-[90vh]`}>
+
+                        <button onClick={() => setOpenAuth(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black z-10">
+                            <Icon icon="solar:close-circle-bold" width={24} />
+                        </button>
+
+                        {/* CONTENT LOGIC */}
+                        <div className="max-w-md mx-auto w-full mt-10 md:mt-0">
+
+                            {/* LOGIN */}
+                            {!isRegister && (
+                                <form onSubmit={handleLogin} className="space-y-5 animate-fadeIn">
+                                    {/* Logo */}
+                                    <div className="flex justify-start mb-4">
+                                        <Image src={logo} alt="Injoyplan" width={40} height={40} />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-[#212121] mb-2">Inicia Sesión</h2>
+                                        <p className="text-gray-500 text-sm">Por favor, ingresa tus datos.</p>
+                                    </div>
+
+                                    {loginError && (
+                                        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2 animate-fadeIn mt-4">
+                                            <Icon icon="solar:danger-circle-bold" width={20} />
+                                            {loginError}
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Correo electrónico</label>
+                                            <input
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007FA4] focus:ring-1 focus:ring-[#007FA4] transition-all"
+                                                placeholder="ejemplo@correo.com"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Contraseña</label>
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007FA4] focus:ring-1 focus:ring-[#007FA4] transition-all"
+                                                placeholder="••••••••"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <button type="button" className="text-xs font-bold text-[#007FA4] hover:underline">
+                                            ¿Olvidaste tu contraseña?
+                                        </button>
+                                    </div>
+
+                                    <button type="submit" className="w-full bg-[#277FA4] hover:bg-[#277FA4] text-[#fff] font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm">
+                                        Continuar
+                                    </button>
+
+                                    <div className="text-center mt-6">
+                                        <p className="text-sm text-gray-500">
+                                            ¿Aún no tienes cuenta? <button type="button" onClick={() => setIsRegister(true)} className="text-[#007FA4] font-bold hover:underline">Regístrate</button>
+                                        </p>
+                                    </div>
+                                </form>
+                            )}
+
+                            {/* REGISTER STEP 0 */}
+                            {isRegister && step === 0 && (
+                                <form onSubmit={handleRegisterSubmit} className="space-y-5 animate-fadeIn">
+                                    {/* Logo */}
+                                    <div className="flex justify-start mb-4">
+                                        <Image src={logo} alt="Injoyplan" width={40} height={40} />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-[#212121] mb-2">Regístrate</h2>
+                                        <p className="text-gray-500 text-sm">Ingresa tus datos para comenzar.</p>
+                                    </div>
+
+                                    {loginError && (
+                                        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2 animate-fadeIn mt-4">
+                                            <Icon icon="solar:danger-circle-bold" width={20} />
+                                            {loginError}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
+                                            <input
+                                                value={nombre}
+                                                onChange={(e) => setNombre(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Apellidos</label>
+                                            <input
+                                                value={apellido}
+                                                onChange={(e) => setApellido(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 uppercase">Correo electrónico</label>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Contraseña</label>
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Confirmar Contraseña</label>
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">F. Nacimiento</label>
+                                            <input
+                                                type="date"
+                                                value={f_nacimiento}
+                                                onChange={(e) => setF_nacimiento(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Género</label>
+                                            <select
+                                                value={genero}
+                                                onChange={(e) => setGenero(e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#007FA4]"
+                                            >
+                                                <option>Seleccionar</option>
+                                                <option>Masculino</option>
+                                                <option>Femenino</option>
+                                                <option>Otro</option>
                                             </select>
                                         </div>
-                                    )
-                                }
-                            </div>
-                            {
-                                isRegister && (
-                                    <>
-                                        <div className='flex items-start mt-4'>
-                                            <input
-                                                type="checkbox"
-                                                className='relative top-1 mr-1'
-                                                checked={isTermsAccepted}
-                                                onChange={(e) => setIsTermsAccepted(e.target.checked)}
-                                                onKeyDown={handleKeyDown}
+                                    </div>
+
+                                    <div className="space-y-2 mt-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex items-center h-5">
+                                                <input
+                                                    id="terms"
+                                                    type="checkbox"
+                                                    checked={terminoCondiciones}
+                                                    onChange={(e) => setTerminoCondiciones(e.target.checked)}
+                                                    className="w-4 h-4 text-[#00DFD1] border-gray-300 rounded focus:ring-[#00DFD1]"
+                                                />
+                                            </div>
+                                            <div className="ml-0 text-xs">
+                                                <label htmlFor="terms" className="font-medium text-gray-700">
+                                                    Declaro que he leído y acepto los Términos y Condiciones, la Política de cookies y la Política de privacidad y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex items-center h-5">
+                                                <input
+                                                    id="policy"
+                                                    type="checkbox"
+                                                    checked={politica}
+                                                    onChange={(e) => setPolitica(e.target.checked)}
+                                                    className="w-4 h-4 text-[#00DFD1] border-gray-300 rounded focus:ring-[#00DFD1]"
+                                                />
+                                            </div>
+                                            <div className="ml-0 text-xs">
+                                                <label htmlFor="policy" className="font-medium text-gray-700">
+                                                    Autorizo el uso de mis datos personales para recibir información, ofertas, promociones o contenido publicitario o comercial relacionado con esta web, injoyplan y sus vinculados
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" className="w-full bg-[#277FA4] hover:bg-[#277FA4] text-[#fff] font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm">
+                                        Continuar
+                                    </button>
+
+                                    <div className="text-center mt-6">
+                                        <p className="text-sm text-gray-500">
+                                            ¿Ya tienes cuenta? <button type="button" onClick={() => setIsRegister(false)} className="text-[#007FA4] font-bold hover:underline">Inicia Sesión</button>
+                                        </p>
+                                    </div>
+                                </form>
+                            )}
+
+                            {/* REGISTER STEP 1 (VERIFY) */}
+                            {isRegister && step === 1 && (
+                                <form onSubmit={handleVerifyCode} className="space-y-6 animate-fadeIn">
+                                    <div className="mb-8">
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep(0)}
+                                            className="flex items-center gap-1 text-[#007FA4] text-sm font-bold mb-4 hover:underline"
+                                        >
+                                            <Icon icon="solar:arrow-left-linear" /> Volver
+                                        </button>
+
+                                        <h2 className="text-2xl font-bold text-[#212121] mb-2">Verifica tu email</h2>
+                                        <p className="text-gray-500 text-sm">
+                                            Hemos enviado un código de verificación a: <br />
+                                            <span className="font-bold text-[#212121]">{email}</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-gray-500 uppercase block">Ingresa el código</label>
+                                        <div className="flex gap-2 justify-between">
+                                            {otp.map((digit, idx) => (
+                                                <input
+                                                    key={idx}
+                                                    ref={(el) => {
+                                                        otpRefs.current[idx] = el;
+                                                    }}
+                                                    type="text"
+                                                    maxLength={1}
+                                                    value={digit}
+                                                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                                                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                                                    onPaste={handleOtpPaste}
+                                                    className="w-12 h-12 border border-gray-300 rounded-lg text-center text-xl font-bold focus:outline-none focus:border-[#007FA4] focus:ring-1 focus:ring-[#007FA4] transition-all"
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={otp.join('').length !== 6}
+                                        className={`w-full font-bold py-3.5 rounded-xl shadow-md transition-all transform active:scale-95 text-sm ${otp.join('').length === 6
+                                            ? 'bg-[#00DFD1] hover:bg-[#00c9bd] text-[#004e4e] hover:shadow-lg'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        Verificar mi cuenta
+                                    </button>
+
+                                    <p className="text-center text-xs text-gray-500 mt-4">
+                                        ¿No recibiste el código? <button type="button" className="text-[#007FA4] font-bold hover:underline">Reenviar</button>
+                                    </p>
+                                </form>
+                            )}
+
+                            {/* SUCCESS STEP (Verified) */}
+                            {isRegister && step === 2 && (
+                                <div className="text-center animate-fadeIn py-10">
+                                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <Image src={logo} width={100} height={100} alt="Logo" />
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-[#212121] mb-2">¡Bienvenido a Injoyplan!</h2>
+                                    <p className="text-gray-500 text-sm mb-8 px-4">
+                                        Tu perfil ha sido creado con éxito.<br />
+                                        Solo necesitamos algunos datos más para completarlo al 100%. ¿Te gustaría añadirlos ahora?
+                                    </p>
+
+                                    <div className="space-y-4 max-w-xs mx-auto relative z-10">
+                                        <button
+                                            onClick={() => setStep(3)} // Go to Interests Step
+                                            className="w-full bg-[#277FA4] hover:bg-[#00c9bd] text-[#fff] font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm"
+                                        >
+                                            Seleccionar mis gustos
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setOpenAuth(false);
+                                                window.location.reload();
+                                            }}
+                                            className="w-full text-[#007FA4] font-bold py-2 hover:underline text-sm"
+                                        >
+                                            Explorar eventos
+                                        </button>
+                                    </div>
+
+                                    {/* Confetti integrated here */}
+                                    {showConfetti && (
+                                        <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden rounded-2xl">
+                                            <img
+                                                src="https://usagif.com/wp-content/uploads/gify/confetti-holiday-cheer.gif"
+                                                alt="Celebration"
+                                                className="w-full h-full object-cover opacity-50"
                                             />
-                                            <p className='text-sm mt-0'>Al hacer click en <strong>Registrarte</strong>, aceptas los términos y condiciones, nuestra política de privacidad y política de cookies.</p>
                                         </div>
-                                        <div className='flex items-start mt-3'>
-                                            <input type="checkbox" className='relative top-1 mr-1' />
-                                            <p className='text-sm mt-0'>Declaro que he leído y acepto los Términos y Condiciones, la Política de cookies y la Política de privacidad y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma.</p>
-                                        </div>
-                                    </>
-                                )
-                            }
-                            <div>
-                                <button disabled={!isFormValid()} className='bg-[#007FA4] disabled:bg-[#a8a8a8] p-3 text-[#Fff] font-sans font-bold rounded w-full mt-4' onClick={handleSubmit}>{isRegister ? "Registrarte" : "Iniciar Sesión"}</button>
-                            </div>
-                            <hr />
-                            <div className='mb-4 mt-4 text-center'>
-                                {
-                                    isRegister ? (
-                                        <p>¿ Ya tienes una cuenta ? <span className='block text-[#007FA4] font-bold' onClick={() => setIsRegister(false)}>inicia sesión</span></p>
-                                    ) :
-                                        <p>¿ Aún no te has creado una cuenta ? <span className='block text-[#007FA4] font-bold' onClick={() => setIsRegister(true)}>regístrate</span></p>
-                                }
-                            </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* INTERESTS STEP (Step 3) */}
+                            {isRegister && step === 3 && (
+                                <div className="animate-fadeIn w-full">
+                                    <div className="text-center mb-6">
+                                        <h2 className="text-2xl font-bold text-[#212121] mb-2">¡Queremos conocerte!</h2>
+                                        <p className="text-gray-500 text-sm">Elige tus intereses para personalizar tu experiencia.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2 scrollbar-hide">
+                                        {categories?.map((item: Category) => (
+                                            <div
+                                                key={item.idCategorias}
+                                                onClick={() => handleSelectCategory(item.idCategorias.toString())}
+                                                className={`cursor-pointer rounded-xl p-3 flex flex-col items-center justify-center transition-all ${selectedCategories?.includes(item?.idCategorias?.toString())
+                                                        ? "bg-[#861F21] text-white shadow-md transform scale-105"
+                                                        : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                                                    }`}
+                                            >
+                                                <div className="w-10 h-10 mb-2">
+                                                    <ReactSVG
+                                                        src={item.iconos}
+                                                        beforeInjection={(svg) => {
+                                                            svg.setAttribute('style', 'width: 100%; height: 100%;');
+                                                            svg.querySelector('path')?.setAttribute('fill', selectedCategories?.includes(item.idCategorias.toString()) ? '#fff' : '#666');
+                                                        }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs font-bold text-center leading-tight">{item.nombreCategoria}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-8 space-y-3">
+                                        <button
+                                            onClick={handleFinishOnboarding}
+                                            className="w-full bg-[#277FA4] text-white font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm"
+                                        >
+                                            Finalizar
+                                        </button>
+                                        <button
+                                            onClick={handleFinishOnboarding}
+                                            className="w-full text-[#007FA4] font-bold text-xs hover:underline block text-center"
+                                        >
+                                            Omitir por ahora
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
-            </motion.div>
-        </ReactModal>
+            </ReactModal>
+        </>
     );
 }
-
-export default Auth;
