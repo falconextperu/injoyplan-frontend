@@ -18,7 +18,7 @@ const RelatedEvents = ({ data }: any) => {
             {
                 categoriesRelations?.length > 0 && (
                     <div className="px-2">
-                        <h3 className="font-[Quicksand] font-bold text-xl mb-6 mt-6 px-3">Te puede interesar más eventos de esta categoria</h3>
+                        <h3 className="font-[Quicksand] font-bold text-xl mb-6 mt-6 px-3">Te pueden interesar estos otros eventos</h3>
                         <Slide categoriesRelations={categoriesRelations} />
                     </div>
                 )

@@ -71,7 +71,7 @@ const Slide = () => {
                         <div key={index} className="h-full">
                             <div className="h-full relative">
                                 <Image src={item.imageUrl} alt="banner" width={2000} height={1000} className="w-full h-full object-fill" />
-                                <div className="absolute md:top-36 top-24 left-10">
+                                <div className="absolute md:top-36 top-24 left-5 md:left-10">
                                     <div>
                                         <h4 className="bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-2xl md:text-3xl p-2 w-fit font-bold">{item.title}</h4>
 

@@ -2,8 +2,19 @@ import Slider from "react-slick";
 import styles from './slide.module.css'
 import Card from "@/app/components/Card";
 import { Event } from "@/app/interfaces/event";
+import { useState, useCallback } from "react";
 
 const Slide = ({ categoriesRelations }: any) => {
+
+    const [dragging, setDragging] = useState(false);
+
+    const handleBeforeChange = useCallback(() => {
+        setDragging(true);
+    }, []);
+
+    const handleAfterChange = useCallback(() => {
+        setDragging(false);
+    }, []);
 
     console.log(categoriesRelations)
 
@@ -16,6 +27,8 @@ const Slide = ({ categoriesRelations }: any) => {
         centerPadding: "0px",
         slidesToScroll: 4,
         autoplay: true,
+        beforeChange: handleBeforeChange,
+        afterChange: handleAfterChange,
         responsive: [
             {
                 breakpoint: 1024,  // Tablets and small laptops
@@ -55,7 +68,7 @@ const Slide = ({ categoriesRelations }: any) => {
                 {
                     categoriesRelations?.map((item: Event, index: number) => {
                         return (
-                            <Card addFavoritesByUser={() => {}} key={index} item={item} heartDisabled />
+                            <Card isDragging={dragging} addFavoritesByUser={() => { }} key={index} item={item} heartDisabled />
                         )
                     })
                 }

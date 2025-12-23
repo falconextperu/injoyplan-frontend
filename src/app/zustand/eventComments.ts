@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { get, post } from '../utils/fetch';
+import { get, post, del, patch } from '../utils/fetch';
 import type { UserDTO } from '../interfaces/user';
 
 export interface EventCommentDTO {
@@ -147,24 +147,17 @@ export const useEventCommentsStore = create<IEventCommentsState>((set, getState)
       commentsByEvent: {
         ...state.commentsByEvent,
         [eventId]: deleteFromTree(state.commentsByEvent[eventId] || [], commentId)
+      },
+      totalByEvent: {
+        ...state.totalByEvent,
+        [eventId]: Math.max(0, (state.totalByEvent[eventId] || 0) - 1)
       }
     }));
 
     try {
-      const { del } = await import('../utils/fetch'); // Dynamic import to avoid circular? or just import at top? top is better but `delete` is keyword
-      // Wait, utils/fetch usually exports `del` or `remove`. Assuming `del` or using fetch wrappers.
-      // Checking imports... `get, post` were imported. I'll guess `remove` or `del`.
-      // Actually, just use standard fetch via wrapper if available.
-      // Assuming `del` exists in utils/fetch (common pattern). I'll add import or check file.
-      // For now, I'll use `get` / `post` style. The file imported `get, post`.
-      // Let's assume `del` is `remove` and was not imported.
-      // I will fix imports in a separate edit if needed.
-      // Using `any` for now to avoid error if I add `remove` to import line later.
-      const { remove }: any = require('../utils/fetch');
-      await remove(`events/comments/${commentId}`);
+      await del(`events/comments/${commentId}`);
       return true;
     } catch (e) {
-      // Revert (omitted for brevity, but should implement)
       set((state) => ({
         commentsByEvent: { ...state.commentsByEvent, [eventId]: previousComments }
       }));
@@ -174,8 +167,7 @@ export const useEventCommentsStore = create<IEventCommentsState>((set, getState)
 
   editComment: async (eventId: string, commentId: string, content: string) => {
     try {
-      const { patch }: any = require('../utils/fetch');
-      const resp = await patch(`events/comments/${commentId}`, { content });
+      const resp: any = await patch(`events/comments/${commentId}`, { content });
       if (resp?.id) {
         set((state) => ({
           commentsByEvent: {

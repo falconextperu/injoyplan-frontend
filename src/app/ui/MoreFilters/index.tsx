@@ -17,31 +17,25 @@ const MoreFilters = ({ onApply }: Props) => {
     const [isOpen, setIsOpen, ref] = useOutsideClick(false);
 
     // Internal state
-    const [timeRange, setTimeRange] = useState<string>("all");
+    const [startTime, setStartTime] = useState<string>("");
     const [esGratis, setEsGratis] = useState<boolean>(false);
     const [enCurso, setEnCurso] = useState<boolean>(false);
-    const [isTimeOpen, setIsTimeOpen] = useState(false);
 
-    const timeOptions = [
-        { value: "all", label: "Cualquier hora", start: "", end: "" },
-        { value: "morning", label: "Mañana (06:00 - 12:00)", start: "06:00", end: "12:00" },
-        { value: "afternoon", label: "Tarde (12:00 - 18:00)", start: "12:00", end: "18:00" },
-        { value: "night", label: "Noche (18:00 - 06:00)", start: "18:00", end: "06:00" },
-    ];
+    // Generate hours: 00:00 to 23:00
+    const hours = Array.from({ length: 24 }, (_, i) => {
+        const hour = i.toString().padStart(2, '0');
+        return { value: `${hour}:00`, label: `${hour}:00` };
+    });
 
     const handleApply = () => {
-        const selectedTime = timeOptions.find(t => t.value === timeRange);
-
         onApply({
-            horaInicio: selectedTime?.start,
-            horaFin: selectedTime?.end,
+            horaInicio: startTime || undefined,
+            horaFin: undefined, // "Desde" implies onwards, backend handles open-ended range if fin is missing
             esGratis,
             enCurso
         });
         setIsOpen(false);
     };
-
-    const selectedLabel = timeOptions.find(t => t.value === timeRange)?.label || "Cualquier hora";
 
     return (
         <div ref={ref} className="relative z-20">
@@ -60,36 +54,36 @@ const MoreFilters = ({ onApply }: Props) => {
                     className="absolute top-10 left-0 bg-white shadow-xl rounded-xl p-4 w-[300px] border border-gray-100"
                 >
                     {/* Time Filter */}
-                    <div className="mb-4 relative">
-                        <div
-                            className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
-                            onClick={() => setIsTimeOpen(!isTimeOpen)}
-                        >
-                            <span className="text-gray-700 font-medium text-sm truncate">{selectedLabel}</span>
-                            <Icon icon={isTimeOpen ? "ei:chevron-up" : "ei:chevron-down"} width={24} />
+                    <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex justify-between items-center mb-2" onClick={() => setStartTime("")}>
+                            <span className={`text-sm font-medium ${!startTime ? 'text-[#007FA4] font-bold' : 'text-gray-700 cursor-pointer'}`}>
+                                Cualquier hora
+                            </span>
+                            {!startTime && <Icon icon="ei:check" className="text-[#007FA4]" width={20} />}
                         </div>
 
-                        {isTimeOpen && (
-                            <div className="absolute top-full text-black left-0 w-full bg-white shadow-lg rounded-lg mt-1 z-30 border border-gray-100">
-                                {timeOptions.map((opt) => (
-                                    <div
-                                        key={opt.value}
-                                        className={`p-3 hover:bg-gray-50 cursor-pointer text-sm ${timeRange === opt.value ? 'font-bold text-[#007FA4]' : 'text-gray-600'}`}
-                                        onClick={() => {
-                                            setTimeRange(opt.value);
-                                            setIsTimeOpen(false);
-                                        }}
-                                    >
-                                        {opt.label}
-                                    </div>
-                                ))}
+                        <div className="flex items-center justify-between mt-3">
+                            <span className="text-sm text-gray-600">Desde</span>
+                            <div className="relative">
+                                <select
+                                    className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-full py-1 px-3 pr-8 leading-tight focus:outline-none focus:border-[#007FA4]"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                >
+                                    <option value="" disabled>--:--</option>
+                                    {hours.map(h => (
+                                        <option key={h.value} value={h.value}>{h.label}</option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <Icon icon="ei:chevron-down" width={16} />
+                                </div>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Checkboxes */}
                     <div className="space-y-3 mb-6">
-                        {/* 
                         <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
                             onClick={() => setEnCurso(!enCurso)}
@@ -98,8 +92,7 @@ const MoreFilters = ({ onApply }: Props) => {
                             <div className={`w-5 h-5 rounded border flex items-center justify-center ${enCurso ? 'bg-[#007FA4] border-[#007FA4]' : 'bg-white border-gray-300'}`}>
                                 {enCurso && <Icon icon="ei:check" className="text-white" width={18} />}
                             </div>
-                        </div> 
-                        */}
+                        </div>
 
                         <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"

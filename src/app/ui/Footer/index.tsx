@@ -5,6 +5,7 @@ import twi from '../../../../public/svg/twitter.svg';
 import youtube from '../../../../public/svg/youtube.svg';
 import arrow from '../../../../public/svg/arrowdown.svg';
 import instagram from '../../../../public/svg/instagram.svg';
+import tiktok from '../../../../public/svg/tiktok.svg';
 import libro from '../../../../public/svg/book.svg';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -113,27 +114,31 @@ const Footer = () => {
         <div className='bg-[#303033] hidden md:block'>
           <div className='mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[980px] pt-8 pb-8 xl:px-10 flex justify-between items-center'>
             <div>
-              <p className='text-[#fff]'>Copyright © 2021 Injoyplan</p>
+              <p className='text-[#fff]'>Copyright © 2026 Injoyplan</p>
             </div>
             <div className='flex items-center'>
               <div className='flex justify-between border-r border-solid border-[rgba(255,255,255,0.1)]'>
-                <div>
-                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={facebook} alt="facebook" />
-                </div>
+                <a href="https://www.facebook.com/Injoyplan" target="_blank" rel="noopener noreferrer">
+                  <Image className='p-2 mr-6 border border-solid rounded-full hover:bg-gray-700' width={34} height={34} objectFit='cover' src={facebook} alt="facebook" />
+                </a>
                 {/* <div>
                   <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={twi} alt="twi" />
                 </div> */}
-                <div>
-                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={youtube} alt="youtube" />
-                </div>
-                <div>
-                  <Image className='p-2 mr-6 border border-solid rounded-full' width={34} height={34} objectFit='cover' src={instagram} alt="instagram" />
-                </div>
+                <a href="https://www.youtube.com/@injoyplan" target="_blank" rel="noopener noreferrer">
+                  <Image className='p-2 mr-6 border border-solid rounded-full hover:bg-gray-700' width={34} height={34} objectFit='cover' src={youtube} alt="youtube" />
+                </a>
+                <a href="https://www.instagram.com/injoyplan" target="_blank" rel="noopener noreferrer">
+                  <Image className='p-2 mr-6 border border-solid rounded-full hover:bg-gray-700' width={34} height={34} objectFit='cover' src={instagram} alt="instagram" />
+                </a>
+                <a href="https://www.tiktok.com/@injoyplan" target="_blank" rel="noopener noreferrer">
+                  <Image className='p-2 mr-6 border border-solid rounded-full hover:bg-gray-700' width={34} height={34} objectFit='cover' src={tiktok} alt="tiktok" />
+                </a>
               </div>
               <div className='ml-6 flex justify-center text-center'>
                 <div className='text-center mx-auto w-full'>
-                  <Image width={50} height={50} className='text-center mx-auto' src={libro} alt="libro" />
-                  <Link href="libro-de-reclamaciones" ><p className='text-[#fff] text-sm'>Libro de Reclamaciones</p></Link>
+                  <Link href="/libro-de-reclamaciones" >
+                    <Image width={110} height={100} className='text-center mx-auto' src="https://cdn.shopify.com/s/files/1/0276/9184/3699/files/Libro_reclamaciones_480x480.png?v=1727902723" alt="Libro de Reclamaciones" style={{ objectFit: 'contain' }} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -145,22 +150,30 @@ const Footer = () => {
           <div className="mx-auto 2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-screen-md pt-8 pb-8 flex flex-col sm:flex-row justify-between items-center xl:px-10">
             {/* Social Icons */}
             <div className="flex items-center space-x-4">
-              {[facebook, twi, youtube, instagram].map((icon, index) => (
-                <div key={index} className="p-2 border rounded-full hover:bg-gray-700">
-                  <Image src={icon} alt={`icon-${index}`} width={16} height={16} />
-                </div>
-              ))}
+              <a href="https://www.facebook.com/Injoyplan" target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-700">
+                <Image src={facebook} alt="facebook" width={16} height={16} />
+              </a>
+              <a href="https://www.instagram.com/injoyplan" target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-700">
+                <Image src={instagram} alt="instagram" width={16} height={16} />
+              </a>
+              <a href="https://www.youtube.com/@injoyplan" target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-700">
+                <Image src={youtube} alt="youtube" width={16} height={16} />
+              </a>
+              <a href="https://www.tiktok.com/@injoyplan" target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-700">
+                <Image src={tiktok} alt="tiktok" width={16} height={16} />
+              </a>
             </div>
 
             {/* Libro de Reclamaciones */}
             <div className="text-center mt-12 sm:mt-0 w-full mx-auto mb-12">
-              <Image className='mx-auto' src={libro} alt="libro" width={40} height={40} />
-              <Link href="libro-de-reclamaciones" ><p className='text-[#fff] text-sm'>Libro de Reclamaciones</p></Link>
+              <Link href="/libro-de-reclamaciones" >
+                <Image className='mx-auto' src="https://cdn.shopify.com/s/files/1/0276/9184/3699/files/Libro_reclamaciones_480x480.png?v=1727902723" alt="Libro de Reclamaciones" width={150} height={100} style={{ objectFit: 'contain' }} />
+              </Link>
             </div>
             <hr className='border-1 border-solid border-[#737373] w-full' />
             {/* Copyright */}
             <div className="text-white text-sm mt-6 sm:mt-0">
-              Copyright © 2021 Injoyplan
+              Copyright © 2026 Injoyplan
             </div>
           </div>
         </div>
@@ -168,5 +181,4 @@ const Footer = () => {
     </div>
   );
 };
-
 export default Footer;

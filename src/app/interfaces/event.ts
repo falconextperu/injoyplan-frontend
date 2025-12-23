@@ -31,6 +31,7 @@ export interface Event {
     descripcionEvento?: string;
     createdAt?: string | Date;
     imageUrl?: string;
+    ticketUrls?: { name: string; url: string }[];
     id?: string;
 }
 

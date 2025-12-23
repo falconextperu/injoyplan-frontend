@@ -37,22 +37,34 @@ const Main = () => {
                             isLoading ? (
                                 Array.from({ length: 4 }).map((_, i) => <CategorySkeleton key={i} />)
                             ) : (
-                                countsCategories?.slice(0, 4).map((item: any, index: number) => (
-                                    <div className='relative cursor-pointer z-0' key={index} onClick={() => navigateByCategory(item)}>
-                                        <div className='flex justify-center bg-[#861f21] p-5 py-6 rounded w-10/12 mx-auto relative z-50'>
-                                            <Image width={50} height={50} className='z-0' src={item.iconos} alt="logomusica" />
+                                (() => {
+                                    // CLONE and SWAP logic for Home Page view
+                                    const displayedCategories = [...(countsCategories || [])];
+                                    const culturaIndex = displayedCategories.findIndex(c => c.nombreCategoria === 'Cultura');
+                                    const musicaIndex = displayedCategories.findIndex(c => c.nombreCategoria === 'Música');
+
+                                    if (culturaIndex !== -1 && musicaIndex !== -1) {
+                                        // Swap elements
+                                        [displayedCategories[culturaIndex], displayedCategories[musicaIndex]] = [displayedCategories[musicaIndex], displayedCategories[culturaIndex]];
+                                    }
+
+                                    return displayedCategories.slice(0, 4).map((item: any, index: number) => (
+                                        <div className='relative cursor-pointer z-0' key={index} onClick={() => navigateByCategory(item)}>
+                                            <div className='flex justify-center bg-[#861f21] p-5 py-6 rounded w-10/12 mx-auto relative z-50'>
+                                                <Image width={50} height={50} className='z-0' src={item.iconos} alt="logomusica" />
+                                            </div>
+                                            <div className='bg-[#F6F6F6] pt-7 p-4 relative -top-5 z-0 rounded'>
+                                                <h3 className='text-[18px] text-[#444] font-bold'>{item?.nombreCategoria}</h3>
+                                                <span className='flex items-center text-sm font-[300] text-[#861F21]'>{item?.cantidad} eventos <Image className='ml-2' src={flecha} alt={item?.nombreCategoria} /></span>
+                                            </div>
                                         </div>
-                                        <div className='bg-[#F6F6F6] pt-7 p-4 relative -top-5 z-0 rounded'>
-                                            <h3 className='text-[18px] text-[#444] font-bold'>{item?.nombreCategoria}</h3>
-                                            <span className='flex items-center text-sm font-[300] text-[#861F21]'>{item?.cantidad} eventos <Image className='ml-2' src={flecha} alt={item?.nombreCategoria} /></span>
-                                        </div>
-                                    </div>
-                                ))
+                                    ));
+                                })()
                             )
                         }
                         <div className='flex justify-end w-full xl:col-start-1 xl:col-end-3 md:col-start-1 md:col-end:5 col-start-1 col-end-2 mt-3'>
                             <Link href="/busqueda/0" className='flex items-center'>
-                                <h4 className='md:text-[14px] text-[#007FA4] font-bold relative -top-7 text-[12px]'>TODAS LAS CATEGORÍAS + 10 </h4>
+                                <h4 className='md:text-[14px] text-[#007FA4] font-bold relative -top-7 text-[12px]'>TODAS LAS CATEGORÍAS </h4>
                                 <Image className='ml-2 -top-7 relative' src={flechazul} alt="flecha-azul" /></Link>
                         </div>
                     </div>

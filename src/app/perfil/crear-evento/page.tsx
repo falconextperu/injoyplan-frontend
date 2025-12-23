@@ -11,6 +11,7 @@ import { useAuthStore } from '@/app/zustand/auth';
 import { useCategoriesState } from '@/app/zustand/categories';
 import { useEventCreateStore } from '@/app/zustand/eventCreate';
 import { get } from '@/app/utils/fetch';
+import ubigeoData from '@/data/ubigeo.json';
 
 type DateForm = {
   date: string;
@@ -199,6 +200,9 @@ function CrearEventoContent() {
 
     const validDates = dates.filter((x) => x.date.trim());
     if (validDates.length === 0) return 'Agrega al menos una fecha';
+
+    if (!latitude || !longitude) return 'La ubicación (latitud y longitud) es obligatoria';
+
     return null;
   };
 
@@ -308,12 +312,22 @@ function CrearEventoContent() {
                 <div className="space-y-3">
                   {ticketUrls.map((link, idx) => (
                     <div key={idx} className="flex gap-2 items-center">
-                      <input
+                      <select
                         value={link.name}
                         onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
                         className="w-1/3 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
-                        placeholder="Ej: Teleticket"
-                      />
+                      >
+                        <option value="" disabled>Plataforma</option>
+                        <option value="Joinnus">Joinnus</option>
+                        <option value="Teleticket">Teleticket</option>
+                        <option value="Ticketmaster">Ticketmaster</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Web">Web</option>
+                        <option value="Otro">Otro</option>
+                      </select>
                       <input
                         value={link.url}
                         onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, url: e.target.value } : l))}
@@ -434,28 +448,51 @@ function CrearEventoContent() {
               </div>
               <div>
                 <label className="text-[12px] font-bold text-[#666]">Departamento</label>
-                <input
+                <select
                   value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
+                  onChange={(e) => {
+                    setDepartment(e.target.value);
+                    setProvince('');
+                    setDistrict('');
+                  }}
                   className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
-                />
+                >
+                  <option value="">Selecciona</option>
+                  {Object.keys(ubigeoData).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-[12px] font-bold text-[#666]">Provincia</label>
-                <input
+                <select
                   value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
-                />
+                  onChange={(e) => {
+                    setProvince(e.target.value);
+                    setDistrict('');
+                  }}
+                  disabled={!department}
+                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl disabled:opacity-50"
+                >
+                  <option value="">Selecciona</option>
+                  {department && (ubigeoData as any)[department] && Object.keys((ubigeoData as any)[department]).map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-[12px] font-bold text-[#666]">Distrito</label>
-                <input
+                <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
-                  placeholder="Ej: Barranco"
-                />
+                  disabled={!province}
+                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl disabled:opacity-50"
+                >
+                  <option value="">Selecciona</option>
+                  {department && province && (ubigeoData as any)[department]?.[province] && (ubigeoData as any)[department][province].map((d: string) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-[12px] font-bold text-[#666]">Dirección</label>
@@ -467,7 +504,7 @@ function CrearEventoContent() {
                 />
               </div>
               <div>
-                <label className="text-[12px] font-bold text-[#666]">Latitud (opcional)</label>
+                <label className="text-[12px] font-bold text-[#666]">Latitud (obligatorio)</label>
                 <input
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
@@ -476,7 +513,7 @@ function CrearEventoContent() {
                 />
               </div>
               <div>
-                <label className="text-[12px] font-bold text-[#666]">Longitud (opcional)</label>
+                <label className="text-[12px] font-bold text-[#666]">Longitud (obligatorio)</label>
                 <input
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
@@ -485,9 +522,6 @@ function CrearEventoContent() {
                 />
               </div>
             </div>
-            <p className="text-[12px] text-[#666] mt-3">
-              Si no ingresas coordenadas, el mapa mostrará "Ubicación no disponible" (no se rompe).
-            </p>
           </div>
 
           {/* Actions */}
@@ -559,10 +593,10 @@ function CrearEventoContent() {
               }
             >
               {isSubmitting ? (editId ? 'Guardando...' : 'Publicando...') : (editId ? 'Guardar cambios' : 'Publicar evento')}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </button >
+          </div >
+        </div >
+      </div >
+    </div >
   );
 }

@@ -15,6 +15,8 @@ export default function GuardadosPage() {
   const { favorites, getFavorites, addFavorite, deleteFavorite } = useFavoriteStore();
 
   const [openAuth, setOpenAuth] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedFavorite, setSelectedFavorite] = useState<any>(null);
 
   useEffect(() => {
     me();
@@ -32,7 +34,7 @@ export default function GuardadosPage() {
           <div className="w-16 h-16 bg-[#E0F2F7] rounded-full flex items-center justify-center text-[#007FA4] mx-auto mb-4">
             <Icon icon="solar:bookmark-circle-bold" width={30} />
           </div>
-          <h1 className="text-2xl font-black text-[#212121]">Guardados</h1>
+          <h1 className="text-2xl font-black text-[#212121]">Favoritos</h1>
           <p className="text-[#666] mt-2">Inicia sesión para ver tus eventos guardados.</p>
           <button
             onClick={() => setOpenAuth(true)}
@@ -48,23 +50,32 @@ export default function GuardadosPage() {
 
   const addFavoritesByUser = (item: any) => {
     if (item.esfavorito === 1) {
-      deleteFavorite(item);
+      setSelectedFavorite(item);
+      setShowDeleteModal(true);
     } else {
       addFavorite({ idEvento: item.idEventos || item.ideventos, idFecha: item.idfecha, registrado: false });
     }
   };
 
+  const confirmDelete = async () => {
+    if (selectedFavorite) {
+      await deleteFavorite(selectedFavorite);
+      setShowDeleteModal(false);
+      setSelectedFavorite(null);
+    }
+  };
+
   return (
     <div className="bg-[#F9FAFC] min-h-[calc(100vh-120px)]">
-      <div className="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 flex gap-6">
-        <div className="hidden md:block w-[80px] lg:w-[240px] flex-shrink-0">
+      <div className="max-w-[1440px] mx-auto p-3 md:p-6 lg:p-8 flex gap-6">
+        <div className="hidden lg:block w-[240px] flex-shrink-0">
           <SidebarLeft />
         </div>
 
         <div className="flex-1">
           <div className="bg-white rounded-2xl p-6 border border-[#EDEFF5] shadow-sm">
-            <h1 className="text-2xl md:text-3xl font-black text-[#212121]">Guardados</h1>
-            <p className="text-[#666] mt-1">Tus eventos favoritos.</p>
+            <h1 className="text-2xl md:text-3xl font-black text-[#212121]">Favoritos</h1>
+            <p className="text-[#666] mt-1">Aquí encontrarás los eventos que te interesaron</p>
           </div>
 
           <div className="mt-6">
@@ -73,11 +84,11 @@ export default function GuardadosPage() {
                 <div className="w-16 h-16 bg-[#FAFBFF] rounded-full flex items-center justify-center text-[#007FA4] mx-auto mb-4 border border-[#EDEFF5]">
                   <Icon icon="solar:heart-bold" width={28} className="text-[#FF4D4D]" />
                 </div>
-                <h2 className="text-xl font-black text-[#212121]">Aún no tienes guardados</h2>
+                <h2 className="text-xl font-black text-[#212121]">Aún no tienes Favoritos</h2>
                 <p className="text-[#666] mt-2">Guarda eventos para encontrarlos rápido aquí.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
                 {favorites.map((item: any) => (
                   <Card
                     key={`${item.idEventos || item.ideventos}-${item.idfecha}-${item.idfavoritos || item.favorito}`}
@@ -92,6 +103,29 @@ export default function GuardadosPage() {
       </div>
 
       <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-[#212121] mb-2">Eliminar de favoritos</h3>
+            <p className="text-[#666] mb-8 font-medium">¿Estás seguro de eliminar este evento de tus favoritos?</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#007FA4] hover:bg-[#006080] transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-[#007FA4] bg-[#F0F8FF] hover:bg-[#e0f0fa] transition-colors"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

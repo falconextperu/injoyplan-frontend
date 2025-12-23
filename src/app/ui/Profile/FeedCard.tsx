@@ -104,9 +104,9 @@ export default function FeedCard({
                 </Link>
 
                 {/* Context Menu Button (Visual only for now) */}
-                <button className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/50 transition-colors border border-white/10">
+                {/* <button className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/50 transition-colors border border-white/10">
                     <Icon icon="solar:menu-dots-bold" width={20} />
-                </button>
+                </button> */}
             </div>
 
             {/* Bottom Content */}
@@ -149,7 +149,7 @@ export default function FeedCard({
                     </div>
 
                     {/* Edit Button (Owner Only) */}
-                    {(auth as any)?.id === owner?.id && (
+                    {/* {(auth as any)?.id === owner?.id && (
                         <Link
                             href={`/perfil/crear-evento?edit=${event.id}`}
                             className="bg-[#F0F7FA] text-[#007FA4] w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E0F2F7] transition-colors"
@@ -157,7 +157,7 @@ export default function FeedCard({
                         >
                             <Icon icon="solar:pen-bold" width={20} />
                         </Link>
-                    )}
+                    )} */}
 
                     {/* CTA Button */}
                     <Link

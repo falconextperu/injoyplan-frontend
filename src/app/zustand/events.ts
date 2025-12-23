@@ -28,8 +28,15 @@ export interface IEventsState {
     setEventsDeleteFavorite: (idFavorito: any) => any
     setEventDataDeleteDFavorite: (idFavorito: any) => any
     setEventDeleteFiltersFavorite: (idFavorito: any) => any
+    setEventsDeleteFavoriteByEventId: (eventId: any) => void;
+    setEventDeleteFiltersFavoriteByEventId: (eventId: any) => void;
+    setEventDataDeleteFavoriteByEventId: (eventId: any) => void;
     getEventByEventAndDate: (event: number, date: number) => any
     getEventSearchByFilters: (params: any) => any
+    setFeaturedEventsAsFavorite: (idEvento: any, resp: any) => any
+    setFeaturedEventsDeleteFavorite: (idFavorito: any) => any
+    setFeaturedEventsDeleteFavoriteByEventId: (eventId: any) => void
+    updateEventsWithFavorites: (favorites: any[]) => void
     getValueSearch: (value: string) => any
 }
 
@@ -72,8 +79,11 @@ export const mapEventFromBackend = (item: any): Event => {
         usuario_id: 0,
 
         // Favoritos
-        favorito: item.favorito ? 1 : 0,
+        favorito: item.favorito || 0,
         esfavorito: item.favorito ? 1 : 0,
+
+        // Entradas externas
+        ticketUrls: item.ticketUrls || [],
     };
 };
 
@@ -204,10 +214,68 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
                 ...dataEventItem,
                 data: dataEventItem?.data?.map((item: any) =>
                     item.favorito === favorito
-                        ? { ...item, favorito: null }
+                        ? { ...item, favorito: null, esfavorito: 0 }
                         : item
                 ),
             })),
+        }));
+    },
+    // Nuevas funciones para eliminar favorito por ID de Evento (más seguro)
+    setEventsDeleteFavoriteByEventId: (eventId: any) => {
+        set((state: any) => ({
+            events: state?.events?.map((item: any) =>
+                (item.ideventos || item.idEventos) === eventId
+                    ? { ...item, esfavorito: 0, favorito: null }
+                    : item
+            )
+        }));
+    },
+    setEventDeleteFiltersFavoriteByEventId: (eventId: any) => {
+        set((state: any) => ({
+            eventSearchByFilters: state?.eventSearchByFilters?.map((item: any) =>
+                (item.ideventos || item.idEventos) === eventId
+                    ? { ...item, favorito: null, esfavorito: 0 }
+                    : item
+            )
+        }));
+    },
+    setEventDataDeleteFavoriteByEventId: (eventId: any) => {
+        set((state: any) => ({
+            dataEvent: state?.dataEvent?.map((dataEventItem: any) => ({
+                ...dataEventItem,
+                data: dataEventItem?.data?.map((item: any) =>
+                    (item.ideventos || item.idEventos) === eventId
+                        ? { ...item, favorito: null, esfavorito: 0 }
+                        : item
+                ),
+            })),
+        }));
+    },
+    setFeaturedEventsAsFavorite: (idEvento: any, resp: any) => {
+        set((state: any) => ({
+            eventsDestacades: state?.eventsDestacades?.map((event: any) =>
+                (event.ideventos || event.idEventos) === idEvento
+                    ? { ...event, esfavorito: 1, favorito: resp }
+                    : event
+            )
+        }));
+    },
+    setFeaturedEventsDeleteFavorite: (favorito: any) => {
+        set((state: any) => ({
+            eventsDestacades: state?.eventsDestacades?.map((item: any) =>
+                item.favorito === favorito
+                    ? { ...item, esfavorito: 0, favorito: null }
+                    : item
+            )
+        }));
+    },
+    setFeaturedEventsDeleteFavoriteByEventId: (eventId: any) => {
+        set((state: any) => ({
+            eventsDestacades: state?.eventsDestacades?.map((item: any) =>
+                (item.ideventos || item.idEventos) === eventId
+                    ? { ...item, esfavorito: 0, favorito: null }
+                    : item
+            )
         }));
     },
     getEventBySearch: async (palabraBusqueda: string) => {
@@ -303,5 +371,31 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
             console.error('Error searching events by filters:', error);
             set({ eventSearchByFilters: [], total: 0 })
         }
+    },
+    updateEventsWithFavorites: (favorites: any[]) => {
+        // Create a Set of Favorite Event IDs for O(1) lookups
+        const favoriteEventIds = new Set(favorites.map((f: any) => f.ideventos || f.idEventos));
+        const favoriteMap = new Map(favorites.map((f: any) => [f.ideventos || f.idEventos, f.idfavoritos])); // Map EventID -> FavoriteID
+
+        set((state: any) => {
+            const updateList = (list: any[]) => list?.map((event: any) => {
+                const eventId = event.ideventos || event.idEventos;
+                if (favoriteEventIds.has(eventId)) {
+                    return { ...event, esfavorito: 1, favorito: favoriteMap.get(eventId) };
+                }
+                return event;
+            }) || [];
+
+            return {
+                events: updateList(state.events),
+                eventsDestacades: updateList(state.eventsDestacades),
+                eventsEntreteiment: updateList(state.eventsEntreteiment),
+                eventsCulture: updateList(state.eventsCulture),
+                eventsTeatro: updateList(state.eventsTeatro),
+                eventsMusic: updateList(state.eventsMusic),
+                eventSearch: updateList(state.eventSearch || []),
+                eventSearchByFilters: updateList(state.eventSearchByFilters || []),
+            };
+        });
     }
 }));

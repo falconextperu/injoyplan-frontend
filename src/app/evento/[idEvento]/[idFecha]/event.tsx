@@ -78,9 +78,15 @@ const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: s
         if (success) setIsEditing(false);
     };
 
-    const handleDelete = async () => {
-        if (!confirm('¿Estás seguro de eliminar este comentario?')) return;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const handleDelete = () => {
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
         await deleteComment(eventId, comment.id);
+        setShowDeleteModal(false);
     };
 
     return (
@@ -170,6 +176,29 @@ const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: s
                     ))}
                 </div>
             )}
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+                        <h3 className="text-xl font-bold text-[#212121] mb-2">Eliminar comentario</h3>
+                        <p className="text-[#666] mb-8 font-medium">¿Estás seguro de eliminar este comentario?</p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#007FA4] hover:bg-[#006080] transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-6 py-2.5 rounded-xl text-sm font-bold text-[#007FA4] bg-[#F0F8FF] hover:bg-[#e0f0fa] transition-colors"
+                            >
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -228,7 +257,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
             console.log(sortedDataFecha)
             // Configurar la fecha inicial como la primera disponible
             if (sortedDataFecha.length > 0) {
-                const initialDate = moment(sortedDataFecha[0]?.FechaInicio).utc().format('dddd, D [de] MMMM [de] YYYY');
+                const initialDate = moment(sortedDataFecha[0]?.FechaInicio).utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY');
                 const days = calcularDiasRestantes(sortedDataFecha[0]?.FechaInicio); // Calcular días restantes
                 setDate(initialDate);
                 setDaysRemaining(days); // Establecer días restantes
@@ -239,7 +268,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     }, [dataFecha, data]);
 
     const getDate = (item: any) => {
-        let date = moment(item.FechaInicio).locale('es').utc().format('dddd, D [de] MMMM [de] YYYY')
+        let date = moment(item.FechaInicio).locale('es').utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY')
         setDate(date);
         const days = calcularDiasRestantes(item.FechaInicio); // Calcular días restantes
         setDaysRemaining(days); // Establecer días restantes
@@ -287,7 +316,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     const addFavoritesByUser = (item: any) => {
         if (auth) {
             console.log(item)
-            if (item?.favorito > 0) {
+            if (item?.favorito) {
                 deleteFavorite(item)
             } else {
                 const data = {
@@ -310,6 +339,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                 <p className={sans.className + ' font-normal text-[#4a4a4a] text-[14px] mt-3'} >Al parecer no hay información sobre este evento</p>
             </div></div>
     }
+
+    console.log(data)
 
     return (
         <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl lg:max-w-screen-lg mx-auto mb-10 xl:px-10 px-0">
@@ -348,7 +379,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
                                     addFavoritesByUser(data[0]);
                                 }}>
-                                    {data[0]?.favorito > 0 ? <div className='top-3'>
+                                    {data[0]?.favorito ? <div className='top-3'>
                                         <Icon className='top-3 relative' color='A3ABCC' width={20} height={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'></span>
                                     </div> :
                                         <div className='relative top-3'>
@@ -401,7 +432,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     }
                 </div>
 
-                <div className="col-start-1  xl:col-start-4 xl:col-end-[16]">
+                <div className="col-start-1  xl:col-start-4 xl:col-end-[16] cursor-pointer">
 
                     <div className="xl:items-center xl:flex xl:justify-end md:block hidden">
                         <div className='flex mr-10' onClick={handleCopyLink}>
@@ -412,7 +443,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                             e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
                             addFavoritesByUser(data[0]);
                         }}>
-                            {data[0]?.favorito > 0 ? <div className='flex items-center'>
+                            {data[0]?.favorito ? <div className='flex items-center'>
                                 <Icon color='A3ABCC' width={20} icon="mdi:heart" /><span className='text-[#A3ABCC] ml-3 font-bold text-md'>Favorito</span>
                             </div> :
                                 <div className='flex items-center'>
@@ -423,7 +454,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     <div className='bg-[#f7f7fa] xl:mt-14 mt-0 xl:p-10 p-6 xl:sticky top-0 xl:top-4'>
                         <div>
                             <h6 className='font-bold'>Fecha y hora</h6>
-                            {date.length > 0 ? <p className='font-thin'>{date}. {initHour} - {endHour}</p> : "Aún por confirmar"}
+                            {date?.length > 0 ? <p className='font-thin'>{date}. {initHour} - {endHour}</p> : "Aún por confirmar"}
                         </div>
 
                         <div className='mt-8 font-bold'>
@@ -436,8 +467,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                         {
                                             dataFechaOrdenada?.slice(0, 5).map((item: any, index: number) => (
                                                 <div className='mr-3 cursor-pointer border py-2.5 w-[70px] h-[70px] rounded px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
-                                                    <strong className='block text-center text-xl'>{moment(item?.FechaInicio).utc().format('D')}</strong>
-                                                    <span className='font-thin text-center mx-auto block'>{moment(item?.FechaInicio).utc().format('MMM').toUpperCase()}</span>
+                                                    <strong className='block text-center text-xl'>{moment(item?.FechaInicio).utcOffset(-5).format('D')}</strong>
+                                                    <span className='font-thin text-center mx-auto block'>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
                                                 </div>
                                             ))
                                         }
@@ -450,9 +481,9 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     <button onClick={modalShowDates} className={styles.seeMoreButton}>Ver todas</button>
                                 )}
                             </div>
-                            <div className='mt-8'>
-                                <h6>Lugar del evento</h6>
-                                <p className='font-thin'>{data[0]?.direccion}</p>
+                            <div className='mt-8 w-[400px]'>
+                                <h6>Lugar del evento y la dirección</h6>
+                                <p className='font-thin'>{data[0]?.NombreLocal} - {data[0]?.direccion}</p>
                             </div>
 
                             <div>
@@ -475,14 +506,24 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     )
                                 })
                             }
-                            {/* New ticketUrls from modern events */}
                             {
                                 data[0]?.ticketUrls && Array.isArray(data[0].ticketUrls) && data[0].ticketUrls.map((link: { name: string; url: string }, idx: number) => {
                                     const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+
+                                    const getIcon = (name: string) => {
+                                        const n = (name || '').toLowerCase();
+                                        if (n.includes('tiktok')) return 'ic:baseline-tiktok';
+                                        if (n.includes('instagram')) return 'mdi:instagram';
+                                        if (n.includes('facebook')) return 'mdi:facebook';
+                                        if (n.includes('whatsapp')) return 'mdi:whatsapp';
+                                        if (n.includes('web')) return 'mdi:web';
+                                        return 'solar:ticket-bold';
+                                    };
+
                                     return (
-                                        <div className='bg-[#007FA4] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
+                                        <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
                                             <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
-                                                <Icon icon="solar:ticket-bold" width={20} className='mr-3' />
+                                                <Icon icon={getIcon(link.name)} width={24} className='mr-3' />
                                                 {link.name || 'Comprar entradas'}
                                             </Link>
                                         </div>
@@ -496,7 +537,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     {
                         <div className='xl:hidden block px-5'>
                             <div>
-                                <h4 className='mb-5 mt-5 font-bold text-[18px]'>Lo que se sabe del evento</h4>
+                                <h4 className='mb-5 mt-5 font-bold text-[18px]'>Te contamos:</h4>
                                 <div className='text-[#212121] text-md font-thin font-sans mb-6'>{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
                             </div>
                         </div>

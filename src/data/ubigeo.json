@@ -1,0 +1,207 @@
+{
+  "Amazonas": {
+    "Chachapoyas": [
+      "Chachapoyas",
+      "Asuncion",
+      "Balsas",
+      "Cheto",
+      "Chiliquin"
+    ],
+    "Bagua": [
+      "Bagua",
+      "Aramango",
+      "Copallin",
+      "El Parco",
+      "Imaza"
+    ],
+    "Bongará": [
+      "Jumbilla",
+      "Chisquilla",
+      "Churuja",
+      "Corosha",
+      "Cuispes"
+    ]
+  },
+  "Ancash": {
+    "Huaraz": [
+      "Huaraz",
+      "Cochabamba",
+      "Colcabamba",
+      "Huanchay",
+      "Independencia"
+    ],
+    "Santa": [
+      "Chimbote",
+      "Caceres del Peru",
+      "Coishco",
+      "Macate",
+      "Moro"
+    ]
+  },
+  "Arequipa": {
+    "Arequipa": [
+      "Arequipa",
+      "Alto Selva Alegre",
+      "Cayma",
+      "Cerro Colorado",
+      "Characato"
+    ],
+    "Camana": [
+      "Camana",
+      "Jose Maria Quimper",
+      "Mariano Nicolas Valcarcel",
+      "Mariscal Caceres",
+      "Nicolas de Pierola"
+    ]
+  },
+  "Cusco": {
+    "Cusco": [
+      "Cusco",
+      "Ccorca",
+      "Poroy",
+      "San Jeronimo",
+      "San Sebastian"
+    ],
+    "Urubamba": [
+      "Urubamba",
+      "Chinchero",
+      "Huayllabamba",
+      "Machupicchu",
+      "Maras"
+    ]
+  },
+  "Lima": {
+    "Lima": [
+      "Lima",
+      "Ancón",
+      "Ate",
+      "Barranco",
+      "Breña",
+      "Carabayllo",
+      "Chaclacayo",
+      "Chorrillos",
+      "Cieneguilla",
+      "Comas",
+      "El Agustino",
+      "Independencia",
+      "Jesús María",
+      "La Molina",
+      "La Victoria",
+      "Lince",
+      "Los Olivos",
+      "Lurigancho",
+      "Lurín",
+      "Magdalena del Mar",
+      "Miraflores",
+      "Pachacámac",
+      "Pucusana",
+      "Pueblo Libre",
+      "Puente Piedra",
+      "Punta Hermosa",
+      "Punta Negra",
+      "Rímac",
+      "San Bartolo",
+      "San Borja",
+      "San Isidro",
+      "San Juan de Lurigancho",
+      "San Juan de Miraflores",
+      "San Luis",
+      "San Martín de Porres",
+      "San Miguel",
+      "Santa Anita",
+      "Santa María del Mar",
+      "Santa Rosa",
+      "Santiago de Surco",
+      "Surquillo",
+      "Villa El Salvador",
+      "Villa María del Triunfo"
+    ],
+    "Barranca": [
+      "Barranca",
+      "Paramonga",
+      "Pativilca",
+      "Supe",
+      "Supe Puerto"
+    ],
+    "Cañete": [
+      "San Vicente de Cañete",
+      "Asia",
+      "Calango",
+      "Cerro Azul",
+      "Chilca"
+    ],
+    "Huaral": [
+      "Huaral",
+      "Atavillos Alto",
+      "Atavillos Bajo",
+      "Aucallama",
+      "Chancay"
+    ],
+    "Huaura": [
+      "Huacho",
+      "Ambar",
+      "Caleta de Carquin",
+      "Checras",
+      "Hualmay"
+    ]
+  },
+  "Callao": {
+    "Callao": [
+      "Callao",
+      "Bellavista",
+      "Carmen de La Legua-Reynoso",
+      "La Perla",
+      "La Punta",
+      "Ventanilla",
+      "Mi Perú"
+    ]
+  },
+  "La Libertad": {
+    "Trujillo": [
+      "Trujillo",
+      "El Porvenir",
+      "Florencia de Mora",
+      "Huanchaco",
+      "La Esperanza"
+    ],
+    "Ascope": [
+      "Ascope",
+      "Chicama",
+      "Chocope",
+      "Magdalena de Cao",
+      "Paijan"
+    ]
+  },
+  "Lambayeque": {
+    "Chiclayo": [
+      "Chiclayo",
+      "Chongoyape",
+      "Eten",
+      "Eten Puerto",
+      "Jose Leonardo Ortiz"
+    ],
+    "Lambayeque": [
+      "Lambayeque",
+      "Chochope",
+      "Illimo",
+      "Jayanca",
+      "Mochumi"
+    ]
+  },
+  "Piura": {
+    "Piura": [
+      "Piura",
+      "Castilla",
+      "Catacaos",
+      "Cura Mori",
+      "El Tallan"
+    ],
+    "Sullana": [
+      "Sullana",
+      "Bellavista",
+      "Ignacio Escudero",
+      "Lancones",
+      "Marcavelica"
+    ]
+  }
+}

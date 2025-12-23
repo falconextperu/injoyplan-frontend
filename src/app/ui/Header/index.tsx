@@ -170,6 +170,9 @@ const Header = () => {
             localStorage.removeItem("token");
         }
         logout();
+        // Clear favorites on logout
+        useFavoriteStore.setState({ favorites: [] });
+        setIsUserDropdownOpen(false);
         navigation.push('/');
     };
 
@@ -185,8 +188,8 @@ const Header = () => {
     return (
         <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
             <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
-            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-3 px-1 mx-auto items-center grid grid-cols-12">
-                <Link className='w-48' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
+            <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-3 px-3 mx-auto items-center grid grid-cols-12">
+                <Link className='w-32 md:w-48 col-span-4 md:col-span-3' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
                 {
                     !path.startsWith("/busqueda") && (
                         <div className={
@@ -201,7 +204,7 @@ const Header = () => {
                                     <input
                                         onClick={() => setIsOpenEvent(true)}
                                         onChange={(e: any) => setSearch(e.target.value)}
-                                        type="text" placeholder="Evento, equipo o artista"
+                                        type="text" placeholder="Evento o lugar"
                                         value={search}
                                         className="w-full  placeholder:text-[#bababa] bg-transparent border-none rounded-3xl relative outline-none font-[Quicksand] py-3 text-md text-[#5C6570] font-bold"
                                     />
@@ -212,7 +215,7 @@ const Header = () => {
                                             {
                                                 isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full">
                                                     <Image src={lupa} alt="lupa" className="" />
-                                                    <input className='w-full outline-none pl-3' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento, equipo o artista" />
+                                                    <input className='w-full outline-none pl-3' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento o lugar" />
                                                     <Icon width={30} icon="openmoji:close" color='#8B2B2C' onClick={() => setIsOpenEvent(false)} />
                                                 </div>
                                             }
@@ -239,7 +242,7 @@ const Header = () => {
                                                                                 </div>
                                                                             </div>
                                                                             <div className='text-right'>
-                                                                                <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utc().format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
+                                                                                <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utcOffset(-5).format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
                                                                                 <p className={quicksand.className + ' text-right text-[#848484] text-[14px]'}>{item.HoraInicio}</p>
                                                                             </div>
                                                                         </div>
@@ -300,12 +303,15 @@ const Header = () => {
                                 {
                                     isMobile && isOpenEvent && (
                                         <ReactModal isOpen ariaHideApp={false} className={"p-0 bg-[#fff] overflow-y-auto h-[100vh]"}>
-                                            <div ref={refEvent} className={"md:hidden md:max-h-[400px] px-5 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
+                                            <div ref={refEvent} className={"md:hidden md:max-h-[400px] px-5 pr-10 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
                                                 {
                                                     isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full icon">
                                                         <Image src={lupa} alt="lupa" className="" />
-                                                        <input className='w-full outline-none pl-3' onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento, equipo o artista" />
-                                                        <Icon width={33} icon="openmoji:close" onClick={() => setIsOpenEvent(false)} />
+                                                        <input className='w-full outline-none pl-3' value={search} onChange={(e: any) => setSearch(e.target.value)} type="text" placeholder="Evento o lugar" />
+                                                        <Icon width={33} icon="openmoji:close" onClick={() => {
+                                                            setIsOpenEvent(false);
+                                                            setSearch(""); // Reset input on close
+                                                        }} />
                                                     </div>
                                                 }
                                                 <div>
@@ -408,15 +414,15 @@ const Header = () => {
                         </div>
                     ) :
                         <div className="col-start-9 col-end-13 flex justify-end md:relative items-center gap-2" ref={favoritesRef}>
-                            {/* User Section - Avatar Dropdown (Desktop) */}
-                            {auth !== null && !isMobile && (
+                            {/* User Section - Avatar Dropdown (Desktop & Mobile) */}
+                            {auth !== null && (
                                 <div className="relative" ref={refUserDropdown}>
                                     <button
                                         onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                                         className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                                     >
                                         {/* Avatar */}
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#007FA4] to-[#00DFD1] flex items-center justify-center text-white font-bold text-sm overflow-hidden border-2 border-white shadow-md">
+                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#007FA4] to-[#00DFD1] flex items-center justify-center text-white font-bold text-xs md:text-sm overflow-hidden border-2 border-white shadow-md">
                                             {(() => {
                                                 const a: any = auth;
                                                 const avatarUrl = a?.profile?.avatar || a?.imagenPerfil;
@@ -447,7 +453,7 @@ const Header = () => {
 
                                     {/* Dropdown Menu */}
                                     {isUserDropdownOpen && (
-                                        <div className="absolute right-0 top-14 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
+                                        <div className="absolute right-[-90px] top-14 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
                                             {/* <div className="px-4 py-3 border-b border-gray-100">
                                                 <p className="font-bold text-[#212121] text-sm truncate">
                                                     {(() => {
@@ -456,8 +462,11 @@ const Header = () => {
                                                     })()}
                                                 </p>
                                             </div> */}
-
-                                            <Link href="/explorar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                            <Link onClick={() => setIsUserDropdownOpen(false)} href={`/usuario/${(auth as any)?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                <Icon icon="solar:user-bold" className="text-[#007FA4]" width={20} />
+                                                <span className="text-[#212121] text-sm">Ver perfil</span>
+                                            </Link>
+                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/explorar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
                                                 <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={20} />
                                                 <span className="text-[#212121] text-sm">Explorar</span>
                                             </Link>
@@ -467,7 +476,7 @@ const Header = () => {
                                                 const a: any = auth;
                                                 if (a?.userType === 'COMPANY') {
                                                     return (
-                                                        <Link href="/mis-eventos" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                        <Link onClick={() => setIsUserDropdownOpen(false)} href="/mis-eventos" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
                                                             <Icon icon="solar:calendar-bold" className="text-[#007FA4]" width={20} />
                                                             <span className="text-[#212121] text-sm">Mis Eventos</span>
                                                         </Link>
@@ -476,11 +485,12 @@ const Header = () => {
                                                 return null;
                                             })()}
 
-                                            <Link href="/mensajes" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/mensajes" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
                                                 <Icon icon="solar:chat-round-dots-bold" className="text-[#007FA4]" width={20} />
                                                 <span className="text-[#212121] text-sm">Mis Mensajes</span>
                                             </Link>
-                                            <Link href="/perfil/editar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+
+                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/perfil/editar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
                                                 <Icon icon="solar:settings-bold" className="text-[#007FA4]" width={20} />
                                                 <span className="text-[#212121] text-sm">Configuración</span>
                                             </Link>
@@ -490,7 +500,7 @@ const Header = () => {
                                                 const a: any = auth;
                                                 if (a?.role === 'ADMIN') {
                                                     return (
-                                                        <Link href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
+                                                        <Link onClick={() => setIsUserDropdownOpen(false)} href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
                                                             <Icon icon="solar:widget-bold" className="text-purple-600" width={20} />
                                                             <span className="text-purple-600 text-sm font-medium">Ir Administrador</span>
                                                         </Link>
@@ -513,12 +523,7 @@ const Header = () => {
                                 </div>
                             )}
 
-                            {/* Mobile: Logout Button */}
-                            {isMobile && auth !== null && (
-                                <button onClick={logout} className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'>
-                                    <Icon icon="material-symbols:logout" width="24" height="24" />
-                                </button>
-                            )}
+
 
                             {/* Login Button (Not Authenticated) */}
                             {auth === null && !isMobile && (
@@ -529,23 +534,25 @@ const Header = () => {
                             {auth === null && isMobile && (
                                 <button onClick={() => setOpenAuth(true)}
                                     className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
-                                ><Icon icon="solar:user-bold" width="24" height="24" /></button>
+                                ><Icon icon="solar:user-bold" width="10" height="10" /></button>
                             )}
 
-                            {/* Explore Icon (Desktop) */}
-                            {!isMobile && (
-                                <Link
-                                    href="/explorar"
-                                    className="hidden md:flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
-                                    title="Explorar"
-                                >
-                                    <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
-                                </Link>
-                            )}
+                            {/* Explore Icon (Desktop & Mobile) */}
+                            <Link
+                                href="/explorar"
+                                className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                title="Explorar"
+                            >
+                                <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
+                            </Link>
 
                             {/* Mobile Search */}
-                            {isMobile && (
-                                <Image onClick={() => setIsOpenEvent(true)} className='ml-2' src={lupaMobile} alt="lupa" width={30} height={30} />
+                            {isMobile && !path.startsWith('/busqueda') && (
+                                <Image onClick={() => {
+                                    setIsOpenEvent(true);
+                                    setSearch(""); // Clear local input (Correct function is setSearch)
+                                    resetEventBySearch(); // Clear zustand results
+                                }} className='' src={lupaMobile} alt="lupa" width={30} height={30} />
                             )}
                             {
                                 isOpenFavorite ? (
@@ -557,18 +564,18 @@ const Header = () => {
                             }
 
 
-                            <div className='md:hidden'>
+                            <div className='md:hidden overflow-y-hidden'>
                                 {
                                     isOpenFavorite && isMobile && (
                                         <ReactModal
                                             isOpen
                                             ariaHideApp={false}
-                                            className={"p-0 bg-[#fff] overflow-y-auto h-[100vh] blur-0"}
+                                            className={"p-0 bg-[#fff] overflow-hidden overflow-x-auto h-[100vh] blur-0"}
                                         >
-                                            <ul>
-                                                <div>
+                                            <ul className='overflow-y-hidden'>
+                                                <div className='pr-6'>
                                                     <div className='sticky top-0 bg-[#fff] z-50'>
-                                                        <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3 px-5 border-b border-solid border-[#e8e8e8]'>Favosssritos</h6>
+                                                        <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3  px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
                                                         {
                                                             isMobile && <div className={styles.closeFavorites}>
                                                                 <Icon className='cursor-pointer absolute right-4 top-4' width={24} icon="ic:baseline-close" onClick={closeModal} />
@@ -589,7 +596,7 @@ const Header = () => {
                                                                         <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
                                                                     </div>
                                                                     <div>
-                                                                        <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
+                                                                        <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
                                                                         <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
                                                                         <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
                                                                     </div>

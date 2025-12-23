@@ -49,7 +49,7 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
                     <div className='md:pt-16 pt-6'>
                         <h2 className='text-3xl mb-8 font-bold text-[#444444] md:text-[#212121]'>Eventos para ti</h2>
                     </div>
-                    <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {
                             isLoading && events.length === 0 ? (
                                 // Show skeletons on initial load (or if cache empty)
@@ -71,7 +71,7 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
                     */}
                     {isLoading && events.length > 0 && (
                         // If we are loading MORE events effectively
-                        <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-4 mt-5">
+                        <div className="grid auto-cols-min grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-5">
                             {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={`skeleton-append-${i}`} />)}
                         </div>
                     )}

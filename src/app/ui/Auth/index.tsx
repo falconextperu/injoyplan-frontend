@@ -14,6 +14,29 @@ import { ReactSVG } from 'react-svg';
 
 const customStyles = {
     content: {
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        padding: '0',
+        border: 'none',
+        borderRadius: '0',
+        width: '100%',
+        height: '100dvh', // Use dvh to avoid address bar issues
+        overflow: 'hidden',
+        background: '#fff',
+        zIndex: 1001,
+    },
+    overlay: {
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 1000,
+    }
+};
+
+// Desktop styles overlay
+const desktopStyles = {
+    content: {
         top: '50%',
         left: '50%',
         right: 'auto',
@@ -49,10 +72,22 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
     const [localIsRegister, setLocalIsRegister] = useState(false);
     const isRegister = isRegisterProp ?? localIsRegister;
     const setIsRegister = setIsRegisterProp ?? setLocalIsRegister;
-    const { login, signIn, verifyCode } = useAuthStore();
+    const { login, signIn, verifyCode, forgotPassword } = useAuthStore();
 
     // Internal state
     const [step, setStep] = useState(0); // 0: Form, 1: Verify, 2: Success
+
+    // ... (rest of state) ...
+
+    // ...
+
+    const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const result = await forgotPassword(email);
+        if (result.success) {
+            setForgotPasswordSuccess(true);
+        }
+    };
 
     // Form fields
     const [nombre, setNombre] = useState('');
@@ -119,9 +154,20 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
         }
     ];
 
+    const [isMobile, setIsMobile] = useState(false);
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+            setIsMobile(window.innerWidth < 768);
+
+            const handleResize = () => {
+                setIsMobile(window.innerWidth < 768);
+                setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+            };
+
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
         }
         ReactModal.setAppElement('body');
     }, []);
@@ -146,6 +192,10 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
         handleReset();
     }, [isRegister]);
 
+    // Forgot Password State
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
+    const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+
     const handleReset = () => {
         setStep(0);
         setNombre('');
@@ -158,6 +208,9 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
         setTerminoCondiciones(false);
         setPolitica(false);
         setOtp(['', '', '', '', '', '']);
+        setIsForgotPassword(false);
+        setForgotPasswordSuccess(false);
+        setLoginError(null);
     };
 
     // Error state
@@ -178,6 +231,8 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
             window.location.reload();
         }
     };
+
+
 
     const handleRegisterSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -295,10 +350,10 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
             <ReactModal
                 isOpen={openAuth}
                 onRequestClose={() => setOpenAuth(false)}
-                style={customStyles}
+                style={isMobile ? customStyles : desktopStyles}
                 ariaHideApp={false}
             >
-                <div className="flex min-h-[600px] font-sans">
+                <div className="flex h-full font-sans flex-col md:flex-row md:min-h-[600px]">
                     {/* LEFT PANEL (Slider) - Hidden on Step 2 (Success) */}
                     {(!isRegister || step !== 2) && (
                         <div className="hidden md:flex w-1/2 text-white relative bg-[#000] overflow-hidden">
@@ -358,7 +413,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                     )}
 
                     {/* RIGHT PANEL (Form) - Full width on Step 2 */}
-                    <div className={`w-full ${(!isRegister || step !== 2) ? 'md:w-1/2' : ''} p-8 md:p-12 relative flex flex-col justify-center overflow-y-auto max-h-[90vh]`}>
+                    <div className={`w-full ${(!isRegister || step !== 2) ? 'md:w-1/2' : ''} p-6 md:p-12 relative flex flex-col justify-start md:justify-center overflow-y-auto h-full md:max-h-[90vh]`}>
 
                         <button onClick={() => setOpenAuth(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black z-10">
                             <Icon icon="solar:close-circle-bold" width={24} />
@@ -367,8 +422,73 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                         {/* CONTENT LOGIC */}
                         <div className="max-w-md mx-auto w-full mt-10 md:mt-0">
 
+                            {/* FORGOT PASSWORD VIEW */}
+                            {!isRegister && isForgotPassword && (
+                                <form onSubmit={handleForgotPasswordSubmit} className="space-y-5 animate-fadeIn">
+                                    {/* Logo */}
+                                    <div className="flex justify-start mb-4">
+                                        <Image src={logo} alt="Injoyplan" width={40} height={40} />
+                                    </div>
+
+                                    {!forgotPasswordSuccess ? (
+                                        <>
+                                            <div className="mb-8">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsForgotPassword(false)}
+                                                    className="flex items-center gap-1 text-[#007FA4] text-sm font-bold mb-4 hover:underline"
+                                                >
+                                                    <Icon icon="solar:arrow-left-linear" /> Volver
+                                                </button>
+                                                <h2 className="text-2xl font-bold text-[#212121] mb-2">Recuperar contraseña</h2>
+                                                <p className="text-gray-500 text-sm">Ingresa tu correo electrónico para enviarte las instrucciones.</p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-bold text-gray-500 uppercase">Correo electrónico</label>
+                                                    <input
+                                                        type="email"
+                                                        value={email}
+                                                        onChange={(e) => setEmail(e.target.value)}
+                                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007FA4] focus:ring-1 focus:ring-[#007FA4] transition-all"
+                                                        placeholder="ejemplo@correo.com"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-4">
+                                                <button type="submit" className="w-full bg-[#277FA4] hover:bg-[#277FA4] text-[#fff] font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm">
+                                                    Enviar instrucciones
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="text-center animate-fadeIn py-4">
+                                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <Icon icon="solar:letter-bold" className="text-green-500 text-4xl" />
+                                            </div>
+                                            <h2 className="text-xl font-bold text-[#212121] mb-2">¡Correo enviado!</h2>
+                                            <p className="text-gray-500 text-sm mb-6">
+                                                Hemos enviado las instrucciones para recuperar tu contraseña a <span className="font-bold">{email}</span>. Revisa tu bandeja de entrada o spam.
+                                            </p>
+                                            <div className="space-y-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsForgotPassword(false)}
+                                                    className="w-full bg-[#277FA4] hover:bg-[#277FA4] text-[#fff] font-bold py-3.5 rounded-full shadow-md hover:shadow-lg transition-all transform active:scale-95 text-sm"
+                                                >
+                                                    Volver a iniciar sesión
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </form>
+                            )}
+
                             {/* LOGIN */}
-                            {!isRegister && (
+                            {!isRegister && !isForgotPassword && (
                                 <form onSubmit={handleLogin} className="space-y-5 animate-fadeIn">
                                     {/* Logo */}
                                     <div className="flex justify-start mb-4">
@@ -413,7 +533,11 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                     </div>
 
                                     <div className="flex justify-end">
-                                        <button type="button" className="text-xs font-bold text-[#007FA4] hover:underline">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsForgotPassword(true)}
+                                            className="text-xs font-bold text-[#007FA4] hover:underline"
+                                        >
                                             ¿Olvidaste tu contraseña?
                                         </button>
                                     </div>
@@ -450,7 +574,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
                                             <input
@@ -482,7 +606,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-gray-500 uppercase">Contraseña</label>
                                             <input
@@ -505,7 +629,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-gray-500 uppercase">F. Nacimiento</label>
                                             <input
@@ -543,7 +667,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                             </div>
                                             <div className="ml-0 text-xs">
                                                 <label htmlFor="terms" className="font-medium text-gray-700">
-                                                    Declaro que he leído y acepto los Términos y Condiciones, la Política de cookies y la Política de privacidad y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma
+                                                    Declaro que he leído y acepto los <a href="/terminos-y-condiciones" target="_blank" className="text-[#007FA4] font-bold hover:underline">Términos y Condiciones</a>, la <a href="/politicas-de-cookies" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de cookies</a> y la <a href="/politicas-de-privacidad" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de privacidad</a> y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma
                                                 </label>
                                             </div>
                                         </div>
@@ -559,7 +683,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                             </div>
                                             <div className="ml-0 text-xs">
                                                 <label htmlFor="policy" className="font-medium text-gray-700">
-                                                    Autorizo el uso de mis datos personales para recibir información, ofertas, promociones o contenido publicitario o comercial relacionado con esta web, injoyplan y sus vinculados
+                                                    Autorizo el uso de mis datos personales para recibir información, ofertas, promociones o contenido publicitario o comercial relacionado con esta web, Injoyplan y sus vinculados
                                                 </label>
                                             </div>
                                         </div>
@@ -691,8 +815,8 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                                 key={item.idCategorias}
                                                 onClick={() => handleSelectCategory(item.idCategorias.toString())}
                                                 className={`cursor-pointer rounded-xl p-3 flex flex-col items-center justify-center transition-all ${selectedCategories?.includes(item?.idCategorias?.toString())
-                                                        ? "bg-[#861F21] text-white shadow-md transform scale-105"
-                                                        : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                                                    ? "bg-[#861F21] text-white shadow-md transform scale-105"
+                                                    : "bg-gray-50 text-gray-500 hover:bg-gray-100"
                                                     }`}
                                             >
                                                 <div className="w-10 h-10 mb-2">

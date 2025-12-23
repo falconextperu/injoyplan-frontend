@@ -11,9 +11,10 @@ export default function SidebarLeft() {
     const { logout } = useAuthStore();
 
     const menuItems = [
-        { icon: 'solar:home-smile-bold', label: 'Inicio', href: '/explorar' },
+        { icon: 'solar:home-smile-bold', label: 'Explorar', href: '/explorar' },
+        { icon: 'solar:calendar-bold', label: 'Mis Eventos', href: '/mis-eventos' },
         { icon: 'solar:chat-round-dots-bold', label: 'Mensajes', href: '/mensajes' },
-        { icon: 'solar:bookmark-circle-bold', label: 'Guardados', href: '/guardados' },
+        { icon: 'solar:heart-bold', label: 'Favoritos', href: '/guardados' },
         { icon: 'solar:settings-bold', label: 'Configuración', href: '/perfil/editar' },
     ];
 

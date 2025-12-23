@@ -7,6 +7,9 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import Auth from '@/app/ui/Auth';
 import { useAuthStore } from '@/app/zustand/auth';
 import { useProfileStore } from '@/app/zustand/profile';
+import SidebarLeft from '@/app/ui/Profile/SidebarLeft';
+import SidebarRight from '@/app/ui/Profile/SidebarRight';
+import { Icon } from '@iconify/react';
 
 export default function EditarPerfilPage() {
   const { auth, me } = useAuthStore();
@@ -66,149 +69,174 @@ export default function EditarPerfilPage() {
   }
 
   return (
-    <div className="bg-[#F9FAFC]">
-      <div className="max-w-[998px] mx-auto px-5 xl:px-10 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#212121]">Editar perfil</h1>
-            <p className="text-[#666] mt-1">{displayName}</p>
-          </div>
-          <Link href="/perfil" className="text-[#007FA4] font-bold">
-            Volver
-          </Link>
-        </div>
+    <div className="bg-[#F9FAFC] min-h-screen py-6 relative">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl overflow-hidden shadow-sm">
-          <div className="relative h-[160px] md:h-[220px] bg-[#EEE]">
-            <Image src={coverSrc} alt="Portada" fill className="object-cover" />
-            <label className="absolute right-4 bottom-4 bg-white/90 border border-solid border-[#EDEFF5] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
-              Cambiar portada
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e: ChangeEvent<HTMLInputElement>) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  await uploadCover(file);
-                }}
-              />
-            </label>
+          {/* Left Sidebar */}
+          <div className="hidden md:block md:col-span-3 lg:col-span-2 sticky top-24 self-start">
+            <SidebarLeft />
           </div>
 
-          <div className="px-6 md:px-8 pb-8">
-            <div className="-mt-10 md:-mt-14 flex items-end gap-4 relative z-10">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white bg-[#F7F7F7]">
-                <Image src={avatarSrc} alt="Avatar" width={112} height={112} className="w-full h-full object-cover" />
-              </div>
-              <label className="bg-white border border-solid border-[#007FA4] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
-                Cambiar avatar
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e: ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    await uploadAvatar(file);
-                  }}
-                />
-              </label>
-            </div>
-
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Center Content */}
+          <div className="col-span-1 md:col-span-9 lg:col-span-7">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <label className="font-bold text-[#444]">Nombres</label>
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                  type="text"
-                />
+                <h1 className="text-2xl md:text-3xl font-black text-[#212121]">Editar perfil</h1>
+                <p className="text-[#666] mt-1">{displayName}</p>
               </div>
-              <div>
-                <label className="font-bold text-[#444]">Apellidos</label>
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                  type="text"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="font-bold text-[#444]">Descripción</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md min-h-[120px]"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-[#444]">Teléfono</label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                  type="tel"
-                />
-              </div>
-              <div>
-                <label className="font-bold text-[#444]">Ciudad</label>
-                <input
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                  type="text"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="font-bold text-[#444]">País</label>
-                <input
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <p className="mt-4 text-[#861F21] font-bold">{error}</p>
-            )}
-
-            <div className="mt-8 flex items-center gap-3">
-              <button
-                disabled={isLoading}
-                onClick={async () => {
-                  await updateMyProfile({
-                    firstName: firstName || undefined,
-                    lastName: lastName || undefined,
-                    description: description || undefined,
-                    phone: phone || undefined,
-                    city: city || undefined,
-                    country: country || undefined,
-                  });
-                }}
-                className={
-                  isLoading
-                    ? 'bg-[#007FA4]/60 text-white font-bold px-8 py-3 rounded-full cursor-not-allowed'
-                    : 'bg-[#007FA4] text-white font-bold px-8 py-3 rounded-full'
-                }
-              >
-                Guardar cambios
-              </button>
-              <Link
-                href="/perfil"
-                className="border border-solid border-[#007FA4] text-[#007FA4] font-bold px-8 py-3 rounded-full"
-              >
-                Cancelar
+              <Link href="/perfil" className="text-[#007FA4] font-bold">
+                Volver
               </Link>
             </div>
-          </div>
-        </div>
 
+            <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl overflow-hidden shadow-sm">
+              <div className="relative h-[160px] md:h-[220px] bg-[#EEE]">
+                <Image src={coverSrc} alt="Portada" fill className="object-cover" />
+                <label className="absolute right-4 bottom-4 bg-white/90 border border-solid border-[#EDEFF5] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
+                  Cambiar portada
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      await uploadCover(file);
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="px-6 md:px-8 pb-8">
+                <div className="-mt-10 md:-mt-14 flex items-end gap-4 relative z-10">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white bg-[#F7F7F7]">
+                    <Image src={avatarSrc} alt="Avatar" width={112} height={112} className="w-full h-full object-cover" />
+                  </div>
+                  <label className="bg-white border border-solid border-[#007FA4] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
+                    Cambiar avatar
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        await uploadAvatar(file);
+                      }}
+                    />
+                  </label>
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-bold text-[#444]">Nombres</label>
+                    <input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-[#444]">Apellidos</label>
+                    <input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="text"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="font-bold text-[#444]">Descripción</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md min-h-[120px]"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 mt-2 mb-1">
+                    <div className="bg-[#F0F8FF] border border-[#B8E2F2] rounded-xl p-4 flex items-start gap-3">
+                      <Icon icon="solar:info-circle-bold" className="text-[#007FA4] mt-0.5 flex-shrink-0" width={20} />
+                      <p className="text-sm text-[#007FA4]">
+                        La información de teléfono, país y ciudad es confidencial y no será expuesta públicamente.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-[#444]">Teléfono</label>
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="tel"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-[#444]">Ciudad</label>
+                    <input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="text"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="font-bold text-[#444]">País</label>
+                    <input
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="text"
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <p className="mt-4 text-[#861F21] font-bold">{error}</p>
+                )}
+
+                <div className="mt-8 flex items-center gap-3">
+                  <button
+                    disabled={isLoading}
+                    onClick={async () => {
+                      await updateMyProfile({
+                        firstName: firstName || undefined,
+                        lastName: lastName || undefined,
+                        description: description || undefined,
+                        phone: phone || undefined,
+                        city: city || undefined,
+                        country: country || undefined,
+                      });
+                    }}
+                    className={
+                      isLoading
+                        ? 'bg-[#007FA4]/60 text-white font-bold px-8 py-3 rounded-full cursor-not-allowed'
+                        : 'bg-[#007FA4] text-white font-bold px-8 py-3 rounded-full'
+                    }
+                  >
+                    Guardar cambios
+                  </button>
+                  <Link
+                    href="/perfil"
+                    className="border border-solid border-[#007FA4] text-[#007FA4] font-bold px-8 py-3 rounded-full"
+                  >
+                    Cancelar
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
+            <SidebarRight myProfile={myProfile} isLoading={isLoading} />
+          </div>
+
+        </div>
         <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
       </div>
     </div>

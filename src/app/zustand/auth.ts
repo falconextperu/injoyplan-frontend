@@ -12,6 +12,8 @@ export interface IAuthState {
     login: (data: any) => Promise<{ success: boolean; message?: string }>;
     sendEmail: (email: IEmail) => Promise<void>
     verifyCode: (email: string, code: string) => Promise<boolean>;
+    forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
+    resetPassword: (data: any) => Promise<{ success: boolean; message?: string }>;
     success: boolean
 }
 
@@ -85,6 +87,25 @@ export const useAuthStore = create<IAuthState>((set, _get) => ({
         } catch (error: any) {
             useAlertStore.getState().alert(error?.message || "Código inválido", "error");
             throw error;
+        }
+    },
+    forgotPassword: async (email: string) => {
+        try {
+            const resp: any = await post(`auth/forgot-password`, { email });
+            return { success: true, message: resp.message };
+        } catch (error: any) {
+            useAlertStore.getState().alert(error?.message || "Error al solicitar recuperación", "error");
+            return { success: false, message: error?.message };
+        }
+    },
+    resetPassword: async (data: any) => {
+        try {
+            const resp: any = await post(`auth/reset-password`, data);
+            useAlertStore.getState().alert(resp.message || "Contraseña restablecida", "success");
+            return { success: true };
+        } catch (error: any) {
+            useAlertStore.getState().alert(error?.message || "Error al restablecer contraseña", "error");
+            return { success: false, message: error?.message };
         }
     },
     logout: () => {

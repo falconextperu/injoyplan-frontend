@@ -13,9 +13,10 @@ interface IProps {
     height?: number
     addFavoritesByUser: (event: Event) => void
     heartDisabled?: boolean
+    isDragging?: boolean
 }
 
-const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
+const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: IProps) => {
 
     const { resetEvent } = useEventStore();
 
@@ -29,13 +30,20 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            {...({ className: `min-h-[28rem] flex flex-col justify-between w-full mb-5 md:mb-5` }) as any}
+            {...({ className: `flex flex-col h-[28rem] md:h-auto justify-between w-full mb-10 md:mb-5` }) as any}
         >
             <Link
-                onClick={() => resetEvent()}
+                onClick={(e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    resetEvent()
+                }}
                 href={`/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`}
                 className='h-full w-full relative'>
-                <div className={heartDisabled ? "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2" : "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 group"}>
+                <div className={heartDisabled ? "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 pb-5" : "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 group pb-5"}>
 
                     <div className='w-full h-56 relative rounded-t-2xl'>
                         {
@@ -76,18 +84,18 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled }: IProps) => {
                     </div>
                     <div className='p-4 bg-[#fff] rounded-bl-2xl rounded-br-2xl'>
                         <div>
-                            <span className='text-xs font-bold text-[#4a4a4a]'>{moment(item?.FechaInicio).utc().format('D MMM').toUpperCase()} - {item?.HoraInicio} - {item?.HoraFinal}</span>
+                            <span className='text-xs font-bold text-[#4a4a4a]'>{moment(item?.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item?.HoraInicio} {item?.HoraFinal === "" ? "" : `-${item?.HoraFinal}`}</span>
                             <h3 className='font-black text-xl line-clamp-2 text-[#212121]'>{item?.titulo}</h3>
                             <h5 className='text-sm font-normal mb-3 text-[#212121] mt-2'>{item?.NombreLocal}</h5>
                         </div>
-                        <div className="absolute bottom-[10px] z-100">
+                        <div className="absolute bottom-[20px] z-100">
                             <strong className='text-[10px] font-bold uppercase text-[#212121]'>Desde</strong>
                             <h4 className='font-bold text-xl text-[#212121]'>{Number(item?.Monto) > 0 ? `S/ ${item?.Monto.toFixed(2)}` : "¡Gratis!"}</h4>
                         </div>
                     </div>
                 </div>
             </Link>
-            <Link className='flex text-[11px] mt-2 text-[#A3ABCC] font-bold'
+            <Link className='flex text-[11px] mt-1 text-[#A3ABCC] font-bold relative -top-0 md:-top-0 left-4'
                 href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}
                 target="_blank"
                 rel="noopener noreferrer"
