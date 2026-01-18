@@ -23,7 +23,7 @@ const Slide = ({ categoriesRelations }: any) => {
         infinite: true,
         speed: 500,
         slidesToShow: 4,
-        centerMode: true,
+        centerMode: false,
         centerPadding: "0px",
         slidesToScroll: 4,
         autoplay: true,

@@ -13,24 +13,24 @@ const SidebarItem = ({ icon, label, active, onClick }: { icon: string, label: st
     <button
         onClick={onClick}
         className={`w-full flex items-center gap-4 px-4 py-3 border-r-[4px] transition-all duration-200 group ${active
-            ? 'border-[#4318FF] text-[#2B3674] font-bold bg-gray-50/50'
-            : 'border-transparent text-[#A3AED0] hover:text-[#2B3674] font-medium'
+            ? 'border-[#277FA4] text-[#277FA4] font-bold bg-[#E0F2F7]/50'
+            : 'border-transparent text-slate-400 hover:text-[#277FA4] font-medium'
             }`}
     >
-        <Icon icon={icon} width={24} className={`${active ? 'text-[#4318FF]' : 'text-[#A3AED0] group-hover:text-[#4318FF]'}`} />
+        <Icon icon={icon} width={24} className={`${active ? 'text-[#277FA4]' : 'text-slate-400 group-hover:text-[#277FA4]'}`} />
         <span>{label}</span>
     </button>
 );
 
 const StatCard = ({ icon, title, value, subtitle, trend }: { icon: string, title: string, value: string | number, subtitle: string, trend?: 'up' | 'down' }) => (
-    <div className="bg-white rounded-[20px] p-4 flex items-center gap-4 shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
-        <div className="w-14 h-14 rounded-full bg-[#F4F7FE] flex items-center justify-center text-[#4318FF]">
+    <div className="bg-white rounded-[20px] p-4 flex items-center gap-4 shadow-sm border border-slate-100">
+        <div className="w-14 h-14 rounded-full bg-[#E0F2F7] flex items-center justify-center text-[#277FA4]">
             <Icon icon={icon} width={32} />
         </div>
         <div>
-            <p className="text-[#A3AED0] text-sm font-medium">{title}</p>
-            <h3 className="text-[#2B3674] text-2xl font-bold">{value}</h3>
-            <p className="text-xs text-[#A3AED0] flex items-center gap-1">
+            <p className="text-slate-400 text-sm font-medium">{title}</p>
+            <h3 className="text-slate-800 text-2xl font-bold">{value}</h3>
+            <p className="text-xs text-slate-400 flex items-center gap-1">
                 {trend === 'up' && <span className="text-[#05CD99] font-bold flex items-center"><Icon icon="solar:arrow-up-linear" /> +2.4%</span>}
                 <span className="font-medium">{subtitle}</span>
             </p>
@@ -41,9 +41,9 @@ const StatCard = ({ icon, title, value, subtitle, trend }: { icon: string, title
 const BarChartMock = () => (
     <div className="flex items-end justify-between h-[200px] w-full gap-2 mt-4 px-2">
         {[40, 70, 30, 85, 50, 90, 60].map((h, i) => (
-            <div key={i} className="w-full bg-[#F4F7FE] rounded-t-lg relative group h-full flex items-end">
+            <div key={i} className="w-full bg-[#E0F2F7] rounded-t-lg relative group h-full flex items-end">
                 <div
-                    className="w-full bg-[#4318FF] rounded-t-lg transition-all duration-500 hover:bg-[#2B3674]"
+                    className="w-full bg-[#277FA4] rounded-t-lg transition-all duration-500 hover:bg-[#1a5c7a]"
                     style={{ height: `${h}%` }}
                 ></div>
             </div>
@@ -107,8 +107,8 @@ const BannerModal = ({ isOpen, onClose, onSave, initialData }: any) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-[20px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h2 className="text-[#2B3674] text-xl font-bold">{initialData ? 'Editar Banner' : 'Nuevo Banner'}</h2>
-                    <button onClick={onClose} className="text-[#A3AED0] hover:text-[#2B3674]">
+                    <h2 className="text-slate-800 text-xl font-bold">{initialData ? 'Editar Banner' : 'Nuevo Banner'}</h2>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-800">
                         <Icon icon="solar:close-circle-bold" width={24} />
                     </button>
                 </div>
@@ -134,55 +134,55 @@ const BannerModal = ({ isOpen, onClose, onSave, initialData }: any) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Título</label>
-                            <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Título del banner" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Título</label>
+                            <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Título del banner" />
                         </div>
                         {/* Image URL legacy input hidden or removed, using file upload now */}
 
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Enlace (Opcional)</label>
-                            <input name="link" value={formData.link} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="/evento/..." />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Enlace (Opcional)</label>
+                            <input name="link" value={formData.link} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="/evento/..." />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Categoría</label>
-                            <input name="categoria" value={formData.categoria} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Ej: Concierto" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Categoría</label>
+                            <input name="categoria" value={formData.categoria} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Ej: Concierto" />
                         </div>
 
                         {/* New Fields */}
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Fecha</label>
-                            <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Fecha</label>
+                            <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Dirección</label>
-                            <input name="direccion" value={formData.direccion} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Lugar del evento" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Dirección</label>
+                            <input name="direccion" value={formData.direccion} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Lugar del evento" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Hora Inicio</label>
-                            <input type="time" name="horaInicio" value={formData.horaInicio} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Hora Inicio</label>
+                            <input type="time" name="horaInicio" value={formData.horaInicio} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">Hora Fin</label>
-                            <input type="time" name="horaFin" value={formData.horaFin} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">Hora Fin</label>
+                            <input type="time" name="horaFin" value={formData.horaFin} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">URL Fuente (Origen)</label>
-                            <input name="urlFuente" value={formData.urlFuente} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="https://ticketera.com..." />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">URL Fuente (Origen)</label>
+                            <input name="urlFuente" value={formData.urlFuente} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://ticketera.com..." />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-[#2B3674] mb-1">ID Row (Ref Ext)</label>
-                            <input name="idRow" value={formData.idRow} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="ID Externo" />
+                            <label className="block text-sm font-bold text-slate-800 mb-1">ID Row (Ref Ext)</label>
+                            <input name="idRow" value={formData.idRow} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="ID Externo" />
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2 mt-4">
-                        <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} id="activeCheck" className="w-5 h-5 text-[#4318FF] rounded focus:ring-0" />
-                        <label htmlFor="activeCheck" className="text-[#2B3674] font-bold">Banner Activo</label>
+                        <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} id="activeCheck" className="w-5 h-5 text-[#277FA4] rounded focus:ring-0" />
+                        <label htmlFor="activeCheck" className="text-slate-800 font-bold">Banner Activo</label>
                     </div>
 
                     <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl text-[#A3AED0] font-bold hover:bg-gray-100 transition-colors">Cancelar</button>
-                        <button type="submit" className="px-8 py-3 rounded-xl bg-[#4318FF] text-white font-bold hover:bg-[#3311CC] transition-colors shadow-lg">Guardar</button>
+                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl text-slate-500 font-bold hover:bg-slate-50 transition-colors">Cancelar</button>
+                        <button type="submit" className="px-8 py-3 rounded-xl bg-[#277FA4] text-white font-bold hover:bg-[#206a8a] transition-colors shadow-lg">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -276,48 +276,48 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-[20px] w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h2 className="text-[#2B3674] text-xl font-bold">{isEditing ? 'Editar Evento' : 'Nuevo Evento'}</h2>
-                    <button onClick={onClose} className="text-[#A3AED0] hover:text-[#2B3674]">
+                    <h2 className="text-slate-800 text-xl font-bold">{isEditing ? 'Editar Evento' : 'Nuevo Evento'}</h2>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-800">
                         <Icon icon="solar:close-circle-bold" width={24} />
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {/* Basic Info */}
                     <div>
-                        <h3 className="text-[#2B3674] font-bold mb-3">Información Básica</h3>
+                        <h3 className="text-slate-800 font-bold mb-3">Información Básica</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Título *</label>
-                                <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Título del evento" />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Título *</label>
+                                <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Título del evento" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Categoría *</label>
-                                <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]">
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Categoría *</label>
+                                <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800">
                                     {(categories || []).map((c: string) => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div className="flex items-center gap-3">
-                                <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} id="featuredCheck" className="w-5 h-5 text-[#4318FF] rounded" />
-                                <label htmlFor="featuredCheck" className="text-[#2B3674] font-bold">Destacado</label>
+                                <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} id="featuredCheck" className="w-5 h-5 text-[#277FA4] rounded" />
+                                <label htmlFor="featuredCheck" className="text-slate-800 font-bold">Destacado</label>
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Descripción *</label>
-                                <textarea required name="description" value={formData.description} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674] min-h-[80px]" placeholder="Descripción del evento" />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Descripción *</label>
+                                <textarea required name="description" value={formData.description} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800 min-h-[80px]" placeholder="Descripción del evento" />
                             </div>
                         </div>
                     </div>
 
                     {/* Media */}
                     <div className="border-t border-gray-100 pt-6">
-                        <h3 className="text-[#2B3674] font-bold mb-3">Imágenes y Enlaces</h3>
+                        <h3 className="text-slate-800 font-bold mb-3">Imágenes y Enlaces</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">URL Imagen</label>
-                                <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="https://..." />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">URL Imagen</label>
+                                <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://..." />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">URL Entradas</label>
-                                <input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="https://teleticket.com/..." />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">URL Entradas</label>
+                                <input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://teleticket.com/..." />
                             </div>
                         </div>
                     </div>
@@ -325,21 +325,21 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                     {/* Dates - Multiple */}
                     <div className="border-t border-gray-100 pt-6">
                         <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-[#2B3674] font-bold">Fechas ({dates.length})</h3>
-                            <button type="button" onClick={addDate} className="text-[#4318FF] font-bold text-sm hover:underline">+ Agregar fecha</button>
+                            <h3 className="text-slate-800 font-bold">Fechas ({dates.length})</h3>
+                            <button type="button" onClick={addDate} className="text-[#277FA4] font-bold text-sm hover:underline">+ Agregar fecha</button>
                         </div>
                         <div className="space-y-3 max-h-[200px] overflow-y-auto">
                             {dates.map((d, idx) => (
-                                <div key={idx} className="bg-[#F4F7FE] p-3 rounded-xl">
+                                <div key={idx} className="bg-slate-50 p-3 rounded-xl">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-[#2B3674] text-xs font-bold">Fecha #{idx + 1}</span>
+                                        <span className="text-slate-800 text-xs font-bold">Fecha #{idx + 1}</span>
                                         {dates.length > 1 && <button type="button" onClick={() => removeDate(idx)} className="text-[#E31A1A] text-xs font-bold">Quitar</button>}
                                     </div>
                                     <div className="grid grid-cols-4 gap-2">
-                                        <input type="date" value={d.date} onChange={(e) => handleDateChange(idx, 'date', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-[#2B3674] text-sm" />
-                                        <input type="time" value={d.startTime} onChange={(e) => handleDateChange(idx, 'startTime', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-[#2B3674] text-sm" placeholder="Inicio" />
-                                        <input type="time" value={d.endTime} onChange={(e) => handleDateChange(idx, 'endTime', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-[#2B3674] text-sm" placeholder="Fin" />
-                                        <input type="number" value={d.price} onChange={(e) => handleDateChange(idx, 'price', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-[#2B3674] text-sm" placeholder="S/" />
+                                        <input type="date" value={d.date} onChange={(e) => handleDateChange(idx, 'date', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-slate-800 text-sm" />
+                                        <input type="time" value={d.startTime} onChange={(e) => handleDateChange(idx, 'startTime', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-slate-800 text-sm" placeholder="Inicio" />
+                                        <input type="time" value={d.endTime} onChange={(e) => handleDateChange(idx, 'endTime', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-slate-800 text-sm" placeholder="Fin" />
+                                        <input type="number" value={d.price} onChange={(e) => handleDateChange(idx, 'price', e.target.value)} className="px-3 py-2 rounded-lg bg-white border-none outline-none text-slate-800 text-sm" placeholder="S/" />
                                     </div>
                                 </div>
                             ))}
@@ -348,26 +348,26 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
 
                     {/* Location */}
                     <div className="border-t border-gray-100 pt-6">
-                        <h3 className="text-[#2B3674] font-bold mb-3">Ubicación</h3>
+                        <h3 className="text-slate-800 font-bold mb-3">Ubicación</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-3">
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Nombre del lugar</label>
-                                <input name="locationName" value={formData.locationName} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Ej: Teatro Municipal" />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Nombre del lugar</label>
+                                <input name="locationName" value={formData.locationName} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Ej: Teatro Municipal" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Distrito</label>
-                                <input name="district" value={formData.district} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Ej: Miraflores" />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Distrito</label>
+                                <input name="district" value={formData.district} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Ej: Miraflores" />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-[#2B3674] mb-1">Dirección</label>
-                                <input name="address" value={formData.address} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674]" placeholder="Av. ..." />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Dirección</label>
+                                <input name="address" value={formData.address} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Av. ..." />
                             </div>
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl text-[#A3AED0] font-bold hover:bg-gray-100 transition-colors">Cancelar</button>
-                        <button type="submit" disabled={isSubmitting} className={`px-8 py-3 rounded-xl text-white font-bold shadow-lg transition-colors ${isSubmitting ? 'bg-[#4318FF]/60 cursor-not-allowed' : 'bg-[#4318FF] hover:bg-[#3311CC]'}`}>
+                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl text-slate-500 font-bold hover:bg-slate-50 transition-colors">Cancelar</button>
+                        <button type="submit" disabled={isSubmitting} className={`px-8 py-3 rounded-xl text-white font-bold shadow-lg transition-colors ${isSubmitting ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#277FA4] hover:bg-[#206a8a]'}`}>
                             {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Evento'}
                         </button>
                     </div>
@@ -385,10 +385,10 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }: any) => {
                 <div className="w-16 h-16 bg-[#FFEAEA] text-[#E31A1A] rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon icon="solar:trash-bin-trash-bold" width={32} />
                 </div>
-                <h3 className="text-[#2B3674] text-xl font-bold mb-2">{title}</h3>
-                <p className="text-[#A3AED0] mb-6">{message}</p>
+                <h3 className="text-slate-800 text-xl font-bold mb-2">{title}</h3>
+                <p className="text-slate-400 mb-6">{message}</p>
                 <div className="flex justify-center gap-3">
-                    <button onClick={onClose} className="px-6 py-3 rounded-xl text-[#A3AED0] font-bold hover:bg-gray-100 transition-colors">Cancelar</button>
+                    <button onClick={onClose} className="px-6 py-3 rounded-xl text-slate-400 font-bold hover:bg-gray-100 transition-colors">Cancelar</button>
                     <button onClick={onConfirm} className="px-8 py-3 rounded-xl bg-[#E31A1A] text-white font-bold hover:bg-[#CC1010] shadow-lg transition-colors">Sí, Eliminar</button>
                 </div>
             </div>
@@ -581,19 +581,19 @@ export default function AdminPage() {
     };
 
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-[#F4F7FE] text-[#4318FF]">Cargando panel...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50 text-[#277FA4]">Cargando panel...</div>;
     const user = auth as any;
 
     return (
-        <div className="flex h-screen bg-[#F4F7FE] font-sans">
+        <div className="flex h-screen bg-[#F0F4F8] font-sans">
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none border-r border-slate-100 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="h-full flex flex-col">
                     <div className="p-8 pb-4 flex items-center justify-center border-b border-gray-100/50">
                         <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
                             <div className="flex items-center gap-2">
-                                <span className="text-[#2B3674] font-black text-2xl uppercase tracking-wider">INJOY<span className="text-[#4318FF]">PLAN</span></span>
+                                <span className="text-slate-800 font-black text-2xl uppercase tracking-wider">INJOY<span className="text-[#277FA4]">PLAN</span></span>
                             </div>
                         </Link>
                     </div>
@@ -651,21 +651,21 @@ export default function AdminPage() {
                 {/* Topbar */}
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white/50 backdrop-blur-sm p-4 rounded-[20px] sticky top-2 z-30">
                     <div>
-                        <p className="text-[#707EAE] text-sm font-medium">Pages / <span className="text-[#2B3674]">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span></p>
-                        <h1 className="text-[#2B3674] text-3xl font-bold mt-1">
+                        <p className="text-slate-400 text-sm font-medium">Pages / <span className="text-[#277FA4]">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span></p>
+                        <h1 className="text-slate-800 text-3xl font-bold mt-1">
                             {activeTab === 'dashboard' ? 'Main Dashboard' : activeTab === 'users' ? 'Gestión de Usuarios' : activeTab === 'banners' ? 'Gestión de Banners' : 'Gestión de Eventos'}
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white p-2.5 rounded-full shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
-                        <div className="flex items-center bg-[#F4F7FE] rounded-full px-4 py-2">
-                            <Icon icon="solar:magnifer-linear" className="text-[#2B3674]" />
-                            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm text-[#2B3674] ml-2 w-24 md:w-32" />
+                    <div className="flex items-center gap-3 bg-white p-2.5 rounded-full shadow-sm border border-slate-100">
+                        <div className="flex items-center bg-slate-50 rounded-full px-4 py-2">
+                            <Icon icon="solar:magnifer-linear" className="text-[#277FA4]" />
+                            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm text-slate-600 ml-2 w-24 md:w-32" />
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-[#11047A] text-white flex items-center justify-center font-bold overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-[#277FA4] text-white flex items-center justify-center font-bold overflow-hidden">
                             {user?.profile?.avatar ? <img src={user.profile.avatar} className="w-full h-full object-cover" /> : (user?.profile?.firstName?.[0] || 'A')}
                         </div>
-                        <button className="lg:hidden text-[#2B3674] ml-2" onClick={() => setIsSidebarOpen(true)}>
+                        <button className="lg:hidden text-slate-800 ml-2" onClick={() => setIsSidebarOpen(true)}>
                             <Icon icon="solar:hamburger-menu-linear" width={24} />
                         </button>
                     </div>
@@ -685,7 +685,7 @@ export default function AdminPage() {
                             <div className="bg-white p-6 rounded-[20px] shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
-                                        <h3 className="text-[#2B3674] text-xl font-bold">Actividad de Usuarios</h3>
+                                        <h3 className="text-slate-800 text-xl font-bold">Actividad de Usuarios</h3>
                                         <p className="text-[#05CD99] text-sm font-bold mt-1 flex items-center gap-1"><Icon icon="solar:arrow-up-linear" /> (+23) nuevos esta semana</p>
                                     </div>
                                 </div>
@@ -693,13 +693,13 @@ export default function AdminPage() {
                             </div>
 
                             <div className="bg-white p-6 rounded-[20px] shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
-                                <h3 className="text-[#2B3674] text-xl font-bold mb-6">Resumen de Eventos</h3>
+                                <h3 className="text-slate-800 text-xl font-bold mb-6">Resumen de Eventos</h3>
                                 <div className="flex items-center justify-center py-4">
                                     <div className="relative w-48 h-48 rounded-full border-[16px] border-[#F4F7FE] flex items-center justify-center">
                                         <div className="absolute inset-0 rounded-full border-[16px] border-[#4318FF] border-t-transparent border-l-transparent rotate-45"></div>
                                         <div className="text-center">
-                                            <p className="text-[#A3AED0] text-sm">Total</p>
-                                            <h4 className="text-[#2B3674] text-2xl font-bold">{stats.totalEvents}</h4>
+                                            <p className="text-slate-400 text-sm">Total</p>
+                                            <h4 className="text-slate-800 text-2xl font-bold">{stats.totalEvents}</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -713,12 +713,12 @@ export default function AdminPage() {
                     <div className="bg-white p-6 rounded-[20px] shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-[#F4F7FE] rounded-lg">
+                                <thead className="bg-[#f1f5f9] rounded-lg">
                                     <tr>
-                                        <th className="text-left p-4 text-[#A3AED0] font-medium text-xs uppercase rounded-l-lg">Usuario</th>
-                                        <th className="text-left p-4 text-[#A3AED0] font-medium text-xs uppercase">Rol</th>
-                                        <th className="text-left p-4 text-[#A3AED0] font-medium text-xs uppercase">Verificado</th>
-                                        <th className="text-left p-4 text-[#A3AED0] font-medium text-xs uppercase rounded-r-lg">Acciones</th>
+                                        <th className="text-left p-4 text-slate-500 font-medium text-xs uppercase rounded-l-lg">Usuario</th>
+                                        <th className="text-left p-4 text-slate-500 font-medium text-xs uppercase">Rol</th>
+                                        <th className="text-left p-4 text-slate-500 font-medium text-xs uppercase">Verificado</th>
+                                        <th className="text-left p-4 text-slate-500 font-medium text-xs uppercase rounded-r-lg">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -726,17 +726,17 @@ export default function AdminPage() {
                                         <tr key={u.id} className="border-b border-gray-100 last:border-none">
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full flex-shrink-0 bg-blue-100 flex items-center justify-center font-bold text-[#4318FF]">
+                                                    <div className="w-10 h-10 rounded-full flex-shrink-0 bg-blue-100 flex items-center justify-center font-bold text-[#277FA4]">
                                                         {(u.profile?.firstName?.[0] || u.email[0]).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <h5 className="text-[#2B3674] font-bold text-sm">{u.profile?.firstName} {u.profile?.lastName}</h5>
-                                                        <p className="text-[#A3AED0] text-xs">{u.email}</p>
+                                                        <h5 className="text-slate-800 font-bold text-sm">{u.profile?.firstName} {u.profile?.lastName}</h5>
+                                                        <p className="text-slate-400 text-xs">{u.email}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="p-4">
-                                                <span className={`px-3 py-1 rounded-md text-xs font-bold ${u.role === 'ADMIN' ? 'bg-[#4318FF] text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                                <span className={`px-3 py-1 rounded-md text-xs font-bold ${u.role === 'ADMIN' ? 'bg-[#277FA4] text-white' : 'bg-gray-100 text-gray-500'}`}>
                                                     {u.role}
                                                 </span>
                                             </td>
@@ -747,7 +747,7 @@ export default function AdminPage() {
                                                 }
                                             </td>
                                             <td className="p-4">
-                                                <button onClick={() => toggleUserRole(u.id, u.role)} className="text-[#4318FF] font-bold text-sm hover:underline">
+                                                <button onClick={() => toggleUserRole(u.id, u.role)} className="text-[#277FA4] font-bold text-sm hover:underline">
                                                     Cambiar Rol
                                                 </button>
                                             </td>
@@ -763,7 +763,7 @@ export default function AdminPage() {
                 {activeTab === 'banners' && (
                     <div className="space-y-6">
                         <div className="flex justify-end">
-                            <button onClick={openCreateModal} className="bg-[#4318FF] text-white px-6 py-3 rounded-[16px] font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all">
+                            <button onClick={openCreateModal} className="bg-[#277FA4] text-white px-6 py-3 rounded-[16px] font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:bg-[#206a8a] transition-all">
                                 <Icon icon="solar:add-circle-bold" width={20} />
                                 Crear Banner
                             </button>
@@ -779,20 +779,20 @@ export default function AdminPage() {
                                             </span>
                                         </div>
                                     </div>
-                                    <h3 className="text-[#2B3674] font-bold text-lg mb-1">{banner.title}</h3>
+                                    <h3 className="text-slate-800 font-bold text-lg mb-1">{banner.title}</h3>
                                     <div className="flex items-center gap-1 text-[#707EAE] text-xs font-bold mb-1">
                                         <Icon icon="solar:link-circle-bold" />
-                                        <a href={banner.link || '#'} target="_blank" className="hover:underline truncate text-[#2B3674]">{banner.link || 'Sin enlace destino'}</a>
+                                        <a href={banner.link || '#'} target="_blank" className="hover:underline truncate text-slate-800">{banner.link || 'Sin enlace destino'}</a>
                                     </div>
-                                    <p className="text-[#A3AED0] text-xs mb-4 truncate">Fuente: {banner.urlFuente || 'N/A'}</p>
+                                    <p className="text-slate-400 text-xs mb-4 truncate">Fuente: {banner.urlFuente || 'N/A'}</p>
 
                                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                                        <button onClick={() => toggleBannerActive(banner.id, banner.isActive)} className="text-[#4318FF] text-sm font-bold flex items-center gap-1">
+                                        <button onClick={() => toggleBannerActive(banner.id, banner.isActive)} className="text-[#277FA4] text-sm font-bold flex items-center gap-1">
                                             <Icon icon={banner.isActive ? "solar:eye-linear" : "solar:eye-closed-linear"} />
                                             {banner.isActive ? 'Ocultar' : 'Publicar'}
                                         </button>
                                         <div className="flex gap-2">
-                                            <button onClick={() => openEditModal(banner)} className="text-[#4318FF] bg-[#EBEBFF] p-2 rounded-lg hover:bg-[#D6D6FF]">
+                                            <button onClick={() => openEditModal(banner)} className="text-[#277FA4] bg-[#E0F2F7] p-2 rounded-lg hover:bg-[#D6D6FF]">
                                                 <Icon icon="solar:pen-bold" width={18} />
                                             </button>
                                             <button onClick={() => deleteBanner(banner.id)} className="text-[#E31A1A] bg-[#FFEAEA] p-2 rounded-lg hover:bg-[#FFD6D6]">
@@ -812,14 +812,14 @@ export default function AdminPage() {
                         {/* Header with controls */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <p className="text-[#A3AED0] text-sm">{eventsTotal} eventos en total (página {eventsPage} de {Math.ceil(eventsTotal / 24) || 1})</p>
+                                <p className="text-slate-400 text-sm">{eventsTotal} eventos en total (página {eventsPage} de {Math.ceil(eventsTotal / 24) || 1})</p>
                             </div>
                             <div className="flex flex-wrap gap-3 items-center">
                                 {/* Filters */}
                                 <select
                                     value={filterStatus}
                                     onChange={(e: any) => setFilterStatus(e.target.value)}
-                                    className="px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674] font-bold text-sm cursor-pointer"
+                                    className="px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800 font-bold text-sm cursor-pointer"
                                 >
                                     <option value="all">Estado: Todos</option>
                                     <option value="active">Activos</option>
@@ -828,7 +828,7 @@ export default function AdminPage() {
                                 <select
                                     value={filterFeatured}
                                     onChange={(e: any) => setFilterFeatured(e.target.value)}
-                                    className="px-4 py-2 rounded-xl bg-[#F4F7FE] border-none outline-none text-[#2B3674] font-bold text-sm cursor-pointer"
+                                    className="px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800 font-bold text-sm cursor-pointer"
                                 >
                                     <option value="all">Tipo: Todos</option>
                                     <option value="featured">Destacados</option>
@@ -836,16 +836,16 @@ export default function AdminPage() {
                                 </select>
 
                                 {/* View Toggle */}
-                                <div className="flex bg-[#F4F7FE] rounded-xl p-1">
+                                <div className="flex bg-slate-50 rounded-xl p-1">
                                     <button
                                         onClick={() => setEventsViewMode('cards')}
-                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${eventsViewMode === 'cards' ? 'bg-white text-[#4318FF] shadow-sm' : 'text-[#A3AED0]'}`}
+                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${eventsViewMode === 'cards' ? 'bg-white text-[#277FA4] shadow-sm' : 'text-slate-400'}`}
                                     >
                                         <Icon icon="solar:widget-5-bold" width={18} />
                                     </button>
                                     <button
                                         onClick={() => setEventsViewMode('table')}
-                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${eventsViewMode === 'table' ? 'bg-white text-[#4318FF] shadow-sm' : 'text-[#A3AED0]'}`}
+                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${eventsViewMode === 'table' ? 'bg-white text-[#277FA4] shadow-sm' : 'text-slate-400'}`}
                                     >
                                         <Icon icon="solar:list-bold" width={18} />
                                     </button>
@@ -886,7 +886,7 @@ export default function AdminPage() {
                                 </label>
                                 <button
                                     onClick={() => { setEditingEvent(null); setIsEventModalOpen(true); }}
-                                    className="bg-[#4318FF] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all text-sm"
+                                    className="bg-[#277FA4] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all text-sm"
                                 >
                                     <Icon icon="solar:add-circle-bold" width={18} />
                                     Crear
@@ -897,10 +897,10 @@ export default function AdminPage() {
                         {/* Events Content */}
                         {events.length === 0 ? (
                             <div className="bg-white p-6 rounded-[20px] shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
-                                <p className="text-[#A3AED0] text-center py-8">
+                                <p className="text-slate-400 text-center py-8">
                                     No hay eventos en esta página.
                                     <br />
-                                    <span className="text-[#2B3674] font-bold">Crea uno o importa desde Excel.</span>
+                                    <span className="text-slate-800 font-bold">Crea uno o importa desde Excel.</span>
                                 </p>
                             </div>
                         ) : eventsViewMode === 'cards' ? (
@@ -912,21 +912,21 @@ export default function AdminPage() {
                                             {event.imageUrl && <img src={event.imageUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />}
                                             <div className="absolute top-2 right-2 flex gap-1">
                                                 {event.isFeatured && (
-                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-[#4318FF]">★</span>
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-[#277FA4]">★</span>
                                                 )}
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${event.isActive ? 'bg-[#05CD99]' : 'bg-gray-400'}`}>
                                                     {event.isActive ? 'ON' : 'OFF'}
                                                 </span>
                                             </div>
                                         </div>
-                                        <h3 className="text-[#2B3674] font-bold text-sm mb-1 line-clamp-1">{event.title}</h3>
-                                        <p className="text-[#A3AED0] text-xs mb-3 truncate">{event.category || 'Sin cat.'}</p>
+                                        <h3 className="text-slate-800 font-bold text-sm mb-1 line-clamp-1">{event.title}</h3>
+                                        <p className="text-slate-400 text-xs mb-3 truncate">{event.category || 'Sin cat.'}</p>
                                         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                                            <div className="flex items-center gap-2 text-xs text-[#A3AED0]">
+                                            <div className="flex items-center gap-2 text-xs text-slate-400">
 
                                             </div>
                                             <div className="flex gap-1">
-                                                <button onClick={() => { setEditingEvent(event); setIsEventModalOpen(true); }} className="text-[#4318FF] bg-[#EBEBFF] p-1.5 rounded-lg hover:bg-[#D6D6FF]" title="Editar">
+                                                <button onClick={() => { setEditingEvent(event); setIsEventModalOpen(true); }} className="text-[#277FA4] bg-[#E0F2F7] p-1.5 rounded-lg hover:bg-[#D6D6FF]" title="Editar">
                                                     <Icon icon="solar:pen-bold" width={14} />
                                                 </button>
                                                 <button
@@ -934,7 +934,7 @@ export default function AdminPage() {
                                                         await fetch(`${API_URL}/events/${event.id}/toggle-status`, { method: 'PATCH', headers: { Authorization: `Bearer ${getToken()}` } });
                                                         fetchEvents(eventsPage);
                                                     }}
-                                                    className="text-[#4318FF] bg-[#EBEBFF] p-1.5 rounded-lg hover:bg-[#D6D6FF]"
+                                                    className="text-[#277FA4] bg-[#E0F2F7] p-1.5 rounded-lg hover:bg-[#D6D6FF]"
                                                     title={event.isActive ? 'Desactivar' : 'Activar'}
                                                 >
                                                     <Icon icon={event.isActive ? "solar:eye-linear" : "solar:eye-closed-linear"} width={14} />
@@ -955,13 +955,13 @@ export default function AdminPage() {
                             <div className="bg-white p-6 rounded-[20px] shadow-[0px_18px_40px_rgba(112,144,176,0.12)]">
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-[#F4F7FE] rounded-lg">
+                                        <thead className="bg-slate-50 rounded-lg">
                                             <tr>
-                                                <th className="text-left p-3 text-[#A3AED0] font-medium text-xs uppercase rounded-l-lg">Evento</th>
-                                                <th className="text-left p-3 text-[#A3AED0] font-medium text-xs uppercase">Categoría</th>
-                                                <th className="text-left p-3 text-[#A3AED0] font-medium text-xs uppercase">Fechas</th>
-                                                <th className="text-left p-3 text-[#A3AED0] font-medium text-xs uppercase">Estado</th>
-                                                <th className="text-left p-3 text-[#A3AED0] font-medium text-xs uppercase rounded-r-lg">Acciones</th>
+                                                <th className="text-left p-3 text-slate-400 font-medium text-xs uppercase rounded-l-lg">Evento</th>
+                                                <th className="text-left p-3 text-slate-400 font-medium text-xs uppercase">Categoría</th>
+                                                <th className="text-left p-3 text-slate-400 font-medium text-xs uppercase">Fechas</th>
+                                                <th className="text-left p-3 text-slate-400 font-medium text-xs uppercase">Estado</th>
+                                                <th className="text-left p-3 text-slate-400 font-medium text-xs uppercase rounded-r-lg">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -973,13 +973,13 @@ export default function AdminPage() {
                                                                 {event.imageUrl && <img src={event.imageUrl} className="w-full h-full object-cover" />}
                                                             </div>
                                                             <div>
-                                                                <h5 className="text-[#2B3674] font-bold text-sm line-clamp-1">{event.title}</h5>
-                                                                <p className="text-[#A3AED0] text-xs">{event.location?.name || 'Sin ubicación'}</p>
+                                                                <h5 className="text-slate-800 font-bold text-sm line-clamp-1">{event.title}</h5>
+                                                                <p className="text-slate-400 text-xs">{event.location?.name || 'Sin ubicación'}</p>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="p-3"><span className="text-[#2B3674] text-sm">{event.category || '-'}</span></td>
-                                                    <td className="p-3"><span className="text-[#4318FF] font-bold text-sm">{event.dates?.length || 0}</span></td>
+                                                    <td className="p-3"><span className="text-slate-800 text-sm">{event.category || '-'}</span></td>
+                                                    <td className="p-3"><span className="text-[#277FA4] font-bold text-sm">{event.dates?.length || 0}</span></td>
                                                     <td className="p-3">
                                                         <span className={`px-3 py-1 rounded-md text-xs font-bold ${event.isActive ? 'bg-[#E8FFF3] text-[#05CD99]' : 'bg-gray-100 text-gray-500'}`}>
                                                             {event.isActive ? 'Activo' : 'Inactivo'}
@@ -987,13 +987,13 @@ export default function AdminPage() {
                                                     </td>
                                                     <td className="p-3">
                                                         <div className="flex gap-2">
-                                                            <button onClick={() => { setEditingEvent(event); setIsEventModalOpen(true); }} className="text-[#4318FF] font-bold text-sm hover:underline">Editar</button>
+                                                            <button onClick={() => { setEditingEvent(event); setIsEventModalOpen(true); }} className="text-[#277FA4] font-bold text-sm hover:underline">Editar</button>
                                                             <button
                                                                 onClick={async () => {
                                                                     await fetch(`${API_URL}/events/${event.id}/toggle-status`, { method: 'PATCH', headers: { Authorization: `Bearer ${getToken()}` } });
                                                                     fetchEvents(eventsPage);
                                                                 }}
-                                                                className="text-[#A3AED0] font-bold text-sm hover:underline"
+                                                                className="text-slate-400 font-bold text-sm hover:underline"
                                                             >
                                                                 {event.isActive ? 'Desact.' : 'Activar'}
                                                             </button>
@@ -1013,17 +1013,17 @@ export default function AdminPage() {
                                 <button
                                     onClick={() => fetchEvents(eventsPage - 1)}
                                     disabled={eventsPage <= 1}
-                                    className={`px-4 py-2 rounded-xl font-bold text-sm ${eventsPage <= 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#4318FF] text-white hover:bg-[#3311CC]'}`}
+                                    className={`px-4 py-2 rounded-xl font-bold text-sm ${eventsPage <= 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#277FA4] text-white hover:bg-[#3311CC]'}`}
                                 >
                                     Anterior
                                 </button>
-                                <span className="px-4 py-2 bg-[#F4F7FE] rounded-xl font-bold text-[#2B3674]">
+                                <span className="px-4 py-2 bg-slate-50 rounded-xl font-bold text-slate-800">
                                     {eventsPage} / {Math.ceil(eventsTotal / 24)}
                                 </span>
                                 <button
                                     onClick={() => fetchEvents(eventsPage + 1)}
                                     disabled={eventsPage >= Math.ceil(eventsTotal / 24)}
-                                    className={`px-4 py-2 rounded-xl font-bold text-sm ${eventsPage >= Math.ceil(eventsTotal / 24) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#4318FF] text-white hover:bg-[#3311CC]'}`}
+                                    className={`px-4 py-2 rounded-xl font-bold text-sm ${eventsPage >= Math.ceil(eventsTotal / 24) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#277FA4] text-white hover:bg-[#3311CC]'}`}
                                 >
                                     Siguiente
                                 </button>

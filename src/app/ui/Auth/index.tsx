@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactModal from 'react-modal';
 import { Icon } from '@iconify/react';
 import { useAuthStore } from '@/app/zustand/auth';
+import { useFavoriteStore } from '@/app/zustand/favorites';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import Image from 'next/image';
@@ -120,10 +121,13 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
         setSelectedCategories(updatedCategories);
     };
 
-    const handleFinishOnboarding = () => {
+    const handleFinishOnboarding = async () => {
         localStorage.setItem("selectedCategories", JSON.stringify(selectedCategories));
         setOpenAuth(false);
-        window.location.reload();
+        // Trigger favorites sync after onboarding
+        if (useAuthStore.getState().auth) {
+            await useFavoriteStore.getState().getFavorites();
+        }
     };
 
     // Verification
@@ -133,6 +137,45 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
     // Confetti
     const [showConfetti, setShowConfetti] = useState(false);
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+    // Resend Code Countdown
+    const [resendCountdown, setResendCountdown] = useState(0);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (resendCountdown > 0) {
+            timer = setInterval(() => {
+                setResendCountdown((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [resendCountdown]);
+
+    const handleResendCode = async () => {
+        if (resendCountdown > 0) return;
+
+        // Restart countdown
+        setResendCountdown(60);
+
+        try {
+            // Re-trigger signIn to send a new code
+            await signIn({
+                nombre,
+                apellido,
+                email,
+                password,
+                userType: "NORMAL",
+                genero: genero === "Seleccionar" ? undefined : genero,
+                f_nacimiento,
+                terminoCondiciones,
+                politica
+            });
+            // Optional: You could show a small toast here saying "Code resent"
+        } catch (error) {
+            console.error("Error resending code:", error);
+            setResendCountdown(0); // Allow retry if it failed immediately
+        }
+    };
 
     // Slider state
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -228,7 +271,8 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
 
         if (useAuthStore.getState().auth) {
             setOpenAuth(false);
-            window.location.reload();
+            // Trigger favorites sync after login
+            await useFavoriteStore.getState().getFavorites();
         }
     };
 
@@ -341,7 +385,13 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                 <Icon icon="solar:check-circle-bold" className="text-green-500 text-6xl" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-800">¡Bienvenido!</h2>
-                            <p className="text-gray-500">Tu cuenta ha sido verificada correctamente.</p>
+                            <p className="text-gray-500 mb-6">Tu cuenta ha sido verificada correctamente.</p>
+                            <button
+                                onClick={() => setShowConfetti(false)}
+                                className="bg-[#277FA4] hover:bg-[#206a8a] text-white font-bold py-2 px-6 rounded-full transition-colors"
+                            >
+                                Continuar
+                            </button>
                         </motion.div>
                     </div>
                 </div>
@@ -667,7 +717,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                             </div>
                                             <div className="ml-0 text-xs">
                                                 <label htmlFor="terms" className="font-medium text-gray-700">
-                                                    Declaro que he leído y acepto los <a href="/terminos-y-condiciones" target="_blank" className="text-[#007FA4] font-bold hover:underline">Términos y Condiciones</a>, la <a href="/politicas-de-cookies" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de cookies</a> y la <a href="/politicas-de-privacidad" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de privacidad</a> y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma
+                                                    Declaro que he leído y acepto los <a href="/terminos-y-condiciones" target="_blank" className="text-[#007FA4] font-bold hover:underline">Términos y Condiciones</a>, la <a href="/politicas-cookies" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de cookies</a> y la <a href="/politicas-privacidad" target="_blank" className="text-[#007FA4] font-bold hover:underline">Política de privacidad</a> y autorizo el tratamiento de mis datos personales para la prestación del servicio ofrecido por esta plataforma
                                                 </label>
                                             </div>
                                         </div>
@@ -753,7 +803,16 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                     </button>
 
                                     <p className="text-center text-xs text-gray-500 mt-4">
-                                        ¿No recibiste el código? <button type="button" className="text-[#007FA4] font-bold hover:underline">Reenviar</button>
+                                        ¿No recibiste el código?{" "}
+                                        <button
+                                            type="button"
+                                            onClick={handleResendCode}
+                                            disabled={resendCountdown > 0}
+                                            className={`font-bold hover:underline ${resendCountdown > 0 ? "text-gray-400 cursor-not-allowed" : "text-[#007FA4]"
+                                                }`}
+                                        >
+                                            {resendCountdown > 0 ? `Reenviar en ${resendCountdown}s` : "Reenviar"}
+                                        </button>
                                     </p>
                                 </form>
                             )}
@@ -778,9 +837,12 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                             Seleccionar mis gustos
                                         </button>
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 setOpenAuth(false);
-                                                window.location.reload();
+                                                // Trigger favorites sync
+                                                if (useAuthStore.getState().auth) {
+                                                    await useFavoriteStore.getState().getFavorites();
+                                                }
                                             }}
                                             className="w-full text-[#007FA4] font-bold py-2 hover:underline text-sm"
                                         >
@@ -809,7 +871,7 @@ export default function Auth({ openAuth, setOpenAuth, isRegister: isRegisterProp
                                         <p className="text-gray-500 text-sm">Elige tus intereses para personalizar tu experiencia.</p>
                                     </div>
 
-                                    <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2 scrollbar-hide">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2 scrollbar-hide">
                                         {categories?.map((item: Category) => (
                                             <div
                                                 key={item.idCategorias}

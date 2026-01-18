@@ -1,9 +1,11 @@
 "use client";
 
 import Main from "./ui/Main";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { IEventsState, useEventStore } from "./zustand/events";
 import { ICategoriesState, useCategoriesState } from "./zustand/categories";
+import { useFavoriteStore } from "./zustand/favorites";
+import { useAuthStore } from "./zustand/auth";
 import LoadingPage from "./ui/LandingPage";
 import Events from "./ui/Events";
 import EventsFeatured from "./ui/EventsFeatured";
@@ -11,6 +13,7 @@ import EventsFeatured from "./ui/EventsFeatured";
 // import Auth from "./ui/Auth";
 import Categories from "./ui/Categories";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const Auth = dynamic(() => import("./ui/Auth"), { ssr: false });
 const MailBox = dynamic(() => import("./ui/MainBox"));
@@ -25,19 +28,40 @@ export default function Home() {
 
   const { getEvents, getEventsDestacades }: IEventsState = useEventStore();
   const { getCategoriesCount }: ICategoriesState = useCategoriesState();
+  const { getFavorites } = useFavoriteStore();
+  const { auth } = useAuthStore();
+  const pathname = usePathname();
+  const hasMounted = useRef(false);
 
   useEffect(() => {
     window?.scrollTo(0, 0);
   }, []);
 
+  // Fetch events when limit changes
   useEffect(() => {
-    getEvents(limit); // Pasamos el límite actual
-    getEventsDestacades();
+    getEvents(limit);
   }, [limit]);
 
+  // ALWAYS fetch featured events, categories, and sync favorites when Home mounts
+  // This ensures favorites are fresh on every visit
   useEffect(() => {
-    getCategoriesCount();
-  }, []);
+    const fetchData = async () => {
+      // Fetch events (these will include favorite info from backend if user is logged in)
+      await Promise.all([
+        getEventsDestacades(),
+        getCategoriesCount()
+      ]);
+
+      // After events are loaded, sync favorites for logged-in users
+      // This updates the event arrays with correct favorite status
+      if (auth) {
+        await getFavorites();
+      }
+    };
+
+    fetchData();
+    hasMounted.current = true;
+  }, [pathname]); // Refetch when pathname changes (navigation)
 
   useEffect(() => {
     // Accede a localStorage solo en el cliente

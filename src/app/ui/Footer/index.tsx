@@ -44,7 +44,9 @@ const Footer = () => {
               <Link href="/politicas-privacidad">
                 <p className="font-light mt-6 text-[#212121]">Política de privacidad</p>
               </Link>
-              <p className="font-light mt-6 text-[#212121]">Política de cookies</p>
+              <Link href="/politicas-cookies">
+                <p className="font-light mt-6 text-[#212121]">Política de cookies</p>
+              </Link>
               <Link href="/terminos-y-condiciones">
                 <p className="font-light mt-6 text-[#212121]">Términos y condiciones de uso</p>
               </Link>
@@ -83,7 +85,7 @@ const Footer = () => {
               title: 'Políticas',
               links: [
                 { label: 'Política de privacidad', href: '/politicas-privacidad' },
-                { label: 'Política de cookies', href: '#' },
+                { label: 'Política de cookies', href: '/politicas-cookies' },
                 { label: 'Términos y condiciones de uso', href: '/terminos-y-condiciones' },
               ],
             },

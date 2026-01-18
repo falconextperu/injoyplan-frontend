@@ -20,20 +20,39 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
     }
 
 
+    // Check if we're on mobile
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
     const customStyles = {
         content: {
-            top: '50%',
-            left: '50%',
+            // Use relative positioning within flex container
+            position: isMobile ? 'absolute' : 'relative',
+            inset: isMobile ? '0' : 'auto', // Reset inset for desktop to avoid conflicts
+
+            // Reset centering hacks
+            top: 'auto',
+            left: 'auto',
             right: 'auto',
             bottom: 'auto',
-            marginRight: '-50%',
-            borderRadius: "10px",
+            marginRight: '0',
+            transform: 'none',
+
             border: "none",
-            width: "auto",
-            overflow: "hidden",
-            padding: "30px 20px 0px 20px",
+            width: isMobile ? '100%' : 'min(90vw, 600px)',
+            height: isMobile ? '100%' : 'auto',
+            maxHeight: isMobile ? '100%' : '85vh',
+            overflow: "auto",
+            padding: isMobile ? "20px 15px 20px 15px" : "20px 15px 0px 15px",
             background: "#fff",
-            transform: 'translate(-50%, -50%)'
+            borderRadius: isMobile ? '0' : '10px',
+            margin: '0',
+        },
+        overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',            // Enable Flexbox
+            justifyContent: 'center',   // Center horizontally
+            alignItems: 'center'        // Center vertically
         }
     };
 
@@ -46,7 +65,7 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
     console.log(dataFechaOrdenada)
 
     return (
-        <ReactModal ariaHideApp={false} isOpen={showModal} style={customStyles}>
+        <ReactModal ariaHideApp={false} isOpen={showModal} style={customStyles as any}>
             {
                 dataFechaOrdenada.length > 0 && (
                     <motion.div
@@ -66,7 +85,8 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                     <h2>Calendario del evento</h2>
                                 </div>
                                 <div className={styles.date__table}>
-                                    <table>
+                                    {/* Desktop Table */}
+                                    <table className="hidden sm:table w-full">
                                         <thead>
                                             <tr>
                                                 <td>
@@ -84,18 +104,47 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                             {
                                                 dataFechaOrdenada?.map((item: any, index: number) => (
                                                     <tr key={index} className="items-center">
-                                                        <td><p className="mt-4 w-[260px]">{moment(item.FechaInicio).locale('es').utc().format('dddd D MMMM')}</p>
+                                                        <td><p className="mt-4">{moment(item.FechaInicio).locale('es').utc().format('dddd D MMMM')}</p>
                                                             <div>{item.HoraInicio} - {item.HoraFinal}</div>
                                                         </td>
-                                                        <td className="w-[150px]">S/ {Number(item.monto).toFixed(2)}</td>
-                                                        <td className="w-[150px]">
-                                                            <Link className="text-[#9A2A2B] uppercase font-semibold" href={`/evento/${item?.idfecha}/${item?.evento_id}`}>Ver evento</Link>
+                                                        <td>{Number(item.Monto) === 0 ? '¡Gratis!' : `S/ ${Number(item.Monto).toFixed(2)}`}</td>
+                                                        <td>
+                                                            <Link className="text-[#9A2A2B] uppercase font-semibold text-sm" href={`/evento/${item?.idfecha}/${item?.evento_id}`}>Ver evento</Link>
                                                         </td>
                                                     </tr>
                                                 ))
                                             }
                                         </tbody>
                                     </table>
+
+                                    {/* Mobile Cards */}
+                                    <div className="sm:hidden space-y-4 mt-4">
+                                        {
+                                            dataFechaOrdenada?.map((item: any, index: number) => (
+                                                <div key={index} className="border-b border-[#EDEFF5] pb-4">
+                                                    <div className="flex justify-between items-start gap-3">
+                                                        <div className="flex-1">
+                                                            <p className="font-semibold text-[#212121] capitalize">
+                                                                {moment(item.FechaInicio).locale('es').utc().format('dddd D MMMM')}
+                                                            </p>
+                                                            <p className="text-sm text-[#666]">{item.HoraInicio} - {item.HoraFinal}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-[#212121]">
+                                                                {Number(item.Monto) === 0 ? '¡Gratis!' : `S/ ${Number(item.Monto).toFixed(2)}`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Link
+                                                        className="inline-block mt-2 text-[#9A2A2B] uppercase font-semibold text-xs"
+                                                        href={`/evento/${item?.idfecha}/${item?.evento_id}`}
+                                                    >
+                                                        Ver evento →
+                                                    </Link>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
                                 <div className={styles.button__close} onClick={onCloseModal}>
                                     <button className={styles.closeModal}>cerrar</button>

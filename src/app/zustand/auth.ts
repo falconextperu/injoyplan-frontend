@@ -26,6 +26,9 @@ export const useAuthStore = create<IAuthState>((set, _get) => ({
             console.log(resp)
             if (resp.accessToken && resp.user) {
                 localStorage.setItem("token", resp.accessToken);
+                if (resp.refreshToken) {
+                    localStorage.setItem("refreshToken", resp.refreshToken);
+                }
                 set({ auth: resp.user, success: true });
                 return { success: true };
             } else {
@@ -80,6 +83,13 @@ export const useAuthStore = create<IAuthState>((set, _get) => ({
             // Backend returns { accessToken, refreshToken } on success, no "user" object
             if (resp.accessToken) {
                 localStorage.setItem("token", resp.accessToken);
+                if (resp.refreshToken) {
+                    localStorage.setItem("refreshToken", resp.refreshToken);
+                }
+
+                // Fetch user profile immediately
+                await _get().me();
+
                 set({ success: true });
                 return true;
             }

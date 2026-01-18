@@ -14,6 +14,7 @@ import { useEventCreateStore } from '@/app/zustand/eventCreate';
 import type { UserDTO } from '@/app/interfaces/user';
 import SidebarLeft from '@/app/ui/Profile/SidebarLeft';
 import SidebarRight from '@/app/ui/Profile/SidebarRight';
+import { getProfileAssets } from '@/app/utils/profileAssets';
 
 const modalStyles = {
   content: {
@@ -37,12 +38,13 @@ const modalStyles = {
 function UserRow({ user }: { user: UserDTO }) {
   const profile = user.profile;
   const name = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || user.email;
-  const avatar = profile?.avatar || '/svg/us.svg';
+  // Use centralized asset logic
+  const { avatar } = getProfileAssets(profile);
 
   return (
     <Link href={`/usuario/${user.id}`} className="flex items-center gap-3 p-4 border-b border-solid border-[#EDEFF5]">
       <div className="w-10 h-10 rounded-full overflow-hidden border border-solid border-[#EDEFF5] bg-[#F7F7F7]">
-        <Image src={avatar} alt={name} width={40} height={40} className="w-full h-full object-cover" />
+        <img src={avatar} alt={name} className="w-full h-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-bold text-[#212121] truncate">{name}</p>
@@ -92,8 +94,9 @@ export default function UsuarioPage() {
     return fullName || userProfile?.email || 'Usuario';
   }, [profile?.firstName, profile?.lastName, userProfile?.email]);
 
-  const coverSrc = profile?.coverImage || '/images/portada11.png';
-  const avatarSrc = profile?.avatar || '/svg/us.svg';
+  const assets = getProfileAssets(profile);
+  const coverSrc = assets.cover;
+  const avatarSrc = assets.avatar;
 
   const counts = userProfile?._count || {};
   const followersCount = counts.followers ?? 0;
@@ -127,19 +130,19 @@ export default function UsuarioPage() {
 
             <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl overflow-hidden shadow-sm">
               <div className="relative h-[160px] md:h-[220px] bg-[#EEE]">
-                <Image src={coverSrc} alt="Portada" fill className="object-cover" />
+                <img src={coverSrc} alt="Portada" className="w-full h-full object-cover" />
               </div>
 
               <div className="px-6 md:px-8">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                   <div className="-mt-10 md:-mt-14 flex items-end gap-4 relative z-10">
                     <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white bg-[#F7F7F7]">
-                      <Image src={avatarSrc} alt="Avatar" width={112} height={112} className="w-full h-full object-cover" />
+                      <img src={avatarSrc} alt="Avatar" className="w-full h-full object-cover" />
                     </div>
 
                   </div>
 
-                  <div className="mt-4 md:mt-0 flex items-center gap-3 pb-5">
+                  <div className="mt-4 md:mt-4 flex items-center gap-3 pb-5">
                     {String(auth?.id) !== String(id) && (
                       <div className="flex items-center gap-3">
                         <Link

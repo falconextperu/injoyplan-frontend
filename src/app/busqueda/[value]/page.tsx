@@ -48,17 +48,20 @@ const BusquedaEvento = () => {
     const isNumericCategory = !isNaN(paramAsNumber) && paramAsNumber !== 0;
     const isSearchTerm = paramValue && isNaN(paramAsNumber);
 
+    const isAllCategories = paramAsNumber === 0;
+
     // Decode URI component for search terms (e.g., "rock%20latino" -> "rock latino")
     const decodedSearchTerm = isSearchTerm ? decodeURIComponent(paramValue) : '';
 
     const [search, setSearch] = useState<any>(
-        isSearchTerm ? decodedSearchTerm : (isNumericCategory ? '' : valueSearch)
+        isSearchTerm ? decodedSearchTerm : ((isNumericCategory || isAllCategories) ? '' : valueSearch)
     );
 
     const { countsCategories, getCategoriesCount, categoryInfo }: ICategoriesState = useCategoriesState();
 
-    // Initialize category from URL params if available (only if numeric), otherwise fallback to store or 0
-    const initialCategory = isNumericCategory ? paramAsNumber : (categoryInfo !== null ? categoryInfo?.idCategorias : 0);
+    // Initialize category from URL params if available (only if numeric), otherwise fallback to store or 0.
+    // IF isAllCategories (param is 0), FORCE category to 0.
+    const initialCategory = isNumericCategory ? paramAsNumber : (isAllCategories ? 0 : (categoryInfo !== null ? categoryInfo?.idCategorias : 0));
     const [category, setCategory] = useState<number>(initialCategory);
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
     const { auth }: IAuthState = useAuthStore();
@@ -150,7 +153,10 @@ const BusquedaEvento = () => {
 
     const buildSearchData = () => {
         const categoryName = countsCategories?.find((c: any) => Number(c.idCategorias) === Number(category))?.nombreCategoria || '';
-        const formattedDate = date ? moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD') : '';
+        // If no date selected, default to today's date to only show current and future events
+        const formattedDate = date
+            ? moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD')
+            : moment().format('YYYY-MM-DD');
 
         return {
             "categoria": Number(category) !== 0 ? categoryName : undefined,
@@ -162,7 +168,8 @@ const BusquedaEvento = () => {
             "esGratis": filtersMore.esGratis ? true : undefined,
             "enCurso": filtersMore.enCurso ? true : undefined,
             "horaInicio": filtersMore.horaInicio || undefined,
-            "horaFin": filtersMore.horaFin || undefined
+            "horaFin": filtersMore.horaFin || undefined,
+            "excludeFeatured": true, // Always exclude featured in search results as per user preference on "For You" parity
         };
     }
 
@@ -174,7 +181,10 @@ const BusquedaEvento = () => {
         const categorySelected = Number(category) !== 0; // Ensure number comparison
         const categoriesLoaded = countsCategories && countsCategories.length > 0;
 
-        if (categorySelected && !categoriesLoaded) {
+        // If explicitly "Todas las categorías" (0), we don't need to wait for categories to resolve names.
+        if (paramAsNumber === 0 && Number(category) === 0) {
+            // Proceed to search immediately
+        } else if (categorySelected && !categoriesLoaded) {
             // Wait for categories to load only if we need to resolve a name
             return;
         }

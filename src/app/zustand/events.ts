@@ -41,8 +41,36 @@ export interface IEventsState {
 }
 
 // Función para mapear eventos del nuevo backend al formato del frontend antiguo
+// Función para mapear eventos del nuevo backend al formato del frontend antiguo
 export const mapEventFromBackend = (item: any): Event => {
-    const firstDate = item.dates?.[0];
+    // Logic to find the most relevant upcoming date
+    let firstDate = item.dates?.[0];
+
+    if (item.dates && item.dates.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Compare from start of today
+
+        // Sort dates chronologically first to be safe
+        const sortedDates = [...item.dates].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        // Find first date >= today
+        const upcoming = sortedDates.find((d: any) => {
+            const dDate = new Date(d.date);
+            // We can compare strictly or with time, but start of day is usually best for "Active"
+            // Adjust for timezone if needed, but basic comparison works for now
+            return new Date(d.date).getTime() >= today.getTime();
+        });
+
+        if (upcoming) {
+            firstDate = upcoming;
+        } else {
+            // If all are past, keep the last one or first? 
+            // Better to show the last one if all past, or just first. 
+            // Let's stick to first or sorted[0] if no upcoming.
+            firstDate = sortedDates[0];
+        }
+    }
+
     const location = item.location;
 
     return {
@@ -78,9 +106,9 @@ export const mapEventFromBackend = (item: any): Event => {
         estado: item.isActive ? '1' : '0',
         usuario_id: 0,
 
-        // Favoritos
-        favorito: item.favorito || 0,
-        esfavorito: item.favorito ? 1 : 0,
+        // Favoritos - Backend sends: favorito (ID string if favorited), esfavorito (1 or 0)
+        favorito: item.favorito || item.esfavorito || 0,
+        esfavorito: item.esfavorito === 1 || (item.favorito && item.favorito !== 0) ? 1 : 0,
 
         // Entradas externas
         ticketUrls: item.ticketUrls || [],
@@ -119,11 +147,12 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         set({ isLoading: true });
         try {
             console.log(limit)
-            const resp: any = await get(`events?page=1&limit=${limit}&excludeFeatured=true`);
+            // Use public/search to get chronological ordering (by nearest date) and date filtering
+            const resp: any = await get(`events/public/search?page=1&limit=${limit}&excludeFeatured=true`);
             console.log(resp)
-            if (resp?.data && Array.isArray(resp.data)) {
+            if (resp?.eventos && Array.isArray(resp.eventos)) {
                 set({
-                    events: resp.data.map((item: any) => mapEventFromBackend(item)),
+                    events: resp.eventos.map((item: any) => mapEventFromBackend(item)),
                     isLoading: false
                 });
             } else {
@@ -308,20 +337,20 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
                 const dates = resp.dates || [];
 
                 // Construct platform sales data from websiteUrl
-                const plataformaVenta = [];
-                if (resp.websiteUrl) {
-                    plataformaVenta.push({
-                        nombrePlataforma: "Comprar Entrada",
-                        urlWebLugar: resp.websiteUrl,
-                        iconos: "/svg/tickets_gray.svg" // Default icon or map based on URL
-                    });
-                } else if (resp.link) {
-                    plataformaVenta.push({
-                        nombrePlataforma: "Más Info",
-                        urlWebLugar: resp.link,
-                        iconos: "/svg/tickets_gray.svg"
-                    });
-                }
+                const plataformaVenta: any[] = [];
+                // if (resp.websiteUrl) {
+                //     plataformaVenta.push({
+                //         nombrePlataforma: "Comprar Entrada",
+                //         urlWebLugar: resp.websiteUrl,
+                //         iconos: "/svg/tickets_gray.svg" // Default icon or map based on URL
+                //     });
+                // } else if (resp.link) {
+                //     plataformaVenta.push({
+                //         nombrePlataforma: "Más Info",
+                //         urlWebLugar: resp.link,
+                //         iconos: "/svg/tickets_gray.svg"
+                //     });
+                // }
 
                 const transformedData = [{
                     data: [mappedEvent],

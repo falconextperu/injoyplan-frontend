@@ -7,6 +7,7 @@ import { Icon } from '@iconify/react';
 import { useAuthStore } from '@/app/zustand/auth';
 import moment from "moment";
 import 'moment/locale/es';
+import { getProfileAssets } from '@/app/utils/profileAssets';
 import { Event } from "@/app/interfaces/event";
 
 interface FeedCardProps {
@@ -88,7 +89,7 @@ export default function FeedCard({
                 >
                     <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-white">
                         <img
-                            src={owner?.profile?.avatar || '/svg/us.svg'}
+                            src={getProfileAssets(owner?.profile).avatar}
                             alt={owner?.profile?.firstName || 'User'}
                             className="w-full h-full object-cover"
                         />

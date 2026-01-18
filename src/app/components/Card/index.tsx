@@ -20,19 +20,15 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
 
     const { resetEvent } = useEventStore();
 
-    console.log(heartDisabled)
-    console.log(item)
-
     return (
         <motion.div
-            layout
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            {...({ className: `flex flex-col h-[28rem] md:h-auto justify-between w-full mb-10 md:mb-5` }) as any}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            {...({ className: `flex flex-col h-[28rem] md:h-[28rem] justify-between w-full mb-10 md:mb-5` }) as any}
         >
             <Link
+                prefetch={true}
                 onClick={(e) => {
                     if (isDragging) {
                         e.preventDefault();

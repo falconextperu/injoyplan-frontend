@@ -11,6 +11,8 @@ export interface UserProfile {
   phone?: string | null;
   city?: string | null;
   country?: string | null;
+  gender?: string | null;
+  birthDate?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,6 +27,7 @@ export interface UserCounts {
 export interface UserDTO {
   id: string;
   email: string;
+  username?: string;
   userType: UserType;
   isVerified: boolean;
   createdAt?: string;

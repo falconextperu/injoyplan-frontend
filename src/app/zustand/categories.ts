@@ -18,7 +18,7 @@ export interface ICategoriesState {
 export const useCategoriesState = create<ICategoriesState>((set, _get) => ({
     categoryInfo: null,
     countsCategories: null,
-    isLoading: false,
+    isLoading: true, // Start true so skeleton shows until data loads
     categoriesRelations: [],
     categories: [],
     getValueCategory: (category: any) => {

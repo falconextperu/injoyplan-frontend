@@ -25,6 +25,8 @@ import { quicksand, sans } from '../../../../public/fonts';
 import 'moment/locale/es'; // Importa el idioma español
 import ReactModal from 'react-modal';
 import useDebounce from '@/app/hooks/useDebounce';
+import { getProfileAssets } from '@/app/utils/profileAssets';
+
 
 moment.locale('es');
 
@@ -117,7 +119,6 @@ const Header = () => {
     };
 
     const deleteFavorites = (e: any, item: any) => {
-        console.log(item)
         e.stopPropagation();
         deleteFavorite(item)
     }
@@ -180,8 +181,6 @@ const Header = () => {
         me();
     }, [])
 
-    console.log(eventsOnlyFavorites)
-
     // Hide Header on Admin routes
     if (path?.startsWith('/admin')) return null;
 
@@ -189,7 +188,7 @@ const Header = () => {
         <div className="border-b border-solid border-[#EDEFF5] bg-[#F9FAFC]">
             <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />
             <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl xl:px-10 max-w-[998px] h-18 py-3 px-3 mx-auto items-center grid grid-cols-12">
-                <Link className='w-32 md:w-48 col-span-4 md:col-span-3' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
+                <Link prefetch={true} className='w-32 md:w-48 col-span-4 md:col-span-3' href="/"><Image src={logo} alt="logo" className='w-full' height={400} width={300} /></Link>
                 {
                     !path.startsWith("/busqueda") && (
                         <div className={
@@ -403,8 +402,8 @@ const Header = () => {
                 }
 
                 {
-                    path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? (
-                        <div className='col-start-9 col-end-13 flex justify-end items-center'>
+                    (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (
+                        <div className='col-start-9 md:col-start-8 xl:col-start-7 col-end-13 md:col-end-10 flex justify-end items-center mr-4'>
                             <div className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px]'>
                                 <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
                             </div>
@@ -412,32 +411,30 @@ const Header = () => {
                                 <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20} alt='ig' />
                             </div>
                         </div>
-                    ) :
-                        <div className="col-start-9 col-end-13 flex justify-end md:relative items-center gap-2" ref={favoritesRef}>
-                            {/* User Section - Avatar Dropdown (Desktop & Mobile) */}
-                            {auth !== null && (
-                                <div className="relative" ref={refUserDropdown}>
-                                    <button
-                                        onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                                    >
-                                        {/* Avatar */}
-                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#007FA4] to-[#00DFD1] flex items-center justify-center text-white font-bold text-xs md:text-sm overflow-hidden border-2 border-white shadow-md">
-                                            {(() => {
-                                                const a: any = auth;
-                                                const avatarUrl = a?.profile?.avatar || a?.imagenPerfil;
-                                                if (avatarUrl) {
-                                                    return <Image src={avatarUrl} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />;
-                                                }
-                                                const initials = [a?.profile?.firstName?.[0], a?.profile?.lastName?.[0]]
-                                                    .filter(Boolean)
-                                                    .join('')
-                                                    .toUpperCase() || a?.nombre?.[0]?.toUpperCase() || a?.email?.[0]?.toUpperCase() || 'U';
-                                                return initials;
-                                            })()}
-                                        </div>
-                                        {/* User Name */}
-                                        {/* <span className="font-bold text-[#212121] text-sm hidden lg:block max-w-[150px] truncate">
+                    )
+                }
+
+                <div className={`col-start-9 col-end-13 flex justify-end md:relative items-center gap-2 ${path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? 'hidden md:flex' : ''}`} ref={favoritesRef}>
+                    {/* User Section - Avatar Dropdown (Desktop & Mobile) */}
+                    {auth !== null && (
+                        <div className="relative" ref={refUserDropdown}>
+                            <button
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                                {/* Avatar */}
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#007FA4] to-[#00DFD1] flex items-center justify-center text-white font-bold text-xs md:text-sm overflow-hidden border-2 border-white shadow-md">
+                                    {(() => {
+                                        const a: any = auth;
+                                        const profile = a?.profile;
+                                        // Using centralized asset logic
+                                        const { avatar } = getProfileAssets(profile);
+
+                                        return <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />;
+                                    })()}
+                                </div>
+                                {/* User Name */}
+                                {/* <span className="font-bold text-[#212121] text-sm hidden lg:block max-w-[150px] truncate">
                                             {(() => {
                                                 const a: any = auth;
                                                 const fullName = [a?.profile?.firstName, a?.profile?.lastName]
@@ -448,13 +445,13 @@ const Header = () => {
                                                 return fullName || legacy || 'Usuario';
                                             })()}
                                         </span> */}
-                                        {/* <Icon icon="solar:alt-arrow-down-linear" className={`text-[#666] transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} width={16} /> */}
-                                    </button>
+                                {/* <Icon icon="solar:alt-arrow-down-linear" className={`text-[#666] transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} width={16} /> */}
+                            </button>
 
-                                    {/* Dropdown Menu */}
-                                    {isUserDropdownOpen && (
-                                        <div className="absolute right-[-90px] top-14 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
-                                            {/* <div className="px-4 py-3 border-b border-gray-100">
+                            {/* Dropdown Menu */}
+                            {isUserDropdownOpen && (
+                                <div className="absolute right-[-90px] top-14 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fadeIn">
+                                    {/* <div className="px-4 py-3 border-b border-gray-100">
                                                 <p className="font-bold text-[#212121] text-sm truncate">
                                                     {(() => {
                                                         const a: any = auth;
@@ -462,244 +459,243 @@ const Header = () => {
                                                     })()}
                                                 </p>
                                             </div> */}
-                                            <Link onClick={() => setIsUserDropdownOpen(false)} href={`/usuario/${(auth as any)?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                <Icon icon="solar:user-bold" className="text-[#007FA4]" width={20} />
-                                                <span className="text-[#212121] text-sm">Ver perfil</span>
-                                            </Link>
-                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/explorar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={20} />
-                                                <span className="text-[#212121] text-sm">Explorar</span>
-                                            </Link>
+                                    <Link onClick={() => setIsUserDropdownOpen(false)} href={`/usuario/${(auth as any)?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                        <Icon icon="solar:user-bold" className="text-[#007FA4]" width={20} />
+                                        <span className="text-[#212121] text-sm">Ver perfil</span>
+                                    </Link>
+                                    <Link onClick={() => setIsUserDropdownOpen(false)} href="/explorar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                        <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={20} />
+                                        <span className="text-[#212121] text-sm">Explorar</span>
+                                    </Link>
 
-                                            {/* My Events - Only for COMPANY type */}
-                                            {(() => {
-                                                const a: any = auth;
-                                                if (a?.userType === 'COMPANY') {
-                                                    return (
-                                                        <Link onClick={() => setIsUserDropdownOpen(false)} href="/mis-eventos" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                            <Icon icon="solar:calendar-bold" className="text-[#007FA4]" width={20} />
-                                                            <span className="text-[#212121] text-sm">Mis Eventos</span>
-                                                        </Link>
-                                                    );
-                                                }
-                                                return null;
-                                            })()}
+                                    {/* My Events - Only for COMPANY type */}
+                                    {(() => {
+                                        const a: any = auth;
+                                        if (a?.userType === 'COMPANY') {
+                                            return (
+                                                <Link onClick={() => setIsUserDropdownOpen(false)} href="/mis-eventos" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                    <Icon icon="solar:calendar-bold" className="text-[#007FA4]" width={20} />
+                                                    <span className="text-[#212121] text-sm">Mis Eventos</span>
+                                                </Link>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
 
-                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/mensajes" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                <Icon icon="solar:chat-round-dots-bold" className="text-[#007FA4]" width={20} />
-                                                <span className="text-[#212121] text-sm">Mis Mensajes</span>
-                                            </Link>
+                                    <Link onClick={() => setIsUserDropdownOpen(false)} href="/mensajes" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                        <Icon icon="solar:chat-round-dots-bold" className="text-[#007FA4]" width={20} />
+                                        <span className="text-[#212121] text-sm">Mis Mensajes</span>
+                                    </Link>
 
-                                            <Link onClick={() => setIsUserDropdownOpen(false)} href="/perfil/editar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                <Icon icon="solar:settings-bold" className="text-[#007FA4]" width={20} />
-                                                <span className="text-[#212121] text-sm">Configuración</span>
-                                            </Link>
+                                    <Link onClick={() => setIsUserDropdownOpen(false)} href="/perfil/editar" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                        <Icon icon="solar:settings-bold" className="text-[#007FA4]" width={20} />
+                                        <span className="text-[#212121] text-sm">Configuración</span>
+                                    </Link>
 
-                                            {/* Admin Link - Only for ADMIN role */}
-                                            {(() => {
-                                                const a: any = auth;
-                                                if (a?.role === 'ADMIN') {
-                                                    return (
-                                                        <Link onClick={() => setIsUserDropdownOpen(false)} href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
-                                                            <Icon icon="solar:widget-bold" className="text-purple-600" width={20} />
-                                                            <span className="text-purple-600 text-sm font-medium">Ir Administrador</span>
-                                                        </Link>
-                                                    );
-                                                }
-                                                return null;
-                                            })()}
+                                    {/* Admin Link - Only for ADMIN role */}
+                                    {(() => {
+                                        const a: any = auth;
+                                        if (a?.role === 'ADMIN') {
+                                            return (
+                                                <Link onClick={() => setIsUserDropdownOpen(false)} href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
+                                                    <Icon icon="solar:widget-bold" className="text-purple-600" width={20} />
+                                                    <span className="text-purple-600 text-sm font-medium">Ir Administrador</span>
+                                                </Link>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
 
-                                            <div className="border-t border-gray-100 mt-2 pt-2">
-                                                <button
-                                                    onClick={logoutUser}
-                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors w-full text-left"
-                                                >
-                                                    <Icon icon="solar:logout-2-bold" className="text-red-500" width={20} />
-                                                    <span className="text-red-500 text-sm font-medium">Cerrar Sesión</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <div className="border-t border-gray-100 mt-2 pt-2">
+                                        <button
+                                            onClick={logoutUser}
+                                            className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors w-full text-left"
+                                        >
+                                            <Icon icon="solar:logout-2-bold" className="text-red-500" width={20} />
+                                            <span className="text-red-500 text-sm font-medium">Cerrar Sesión</span>
+                                        </button>
+                                    </div>
                                 </div>
                             )}
-
-
-
-                            {/* Login Button (Not Authenticated) */}
-                            {auth === null && !isMobile && (
-                                <button onClick={() => setOpenAuth(true)}
-                                    className='text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
-                                >Ingresar</button>
-                            )}
-                            {auth === null && isMobile && (
-                                <button onClick={() => setOpenAuth(true)}
-                                    className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
-                                ><Icon icon="solar:user-bold" width="10" height="10" /></button>
-                            )}
-
-                            {/* Explore Icon (Desktop & Mobile) */}
-                            <Link
-                                href="/explorar"
-                                className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
-                                title="Explorar"
-                            >
-                                <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
-                            </Link>
-
-                            {/* Mobile Search */}
-                            {isMobile && !path.startsWith('/busqueda') && (
-                                <Image onClick={() => {
-                                    setIsOpenEvent(true);
-                                    setSearch(""); // Clear local input (Correct function is setSearch)
-                                    resetEventBySearch(); // Clear zustand results
-                                }} className='' src={lupaMobile} alt="lupa" width={30} height={30} />
-                            )}
-                            {
-                                isOpenFavorite ? (
-                                    <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                                ) :
-                                    (
-                                        <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                                    )
-                            }
-
-
-                            <div className='md:hidden overflow-y-hidden'>
-                                {
-                                    isOpenFavorite && isMobile && (
-                                        <ReactModal
-                                            isOpen
-                                            ariaHideApp={false}
-                                            className={"p-0 bg-[#fff] overflow-hidden overflow-x-auto h-[100vh] blur-0"}
-                                        >
-                                            <ul className='overflow-y-hidden'>
-                                                <div className='pr-6'>
-                                                    <div className='sticky top-0 bg-[#fff] z-50'>
-                                                        <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3  px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
-                                                        {
-                                                            isMobile && <div className={styles.closeFavorites}>
-                                                                <Icon className='cursor-pointer absolute right-4 top-4' width={24} icon="ic:baseline-close" onClick={closeModal} />
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                    <div className="p-5">
-                                                        {
-                                                            eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
-                                                                <div className="flex mt-2 mb-8 last:mb-0 relative w-full cursor-pointer group"
-                                                                    onClick={() => navigateEvent(item)}
-                                                                    key={index}
-                                                                    onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
-                                                                    onMouseLeave={() => setHoveredFavoriteId(null)}
-
-                                                                >
-                                                                    <div className='w-[45px] h-[35px] mr-4'>
-                                                                        <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
-                                                                        <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
-                                                                        <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
-                                                                    </div>
-
-                                                                    {
-                                                                        isMobile && <Icon className='absolute right-0 top-0' icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
-                                                                    }
-
-                                                                    <Icon
-                                                                        className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"
-                                                                            }`}
-                                                                        icon="ic:baseline-close"
-                                                                        onClick={(e: any) => {
-                                                                            e.stopPropagation(); // Evita que el evento alcance otros handlers
-                                                                            deleteFavorites(e, item);
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            )) :
-
-                                                                <div className='p-10 px-16 py-20 relative z-50 text-center mx-auto flex justify-center'>
-                                                                    <div>
-                                                                        <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60} />
-                                                                        <strong className='text-[16px]'>Aún no tienes eventos favoritos</strong>
-                                                                        <p className='text-[14px] mt-2'>En cuanto los tengas, podrás verlos aquí</p>
-                                                                    </div>
-                                                                </div>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </ul>
-                                        </ReactModal>
-                                    )
-                                }
-                            </div>
-
-                            {
-                                isOpenFavorite && (
-                                    <div
-                                        ref={refFavorite}
-                                        className={"hidden md:block md:left-auto left-0 w-full md:w-[430px] overflow-hidden md:overflow-y-auto md:max-h-auto max-h-[400px] overflow-y-scroll md:shadow-custom-2 bg-[#fff] md:rounded-xl md:top-14 absolute md:right-0 z-50 md:after:absolute md:after:top-[-10px] md:after:right-[10px] md:after:mx-auto md:after:w-[1px] md:after:border-b-[11px] md:after:border-b-white md:after:border-l-[11px] md:after:border-l-transparent md:after:border-r-[11px] md:after:border-r-transparent md:after:content-['']"}
-                                    >
-                                        <ul>
-                                            <div>
-                                                <div>
-                                                    <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3 px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
-                                                    {
-                                                        isMobile && <div>
-                                                            <Icon className='cursor-pointer absolute right-4 top-4' width={24} icon="ic:baseline-close" onClick={() => setIsOpenFavorite(false)} />
-                                                        </div>
-                                                    }
-                                                </div>
-                                                <div className="p-5">
-                                                    {
-                                                        eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
-                                                            <div className="flex mt-2 mb-8 last:mb-0 relative w-full cursor-pointer group"
-                                                                onClick={() => navigateEvent(item)}
-                                                                key={index}
-                                                                onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
-                                                                onMouseLeave={() => setHoveredFavoriteId(null)}
-
-                                                            >
-                                                                <div className='w-[45px] h-[35px] mr-4'>
-                                                                    <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
-                                                                </div>
-                                                                <div>
-                                                                    <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
-                                                                    <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
-                                                                    <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
-                                                                </div>
-
-                                                                {
-                                                                    isMobile && <Icon className='absolute right-0 top-0' icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
-                                                                }
-
-                                                                <Icon
-                                                                    className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"
-                                                                        }`}
-                                                                    icon="ic:baseline-close"
-                                                                    onClick={(e: any) => {
-                                                                        e.stopPropagation(); // Evita que el evento alcance otros handlers
-                                                                        deleteFavorites(e, item);
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        )) :
-
-                                                            <div className='p-10 px-16 py-20 relative z-50 text-center mx-auto flex justify-center'>
-                                                                <div>
-                                                                    <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60} />
-                                                                    <strong className='text-[16px]'>Aún no tienes eventos favoritos</strong>
-                                                                    <p className='text-[14px] mt-2'>En cuanto los tengas, podrás verlos aquí</p>
-                                                                </div>
-                                                            </div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </ul>
-                                    </div>
-                                )
-                            }
                         </div>
-                }
+                    )}
+
+
+
+                    {/* Login Button (Not Authenticated) */}
+                    {auth === null && !isMobile && (
+                        <button onClick={() => setOpenAuth(true)}
+                            className='text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
+                        >Ingresar</button>
+                    )}
+                    {auth === null && isMobile && (
+                        <button onClick={() => setOpenAuth(true)}
+                            className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
+                        ><Icon icon="solar:user-bold" width="10" height="10" /></button>
+                    )}
+
+                    {/* Explore Icon (Desktop & Mobile) */}
+                    <Link
+                        href="/explorar"
+                        className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        title="Explorar"
+                    >
+                        <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
+                    </Link>
+
+                    {/* Mobile Search */}
+                    {isMobile && !path.startsWith('/busqueda') && (
+                        <Image onClick={() => {
+                            setIsOpenEvent(true);
+                            setSearch(""); // Clear local input (Correct function is setSearch)
+                            resetEventBySearch(); // Clear zustand results
+                        }} className='' src={lupaMobile} alt="lupa" width={30} height={30} />
+                    )}
+                    {
+                        isOpenFavorite ? (
+                            <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                        ) :
+                            (
+                                <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                            )
+                    }
+
+
+                    <div className='md:hidden overflow-y-hidden'>
+                        {
+                            isOpenFavorite && isMobile && (
+                                <ReactModal
+                                    isOpen
+                                    ariaHideApp={false}
+                                    className={"p-0 bg-[#fff] overflow-hidden overflow-x-auto h-[100vh] blur-0"}
+                                >
+                                    <ul className='overflow-y-hidden'>
+                                        <div className='pr-6'>
+                                            <div className='sticky top-0 bg-[#fff] z-50'>
+                                                <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3  px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
+                                                {
+                                                    isMobile && <div className={styles.closeFavorites}>
+                                                        <Icon className='cursor-pointer absolute right-4 top-4' width={24} icon="ic:baseline-close" onClick={closeModal} />
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div className="p-5">
+                                                {
+                                                    eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
+                                                        <div className="flex mt-2 mb-8 last:mb-0 relative w-full cursor-pointer group"
+                                                            onClick={() => navigateEvent(item)}
+                                                            key={index}
+                                                            onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
+                                                            onMouseLeave={() => setHoveredFavoriteId(null)}
+
+                                                        >
+                                                            <div className='w-[45px] h-[35px] mr-4'>
+                                                                <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
+                                                            </div>
+                                                            <div>
+                                                                <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
+                                                                <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
+                                                                <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
+                                                            </div>
+
+                                                            {
+                                                                isMobile && <Icon className='absolute right-0 top-0' icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
+                                                            }
+
+                                                            <Icon
+                                                                className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"
+                                                                    }`}
+                                                                icon="ic:baseline-close"
+                                                                onClick={(e: any) => {
+                                                                    e.stopPropagation(); // Evita que el evento alcance otros handlers
+                                                                    deleteFavorites(e, item);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )) :
+
+                                                        <div className='p-10 px-16 py-20 relative z-50 text-center mx-auto flex justify-center'>
+                                                            <div>
+                                                                <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60} />
+                                                                <strong className='text-[16px]'>Aún no tienes eventos favoritos</strong>
+                                                                <p className='text-[14px] mt-2'>En cuanto los tengas, podrás verlos aquí</p>
+                                                            </div>
+                                                        </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </ul>
+                                </ReactModal>
+                            )
+                        }
+                    </div>
+
+                    {
+                        isOpenFavorite && (
+                            <div
+                                ref={refFavorite}
+                                className={"hidden md:block md:left-auto left-0 w-full md:w-[430px] overflow-hidden md:overflow-y-auto md:max-h-auto max-h-[400px] overflow-y-scroll md:shadow-custom-2 bg-[#fff] md:rounded-xl md:top-14 absolute md:right-0 z-50 md:after:absolute md:after:top-[-10px] md:after:right-[10px] md:after:mx-auto md:after:w-[1px] md:after:border-b-[11px] md:after:border-b-white md:after:border-l-[11px] md:after:border-l-transparent md:after:border-r-[11px] md:after:border-r-transparent md:after:content-['']"}
+                            >
+                                <ul>
+                                    <div>
+                                        <div>
+                                            <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3 px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
+                                            {
+                                                isMobile && <div>
+                                                    <Icon className='cursor-pointer absolute right-4 top-4' width={24} icon="ic:baseline-close" onClick={() => setIsOpenFavorite(false)} />
+                                                </div>
+                                            }
+                                        </div>
+                                        <div className="p-5">
+                                            {
+                                                eventsOnlyFavorites.length > 0 ? eventsOnlyFavorites?.map((item: any, index: number) => (
+                                                    <div className="flex mt-2 mb-8 last:mb-0 relative w-full cursor-pointer group"
+                                                        onClick={() => navigateEvent(item)}
+                                                        key={index}
+                                                        onMouseEnter={() => setHoveredFavoriteId(item.idfavoritos)}
+                                                        onMouseLeave={() => setHoveredFavoriteId(null)}
+
+                                                    >
+                                                        <div className='w-[45px] h-[35px] mr-4'>
+                                                            <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
+                                                        </div>
+                                                        <div>
+                                                            <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utc().format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
+                                                            <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
+                                                            <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
+                                                        </div>
+
+                                                        {
+                                                            isMobile && <Icon className='absolute right-0 top-0' icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
+                                                        }
+
+                                                        <Icon
+                                                            className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"
+                                                                }`}
+                                                            icon="ic:baseline-close"
+                                                            onClick={(e: any) => {
+                                                                e.stopPropagation(); // Evita que el evento alcance otros handlers
+                                                                deleteFavorites(e, item);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )) :
+
+                                                    <div className='p-10 px-16 py-20 relative z-50 text-center mx-auto flex justify-center'>
+                                                        <div>
+                                                            <Image src={calendar} alt="" className='mb-6 text-center mx-auto' width={60} height={60} />
+                                                            <strong className='text-[16px]'>Aún no tienes eventos favoritos</strong>
+                                                            <p className='text-[14px] mt-2'>En cuanto los tengas, podrás verlos aquí</p>
+                                                        </div>
+                                                    </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                        )
+                    }
+                </div>
             </div>
         </div>
     )

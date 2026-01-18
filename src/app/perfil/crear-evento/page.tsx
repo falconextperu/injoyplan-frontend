@@ -48,7 +48,7 @@ function CrearEventoContent() {
   const [description, setDescription] = useState('');
 
   const [imageUrl, setImageUrl] = useState('');
-  const [bannerUrl, setBannerUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [ticketUrls, setTicketUrls] = useState<{ name: string; url: string }[]>([{ name: '', url: '' }]);
   const [isFeatured, setIsFeatured] = useState(false);
 
@@ -93,13 +93,10 @@ function CrearEventoContent() {
         setDescription(data.description || '');
         setCategory(data.category || '');
         setImageUrl(data.imageUrl || '');
-        setBannerUrl(data.bannerUrl || '');
+        setWebsiteUrl(data.websiteUrl || data.bannerUrl || '');
         // Ticket URLs
         if (data.ticketUrls && Array.isArray(data.ticketUrls) && data.ticketUrls.length > 0) {
           setTicketUrls(data.ticketUrls);
-        } else if (data.websiteUrl) {
-          // Backwards compatibility: convert single URL to array
-          setTicketUrls([{ name: 'Entradas', url: data.websiteUrl }]);
         } else {
           setTicketUrls([{ name: '', url: '' }]);
         }
@@ -289,10 +286,10 @@ function CrearEventoContent() {
                 />
               </div>
               <div>
-                <label className="text-[12px] font-bold text-[#666]">Banner (URL)</label>
+                <label className="text-[12px] font-bold text-[#666]">URL Fuente Principal</label>
                 <input
-                  value={bannerUrl}
-                  onChange={(e) => setBannerUrl(e.target.value)}
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
                   className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
                   placeholder="https://..."
                 />
@@ -417,7 +414,7 @@ function CrearEventoContent() {
                         placeholder="0"
                       />
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="text-[12px] font-bold text-[#666]">Capacidad</label>
                       <input
                         type="number"
@@ -426,7 +423,7 @@ function CrearEventoContent() {
                         className="w-full mt-2 bg-white outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl"
                         placeholder="100"
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               ))}
@@ -548,7 +545,7 @@ function CrearEventoContent() {
                   description: description.trim(),
                   category,
                   imageUrl: imageUrl.trim() || undefined,
-                  bannerUrl: bannerUrl.trim() || undefined,
+                  websiteUrl: websiteUrl.trim() || undefined,
                   ticketUrls: ticketUrls.filter(t => t.url.trim()).map(t => ({ name: t.name.trim() || 'Entradas', url: t.url.trim() })),
                   isFeatured,
                   dates: validDates.map((x) => ({

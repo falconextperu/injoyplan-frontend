@@ -23,8 +23,8 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
 
         // Si es 401 y había un token, intentar refresh
         if (response.status === 401) {
-            const token = localStorage.getItem('tokenRP');
-            const refreshToken = localStorage.getItem('refreshTokenRP');
+            const token = localStorage.getItem('token');
+            const refreshToken = localStorage.getItem('refreshToken');
             const hasAuthHeader = options?.headers?.['Authorization'];
 
             // Solo intentar refresh si había un token en la petición original
@@ -32,22 +32,27 @@ async function fetchData<T>(url: string, options?: any): Promise<T> {
                 console.log("Intentando refrescar token...")
                 const refreshResp: any = await refreshTokens(token, refreshToken);
 
-                if (refreshResp.code === 1) {
-                    // Token refrescado con éxito
-                    const newToken = refreshResp.data.token;
-                    localStorage.setItem('tokenRP', newToken);
-                    localStorage.setItem('refreshTokenRP', refreshResp.data.refreshToken);
+                if (refreshResp.code === 1 || (refreshResp.accessToken && refreshResp.refreshToken)) {
+                    // Token refrescado con éxito (backend might return data wrapper or direct object)
+                    const newToken = refreshResp.data?.token || refreshResp.accessToken;
+                    const newRefresh = refreshResp.data?.refreshToken || refreshResp.refreshToken;
 
-                    // Actualizar header y reintentar
-                    if (options && options.headers) {
-                        options.headers['Authorization'] = `Bearer ${newToken}`;
+                    if (newToken) {
+                        localStorage.setItem('token', newToken);
+                        if (newRefresh) localStorage.setItem('refreshToken', newRefresh);
+
+                        // Actualizar header y reintentar
+                        if (options && options.headers) {
+                            options.headers['Authorization'] = `Bearer ${newToken}`;
+                        }
+                        return await fetchData<T>(url, options);
                     }
-                    return await fetchData<T>(url, options);
                 } else {
                     // Refresh falló, limpiar tokens
-                    localStorage.removeItem('tokenRP');
-                    localStorage.removeItem('refreshTokenRP');
-                    throw new Error('No se pudo refrescar el token de acceso');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    // throw new Error('No se pudo refrescar el token de acceso');
+                    // Better to let it fail or reload page? For now just throw/return error.
                 }
             }
             // Si no había token, es un endpoint público que requiere auth - devolver error normal

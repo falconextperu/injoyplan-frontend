@@ -10,6 +10,11 @@ export interface ProfileUpdateDto {
   phone?: string;
   city?: string;
   country?: string;
+  gender?: string;
+  birthDate?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 }
 
 export interface IProfileState {

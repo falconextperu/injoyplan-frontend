@@ -3,10 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 
 import Auth from '@/app/ui/Auth';
 import { useAuthStore } from '@/app/zustand/auth';
 import { useProfileStore } from '@/app/zustand/profile';
+import useAlertStore from '@/app/zustand/alert';
 import SidebarLeft from '@/app/ui/Profile/SidebarLeft';
 import SidebarRight from '@/app/ui/Profile/SidebarRight';
 import { Icon } from '@iconify/react';
@@ -14,6 +16,7 @@ import { Icon } from '@iconify/react';
 export default function EditarPerfilPage() {
   const { auth, me } = useAuthStore();
   const { myProfile, getMyProfile, updateMyProfile, uploadAvatar, uploadCover, isLoading, error } = useProfileStore();
+  const { alert } = useAlertStore();
 
   const [openAuth, setOpenAuth] = useState(false);
 
@@ -26,27 +29,63 @@ export default function EditarPerfilPage() {
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
 
+  // New Fields
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Note: gender and birthDate should be in profile, but if schema update isn't applied yet, they might be undefined
+  const [gender, setGender] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+
   useEffect(() => {
     me();
     getMyProfile();
   }, []);
 
   useEffect(() => {
-    setFirstName(profile?.firstName || '');
-    setLastName(profile?.lastName || '');
-    setDescription(profile?.description || '');
-    setPhone(profile?.phone || '');
-    setCity(profile?.city || '');
-    setCountry(profile?.country || '');
-  }, [profile?.firstName, profile?.lastName, profile?.description, profile?.phone, profile?.city, profile?.country]);
+    // User fields are at root of myProfile
+    if (myProfile) {
+      setEmail(myProfile.email || '');
+      setUsername(myProfile.username || '');
+    }
+
+    // Profile fields
+    if (profile) {
+      setFirstName(profile.firstName || '');
+      setLastName(profile.lastName || '');
+      setDescription(profile.description || '');
+      setPhone(profile.phone || '');
+      setCity(profile.city || '');
+      setCountry(profile.country || '');
+      setGender(profile.gender || '');
+      setBirthDate(profile.birthDate ? moment.utc(profile.birthDate).format('YYYY-MM-DD') : '');
+    }
+  }, [myProfile, profile]);
 
   const displayName = useMemo(() => {
     const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
     return fullName || myProfile?.email || 'Editar perfil';
   }, [firstName, lastName, myProfile?.email]);
 
-  const avatarSrc = profile?.avatar || '/svg/us.svg';
-  const coverSrc = profile?.coverImage || '/images/portada11.png';
+  const avatarSrc = useMemo(() => {
+    if (profile?.avatar) return profile.avatar;
+    // Local 3D Avatars
+    if (gender === 'Male') return '/images/avatar_male.png';
+    if (gender === 'Female') return '/images/avatar_female.png';
+    return '/images/avatar_male.png'; // Fallback
+  }, [profile?.avatar, gender]);
+
+  const coverSrc = profile?.coverImage || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop'; // Sleek Gradient Blue/Purple Professional background
+
+  // Generate default username if empty
+  useEffect(() => {
+    if (myProfile && !myProfile.username && !username) {
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const baseName = (myProfile.email.split('@')[0] || 'user').replace(/[^a-zA-Z0-9]/g, '');
+      setUsername(`${baseName}${randomSuffix}`);
+    }
+  }, [myProfile]);
 
   if (!auth) {
     return (
@@ -92,7 +131,11 @@ export default function EditarPerfilPage() {
 
             <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl overflow-hidden shadow-sm">
               <div className="relative h-[160px] md:h-[220px] bg-[#EEE]">
-                <Image src={coverSrc} alt="Portada" fill className="object-cover" />
+                <img
+                  src={coverSrc}
+                  alt="Portada"
+                  className="w-full h-full object-cover"
+                />
                 <label className="absolute right-4 bottom-4 bg-white/90 border border-solid border-[#EDEFF5] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
                   Cambiar portada
                   <input
@@ -111,7 +154,11 @@ export default function EditarPerfilPage() {
               <div className="px-6 md:px-8 pb-8">
                 <div className="-mt-10 md:-mt-14 flex items-end gap-4 relative z-10">
                   <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white bg-[#F7F7F7]">
-                    <Image src={avatarSrc} alt="Avatar" width={112} height={112} className="w-full h-full object-cover" />
+                    <img
+                      src={avatarSrc}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <label className="bg-white border border-solid border-[#007FA4] text-[#007FA4] font-bold px-4 py-2 rounded-full cursor-pointer">
                     Cambiar avatar
@@ -129,22 +176,78 @@ export default function EditarPerfilPage() {
                 </div>
 
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-[#444]">Nombres</label>
+                  <div className="md:col-span-2">
+                    <label className="font-bold text-[#444]">Nombre Completo</label>
                     <input
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      value={`${firstName} ${lastName}`.trim()}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const parts = val.split(' ');
+                        setFirstName(parts[0] || '');
+                        setLastName(parts.slice(1).join(' ') || '');
+                      }}
+                      placeholder="Nombre y Apellido"
                       className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
                       type="text"
                     />
                   </div>
+
+                  {/* Public Fields Group */}
                   <div>
-                    <label className="font-bold text-[#444]">Apellidos</label>
+                    <label className="font-bold text-[#444]">Nombre de usuario</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+                      <input
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 pl-8 rounded-md"
+                        type="text"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-[#444]">Correo electrónico</label>
                     <input
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
-                      type="text"
+                      type="email"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="font-bold text-[#444]">Contraseña</label>
+                    <input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Escribe una nueva contraseña para cambiarla"
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="password"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-[#444]">Género</label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="Male">Masculino</option>
+                      <option value="Female">Femenino</option>
+                      <option value="Other">Otro</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-[#444]">Fecha de nacimiento</label>
+                    <input
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#ddd] p-3 rounded-md"
+                      type="date"
                     />
                   </div>
 
@@ -210,7 +313,16 @@ export default function EditarPerfilPage() {
                         phone: phone || undefined,
                         city: city || undefined,
                         country: country || undefined,
+                        username: username || undefined,
+                        email: email || undefined,
+                        password: password || undefined,
+                        gender: gender || undefined,
+                        birthDate: birthDate || undefined,
                       });
+                      const { error } = useProfileStore.getState();
+                      if (!error) {
+                        alert('Perfil actualizado correctamente', 'success');
+                      }
                     }}
                     className={
                       isLoading
@@ -233,7 +345,7 @@ export default function EditarPerfilPage() {
 
           {/* Right Sidebar */}
           <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
-            <SidebarRight myProfile={myProfile} isLoading={isLoading} />
+            <SidebarRight myProfile={myProfile} isLoading={isLoading} previewAvatar={avatarSrc} previewCover={coverSrc} />
           </div>
 
         </div>

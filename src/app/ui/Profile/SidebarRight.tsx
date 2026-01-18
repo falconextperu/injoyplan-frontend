@@ -3,14 +3,17 @@ import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { UserDTO } from '@/app/interfaces/user';
+import { getProfileAssets } from '@/app/utils/profileAssets';
 import CreatePostModal from './CreatePostModal';
 
 interface Props {
     myProfile: UserDTO | null;
     isLoading: boolean;
+    previewAvatar?: string;
+    previewCover?: string;
 }
 
-export default function SidebarRight({ myProfile, isLoading }: Props) {
+export default function SidebarRight({ myProfile, isLoading, previewAvatar, previewCover }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     if (isLoading || !myProfile) {
@@ -25,7 +28,12 @@ export default function SidebarRight({ myProfile, isLoading }: Props) {
 
     const { profile, email, _count } = myProfile;
     const displayName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || email;
-    const avatarSrc = profile?.avatar || '/svg/us.svg';
+
+    // Use centralised asset logic
+    const assets = getProfileAssets(profile);
+    const avatarSrc = previewAvatar || assets.avatar;
+    const coverDest = previewCover || assets.cover;
+
     const description = profile?.description || 'Sin descripción';
 
     // Stats
@@ -39,23 +47,18 @@ export default function SidebarRight({ myProfile, isLoading }: Props) {
         <div className="bg-white rounded-2xl border border-[#EDEFF5] overflow-hidden">
             {/* Cover Image */}
             <div className="relative h-24 w-full bg-gray-200">
-                {myProfile?.profile?.coverImage && (
-                    <Image
-                        src={myProfile.profile.coverImage}
-                        alt="Cover"
-                        fill
-                        className="object-cover"
-                    />
-                )}
+                <img
+                    src={coverDest}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                />
             </div>
 
             <div className="flex flex-col items-center text-center px-6 pb-6">
                 <div className="-mt-10 w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm mb-4 bg-[#F7F7F7] relative z-10">
-                    <Image
+                    <img
                         src={avatarSrc}
                         alt={displayName}
-                        width={96}
-                        height={96}
                         className="w-full h-full object-cover"
                     />
                 </div>

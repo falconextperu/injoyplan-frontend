@@ -57,16 +57,6 @@ export default function SidebarLeft() {
                     </Link>
                 ))}
             </nav>
-
-            <div className="mt-10 pt-6 border-t border-[#EDEFF5]">
-                <button
-                    onClick={onLogout}
-                    className="flex items-center gap-4 text-[#FF4D4D] hover:text-[#D93636] transition-colors w-full"
-                >
-                    <Icon icon="solar:logout-2-bold" width={24} />
-                    <span className="font-bold text-sm">Cerrar Sesión</span>
-                </button>
-            </div>
         </div>
     );
 }

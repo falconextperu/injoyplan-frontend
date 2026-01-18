@@ -10,7 +10,7 @@ export interface IBannersState {
 
 export const useBannersStore = create<IBannersState>((set, _get) => ({
     banners: [],
-    isLoading: false,
+    isLoading: true, // Start true so skeleton shows until data loads
     getBanners: async () => {
         set({ isLoading: true });
         try {

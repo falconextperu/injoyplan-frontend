@@ -23,6 +23,9 @@ const Main = () => {
         navigate.push(`/busqueda/${item?.idCategorias}`)
     }
 
+    // Show category skeletons while loading or if no categories yet
+    const showCategorySkeleton = isLoading || (!isLoading && (!countsCategories || countsCategories.length === 0));
+
     return (
         <div className="">
             <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl max-w-[998px] px-0 mx-auto grid grid-cols-12 gap-10 xl:px-10">

@@ -90,8 +90,8 @@ const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: s
     };
 
     return (
-        <div className={`flex flex-col gap-3 ${depth > 0 ? 'ml-10 border-l-2 border-[#EDEFF5] pl-4' : ''}`}>
-            <div className="flex items-start gap-3">
+        <div className={`flex flex-col gap-3 ${depth > 0 ? 'ml-4 sm:ml-10 border-l-2 border-[#EDEFF5] pl-3 sm:pl-4' : ''}`}>
+            <div className="flex items-start gap-2 sm:gap-3">
                 <Link href={ownerHref} className="block w-10 h-10 rounded-full overflow-hidden border border-[#EDEFF5] bg-[#F7F7F7] flex-shrink-0 hover:opacity-80 transition-opacity">
                     <img src={avatar} alt={name} className="w-full h-full object-cover" />
                 </Link>
@@ -117,21 +117,21 @@ const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: s
                         <p className="text-sm text-[#444] mt-1 whitespace-pre-line">{comment.content}</p>
                     )}
 
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
                         <button
                             onClick={handleLike}
-                            className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${isLiked ? 'text-[#861F21]' : 'text-[#666] hover:text-[#861F21]'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 text-xs font-bold transition-colors ${isLiked ? 'text-[#861F21]' : 'text-[#666] hover:text-[#861F21]'}`}
                         >
-                            <Icon icon={isLiked ? "solar:heart-bold" : "solar:heart-linear"} width={16} />
+                            <Icon icon={isLiked ? "solar:heart-bold" : "solar:heart-linear"} width={14} />
                             <span>{likesCount > 0 ? likesCount : 'Me gusta'}</span>
                         </button>
 
                         {auth && (
                             <button
                                 onClick={() => setIsReplying(!isReplying)}
-                                className="flex items-center gap-1.5 text-xs font-bold text-[#666] hover:text-[#007FA4] transition-colors"
+                                className="flex items-center gap-1 sm:gap-1.5 text-xs font-bold text-[#666] hover:text-[#007FA4] transition-colors"
                             >
-                                <Icon icon="solar:reply-outline" width={16} />
+                                <Icon icon="solar:reply-outline" width={14} />
                                 <span>Responder</span>
                             </button>
                         )}
@@ -238,7 +238,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     const ownerAvatar = owner?.profile?.avatar || '/svg/us.svg';
     const ownerHref = owner?.id ? `/usuario/${owner.id}` : '#';
 
-    const fuente = data?.[0]?.urlFuente;
+    const fuente = data?.[0]?.urlFuente || data?.[0]?.websiteUrl;
     const fuenteHref = fuente ? (String(fuente).startsWith('http') ? String(fuente) : `https://${fuente}`) : '#';
 
     useEffect(() => {
@@ -345,8 +345,10 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     return (
         <div className="2xl:max-w-screen-2xl xl:max-w-screen-xl lg:max-w-screen-lg mx-auto mb-10 xl:px-10 px-0">
             {showModal && <ModalDates setShowModal={setShowModal} showModal={showModal} dataFechaOrdenada={dataFechaOrdenada} />}
-            <div className='grid grid-cols-[15] mt-10 gap-10'>
-                <div className="col-start-1 xl:col-start-1 xl:col-end-4 px-5">
+            {/* Fix: Use grid-cols-1 by default for mobile, and 15 cols for lg (desktop/laptop) */}
+            <div className='grid grid-cols-1 lg:grid-cols-[15] mt-10 gap-10'>
+                {/* Left Column: Full width on mobile, spans 3 cols on desktop */}
+                <div className="lg:col-start-1 lg:col-end-4 px-5">
                     <div>
                         <h2 className='text-[#007FA4] text-3xl font-bold'>{data[0]?.titulo}</h2>
                         <div>
@@ -416,15 +418,15 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
                     {
                         // !isMobile && (
-                        <div className='xl:block hidden'>
-                            <h4 className="text-[#212121] mt-10 text-xl font-bold mb-6">Lo que se sabe del evento</h4>
+                        <div className='lg:block hidden'>
+                            <h4 className="text-[#212121] mt-10 text-xl font-bold mb-6">Te contamos:</h4>
                             <div className="text-[#212121] text-md font-thin font-sans mb-6">{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
                         </div>
                     }
 
                     {
                         // !isMobile && (
-                        <div className='xl:block hidden'>
+                        <div className='lg:block hidden'>
                             <div ref={mapRefDesktop}>
                                 <Map location={data[0]?.latitud_longitud} />
                             </div>
@@ -432,7 +434,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     }
                 </div>
 
-                <div className="col-start-1  xl:col-start-4 xl:col-end-[16] cursor-pointer">
+                {/* Right Column: Full width on mobile, spans remaining 12 cols on desktop */}
+                <div className="lg:col-start-4 lg:col-end-[16] cursor-pointer">
 
                     <div className="xl:items-center xl:flex xl:justify-end md:block hidden">
                         <div className='flex mr-10' onClick={handleCopyLink}>
@@ -462,13 +465,13 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                             {dataFechaOrdenada?.length === 0 && <p className='font-normal w-[200px] mt-0'>Aún por confirmar</p>}
                             {
                                 dataFechaOrdenada?.length > 0 && (
-                                    <div className='flex mt-5'>
+                                    <div className='flex flex-wrap gap-2 mt-5'>
 
                                         {
                                             dataFechaOrdenada?.slice(0, 5).map((item: any, index: number) => (
-                                                <div className='mr-3 cursor-pointer border py-2.5 w-[70px] h-[70px] rounded px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
-                                                    <strong className='block text-center text-xl'>{moment(item?.FechaInicio).utcOffset(-5).format('D')}</strong>
-                                                    <span className='font-thin text-center mx-auto block'>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
+                                                <div className='cursor-pointer border py-2.5 w-[60px] sm:w-[70px] h-[60px] sm:h-[70px] rounded px-2 sm:px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
+                                                    <strong className='block text-center text-lg sm:text-xl'>{moment(item?.FechaInicio).utcOffset(-5).format('D')}</strong>
+                                                    <span className='font-thin text-center mx-auto block text-xs sm:text-base'>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
                                                 </div>
                                             ))
                                         }
@@ -481,9 +484,9 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     <button onClick={modalShowDates} className={styles.seeMoreButton}>Ver todas</button>
                                 )}
                             </div>
-                            <div className='mt-8 w-[400px]'>
+                            <div className='mt-8 max-w-full'>
                                 <h6>Lugar del evento y la dirección</h6>
-                                <p className='font-thin'>{data[0]?.NombreLocal} - {data[0]?.direccion}</p>
+                                <p className='font-thin break-words'>{data[0]?.NombreLocal} - {data[0]?.direccion}</p>
                             </div>
 
                             <div>
@@ -534,21 +537,17 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
                     </div>
                     {/*responsive*/}
-                    {
-                        <div className='xl:hidden block px-5'>
-                            <div>
-                                <h4 className='mb-5 mt-5 font-bold text-[18px]'>Te contamos:</h4>
-                                <div className='text-[#212121] text-md font-thin font-sans mb-6'>{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
-                            </div>
+                    <div className='lg:hidden block px-5'>
+                        <div>
+                            <h4 className='mb-5 mt-5 font-bold text-[18px]'>Te contamos:</h4>
+                            <div className='text-[#212121] text-md font-thin font-sans mb-6'>{ReactHtmlParser(data[0]?.descripcionEvento)}</div>
                         </div>
-                    }
-                    {
-                        <div className='xl:hidden block max-w-[96%] mx-auto mt-5'>
-                            <div ref={mapRefMobile} style={{ marginBottom: "15px", padding: "0px 10px" }}>
-                                <Map location={data[0]?.latitud_longitud} />
-                            </div>
+                    </div>
+                    <div className='lg:hidden block max-w-[96%] mx-auto mt-5'>
+                        <div ref={mapRefMobile} style={{ marginBottom: "15px", padding: "0px 10px" }}>
+                            <Map location={data[0]?.latitud_longitud} />
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
 
@@ -587,14 +586,14 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
                         <div className="mt-6 pt-6 border-t border-[#EDEFF5]">
                             {auth ? (
-                                <div className="flex items-end gap-3">
+                                <div className="flex flex-col sm:flex-row sm:items-end gap-3">
                                     <div className="flex-1">
                                         <label className="text-[12px] font-bold text-[#666]">Escribe un comentario</label>
                                         <textarea
                                             value={commentText}
                                             onChange={(e) => setCommentText(e.target.value)}
                                             placeholder="Comparte tu opinión..."
-                                            className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl min-h-[90px]"
+                                            className="w-full mt-2 bg-[#F7F7F7] outline-none border border-solid border-[#EDEFF5] p-3 rounded-xl min-h-[80px] sm:min-h-[90px]"
                                         />
                                     </div>
                                     <button
@@ -602,7 +601,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                             const ok = await addComment(eventId, commentText);
                                             if (ok) setCommentText('');
                                         }}
-                                        className="bg-[#007FA4] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#006080] transition-colors"
+                                        className="bg-[#007FA4] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#006080] transition-colors w-full sm:w-auto"
                                     >
                                         Publicar
                                     </button>

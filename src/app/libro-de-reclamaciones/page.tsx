@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
 import styles from './book.module.css';
 import libro from './../../../public/svg/claims.svg';
 import Image from 'next/image';
@@ -33,31 +34,196 @@ const modalStyles = {
     },
 };
 
-const SuccessModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-    <Modal
-        isOpen={isOpen}
-        onRequestClose={onClose}
-        style={modalStyles}
-        contentLabel="Reclamación Enviada"
-        ariaHideApp={false}
-    >
-        <div className="flex flex-col items-center justify-center p-8 text-center bg-white">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                <Icon icon="line-md:confirm-circle" className="text-green-500 text-5xl" />
+const SuccessModal = ({ isOpen, onClose, data }: { isOpen: boolean; onClose: () => void; data: any }) => {
+    const generatePDF = () => {
+        if (!data) return;
+        const doc = new jsPDF();
+
+        // Helper to draw cell with label and value
+        const drawCell = (x: number, y: number, w: number, h: number, label: string, value: string = '') => {
+            doc.rect(x, y, w, h);
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.text(label, x + 2, y + 5);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            // Simple truncation or primitive wrap for value
+            // proper wrapping would require doc.splitTextToSize logic handled outside or complexly here
+            // For now, let's assume one line or basic wrap if needed, but keeping it simple for "value" cells
+            if (value) {
+                const splitVal = doc.splitTextToSize(value, w - 4);
+                doc.text(splitVal, x + 2, y + 10);
+            }
+        };
+
+        const startX = 15;
+        const endX = 195;
+        const width = endX - startX;
+        let y = 15;
+
+        // --- HEADER ---
+        // Left Box: Company Info
+        doc.rect(startX, y, width / 2, 30);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text('INJOYPLAN S.A.C.', startX + 5, y + 10);
+        doc.setFontSize(10);
+        doc.text('RUC: 20603074956', startX + 5, y + 18);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text('Dirección: Jr. Los Mirtos 310, Lince', startX + 5, y + 25);
+
+        // Right Box: Hoja Info
+        doc.rect(startX + (width / 2), y, width / 2, 30);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text('HOJA DE RECLAMACIÓN', startX + (width / 2) + 5, y + 8);
+        doc.setFontSize(10);
+        doc.text(`Nº: ${data.idReclamo ? data.idReclamo.substring(0, 8) : 'PENDIENTE'}`, startX + (width / 2) + 5, y + 18);
+        const dateObj = new Date();
+        doc.text(`Fecha: ${dateObj.toLocaleDateString()}`, startX + (width / 2) + 5, y + 26);
+
+        y += 35; // Spacing
+
+        // --- 1. IDENTIFICACIÓN DEL CONSUMIDOR ---
+        doc.setFillColor(220, 220, 220);
+        doc.rect(startX, y, width, 8, 'F');
+        doc.rect(startX, y, width, 8);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text('1. IDENTIFICACIÓN DEL CONSUMIDOR RECLAMANTE', startX + 2, y + 6);
+        y += 8;
+
+        // Row 1: Nombre
+        const hRow = 14;
+        drawCell(startX, y, width, hRow, "Nombre del Consumidor:", data.consumerName);
+        y += hRow;
+
+        // Row 2: Domicilio
+        drawCell(startX, y, width, hRow, "Domicilio:", data.consumerAddress);
+        y += hRow;
+
+        // Row 3: DNI + Tel + Email
+        const w3 = width / 3;
+        drawCell(startX, y, w3, hRow, `${data.consumerDocType}:`, data.consumerDocNumber);
+        drawCell(startX + w3, y, w3, hRow, "Teléfono:", data.consumerPhone);
+        drawCell(startX + (w3 * 2), y, w3, hRow, "Email:", data.consumerEmail);
+        y += hRow;
+
+        // Minor Section
+        if (data.isMinor) {
+            const hMinor = 14;
+            drawCell(startX, y, width, hMinor, "Padre/Madre/Apoderado (Menor de edad):", data.repName);
+            y += hMinor;
+        }
+
+        y += 5;
+
+        // --- 2. IDENTIFICACIÓN DEL BIEN CONTRATADO ---
+        doc.setFillColor(220, 220, 220);
+        doc.rect(startX, y, width, 8, 'F');
+        doc.rect(startX, y, width, 8);
+        doc.setFont("helvetica", "bold");
+        doc.text('2. IDENTIFICACIÓN DEL BIEN CONTRATADO', startX + 2, y + 6);
+        y += 8;
+
+        // Main Container for 2
+        // Row 1: Tipo Checkboxes + Monto
+        const hProd = 12;
+        doc.rect(startX, y, width * 0.4, hProd);
+        doc.text(`[ ${data.goodType === 'PRODUCTO' ? 'X' : ' '} ] PRODUCTO    [ ${data.goodType === 'SERVICIO' ? 'X' : ' '} ] SERVICIO`, startX + 5, y + 8);
+
+        drawCell(startX + (width * 0.4), y, width * 0.6, hProd, "Monto Reclamado:", `S/ ${data.claimAmount}`);
+        y += hProd;
+
+        // Row 2: Description
+        const hDesc = 20;
+        drawCell(startX, y, width, hDesc, "Descripción:", data.goodDescription);
+        y += hDesc;
+
+        y += 5;
+
+        // --- 3. DETALLE DE LA RECLAMACIÓN ---
+        doc.setFillColor(220, 220, 220);
+        doc.rect(startX, y, width, 8, 'F');
+        doc.rect(startX, y, width, 8);
+        doc.setFont("helvetica", "bold");
+        doc.text('3. DETALLE DE LA RECLAMACIÓN Y PEDIDO DEL CONSUMIDOR', startX + 2, y + 6);
+        y += 8;
+
+        // Type
+        const hType = 12;
+        doc.rect(startX, y, width, hType);
+        doc.text(`[ ${data.claimType === 'RECLAMO' ? 'X' : ' '} ] RECLAMO   [ ${data.claimType === 'QUEJA' ? 'X' : ' '} ] QUEJA`, startX + 5, y + 8);
+        y += hType;
+
+        // Detail
+        const hDet = 40;
+        drawCell(startX, y, width, hDet, "Detalle:", data.claimDetail);
+        y += hDet;
+
+        // Request
+        const hReq = 30;
+        drawCell(startX, y, width, hReq, "Pedido:", data.orderRequest);
+        y += hReq;
+
+        y += 5;
+
+        // Footer: Firmas
+        const hSig = 30;
+        doc.rect(startX, y, width / 2, hSig); // Firma Consumidor
+        doc.rect(startX + (width / 2), y, width / 2, hSig); // Firma Empresa
+
+        doc.setFontSize(8);
+        doc.text("Firma del Consumidor", startX + 5, y + 5);
+        doc.text("Firma del Proveedor", startX + (width / 2) + 5, y + 5);
+
+        y += hSig + 5;
+
+        // Legal Text
+        doc.setFontSize(6);
+        doc.setTextColor(80, 80, 80);
+        const legal = "RECLAMO: Disconformidad relacionada a los productos o servicios.\nQUEJA: Disconformidad no relacionada a los productos o servicios; o, malestar o descontento respecto a la atención al público.";
+        const splitLegal = doc.splitTextToSize(legal, width);
+        doc.text(splitLegal, startX, y);
+
+        doc.save(`Reclamo_${data.idReclamo || 'Injoyplan'}.pdf`);
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={onClose}
+            style={modalStyles}
+            contentLabel="Reclamación Enviada"
+            ariaHideApp={false}
+        >
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-white">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <Icon icon="line-md:confirm-circle" className="text-green-500 text-5xl" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 font-poppins">¡Registrado!</h2>
+                <p className="text-gray-600 mb-8 font-medium leading-relaxed">
+                    Su hoja de reclamación ha sido registrada correctamente. Hemos enviado una copia a su correo.
+                </p>
+                <div className="w-full flex flex-col gap-3">
+                    <button
+                        onClick={generatePDF}
+                        className="bg-[#277FA4] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#1f6683] transition-all w-full uppercase tracking-wide flex items-center justify-center gap-2"
+                    >
+                        <Icon icon="solar:file-download-bold" /> Descargar PDF
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="border border-[#277FA4] text-[#277FA4] font-bold py-3 px-8 rounded-full hover:bg-gray-50 transition-all w-full uppercase tracking-wide"
+                    >
+                        Entendido
+                    </button>
+                </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2 font-poppins">¡Registrado!</h2>
-            <p className="text-gray-600 mb-8 font-medium leading-relaxed">
-                Su hoja de reclamación ha sido registrada correctamente. Hemos enviado una copia a su correo.
-            </p>
-            <button
-                onClick={onClose}
-                className="bg-[#277FA4] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#1f6683] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 w-full uppercase tracking-wide"
-            >
-                Entendido
-            </button>
-        </div>
-    </Modal>
-);
+        </Modal>
+    )
+};
 
 const ClaimsBook = () => {
     const [isMinor, setIsMinor] = useState(false);
@@ -96,6 +262,7 @@ const ClaimsBook = () => {
     const [showModal, setShowModal] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [submittedData, setSubmittedData] = useState<any>(null);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -240,6 +407,7 @@ const ClaimsBook = () => {
             }
 
             setStatus('success');
+            setSubmittedData({ ...payload, idReclamo: (await response.clone().json()).id || 'PENDIENTE' });
             setShowModal(true);
             setFormData({
                 consumerName: '', consumerDocType: '', consumerDocNumber: '', consumerAddress: '', consumerDepartment: '', consumerProvince: '', consumerDistrict: '', consumerPhone: '', consumerEmail: '',
@@ -781,7 +949,7 @@ const ClaimsBook = () => {
                     </form>
                 </div>
             </div>
-            <SuccessModal isOpen={showModal} onClose={() => setShowModal(false)} />
+            <SuccessModal isOpen={showModal} onClose={() => setShowModal(false)} data={submittedData} />
         </div>
     );
 };
