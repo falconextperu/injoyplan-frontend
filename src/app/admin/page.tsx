@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthStore } from '../zustand/auth';
+import ubigeoData from '@/data/ubigeo.json';
 
 // --- Components ---
 
@@ -195,10 +196,14 @@ const BannerModal = ({ isOpen, onClose, onSave, initialData }: any) => {
 type DateEntry = { date: string; startTime: string; endTime: string; price: string; id?: string };
 
 const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        title: string; description: string; category: string; imageUrl: string; websiteUrl: string; isFeatured: boolean;
+        locationName: string; department: string; province: string; district: string; address: string; latitude: string; longitude: string;
+    }>({
         title: '', description: '', category: '', imageUrl: '', websiteUrl: '', isFeatured: false,
-        locationName: '', department: 'Lima', province: 'Lima', district: '', address: ''
+        locationName: '', department: 'Lima', province: 'Lima', district: '', address: '', latitude: '', longitude: ''
     });
+    const [ticketUrls, setTicketUrls] = useState<{ name: string; url: string }[]>([{ name: '', url: '' }]);
     const [dates, setDates] = useState<DateEntry[]>([{ date: '', startTime: '', endTime: '', price: '' }]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -211,14 +216,23 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                     description: initialData.description || '',
                     category: initialData.category || categories?.[0] || '',
                     imageUrl: initialData.imageUrl || '',
-                    websiteUrl: initialData.websiteUrl || '',
+                    websiteUrl: initialData.websiteUrl || initialData.bannerUrl || '',
                     isFeatured: initialData.isFeatured || false,
                     locationName: initialData.location?.name || '',
                     department: initialData.location?.department || 'Lima',
                     province: initialData.location?.province || 'Lima',
                     district: initialData.location?.district || '',
-                    address: initialData.location?.address || ''
+                    address: initialData.location?.address || '',
+                    latitude: initialData.location?.latitude || '',
+                    longitude: initialData.location?.longitude || ''
                 });
+                // Ticket URLs
+                if (initialData.ticketUrls && Array.isArray(initialData.ticketUrls) && initialData.ticketUrls.length > 0) {
+                    setTicketUrls(initialData.ticketUrls);
+                } else {
+                    setTicketUrls([{ name: '', url: '' }]);
+                }
+
                 // Populate dates
                 if (initialData.dates && initialData.dates.length > 0) {
                     setDates(initialData.dates.map((d: any) => ({
@@ -235,8 +249,9 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                 // Creating mode - reset
                 setFormData({
                     title: '', description: '', category: categories?.[0] || '', imageUrl: '', websiteUrl: '', isFeatured: false,
-                    locationName: '', department: 'Lima', province: 'Lima', district: '', address: ''
+                    locationName: '', department: 'Lima', province: 'Lima', district: '', address: '', latitude: '', longitude: ''
                 });
+                setTicketUrls([{ name: '', url: '' }]);
                 setDates([{ date: '', startTime: '', endTime: '', price: '' }]);
             }
         }
@@ -266,7 +281,17 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         setIsSubmitting(true);
-        await onSave({ ...formData, dates: dates.filter(d => d.date), isEdit: !!initialData, eventId: initialData?.id });
+        const payload = {
+            ...formData,
+            ticketUrls: ticketUrls.filter(t => t.url.trim()).map(t => ({ name: t.name.trim() || 'Entradas', url: t.url.trim() })),
+            dates: dates.filter(d => d.date),
+            isEdit: !!initialData,
+            eventId: initialData?.id,
+            // Ensure lat/lng are numbers or undefined
+            latitude: formData.latitude ? Number(formData.latitude) : undefined,
+            longitude: formData.longitude ? Number(formData.longitude) : undefined
+        };
+        await onSave(payload);
         setIsSubmitting(false);
     };
 
@@ -312,12 +337,62 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                         <h3 className="text-slate-800 font-bold mb-3">Imágenes y Enlaces</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-bold text-slate-800 mb-1">URL Imagen</label>
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Imagen principal (URL)</label>
                                 <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://..." />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-800 mb-1">URL Entradas</label>
-                                <input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://teleticket.com/..." />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">URL Fuente Principal</label>
+                                <input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="https://..." />
+                            </div>
+                            {/* Multiple Ticket URLs */}
+                            <div className="md:col-span-2">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-bold text-slate-800 mb-1">Links de entradas / fuentes</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setTicketUrls(prev => [...prev, { name: '', url: '' }])}
+                                        className="text-[#277FA4] font-bold text-sm hover:underline"
+                                    >
+                                        + Agregar link
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {ticketUrls.map((link, idx) => (
+                                        <div key={idx} className="flex gap-2 items-center">
+                                            <select
+                                                value={link.name}
+                                                onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                                                className="w-1/3 px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
+                                            >
+                                                <option value="" disabled>Plataforma</option>
+                                                <option value="Joinnus">Joinnus</option>
+                                                <option value="Teleticket">Teleticket</option>
+                                                <option value="Ticketmaster">Ticketmaster</option>
+                                                <option value="Instagram">Instagram</option>
+                                                <option value="TikTok">TikTok</option>
+                                                <option value="Facebook">Facebook</option>
+                                                <option value="WhatsApp">WhatsApp</option>
+                                                <option value="Web">Web</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                            <input
+                                                value={link.url}
+                                                onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, url: e.target.value } : l))}
+                                                className="flex-1 px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
+                                                placeholder="https://..."
+                                            />
+                                            {ticketUrls.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTicketUrls(prev => prev.filter((_, i) => i !== idx))}
+                                                    className="text-[#E31A1A] font-bold text-sm"
+                                                >
+                                                    <Icon icon="solar:trash-bin-trash-bold" width={20} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -349,18 +424,70 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                     {/* Location */}
                     <div className="border-t border-gray-100 pt-6">
                         <h3 className="text-slate-800 font-bold mb-3">Ubicación</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="md:col-span-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-bold text-slate-800 mb-1">Nombre del lugar</label>
                                 <input name="locationName" value={formData.locationName} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Ej: Teatro Municipal" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-800 mb-1">Distrito</label>
-                                <input name="district" value={formData.district} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Ej: Miraflores" />
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Departamento</label>
+                                <select
+                                    name="department"
+                                    value={formData.department}
+                                    onChange={(e) => {
+                                        setFormData(prev => ({ ...prev, department: e.target.value, province: '', district: '' }));
+                                    }}
+                                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
+                                >
+                                    <option value="">Selecciona</option>
+                                    {Object.keys(ubigeoData).map((d) => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </select>
                             </div>
-                            <div className="md:col-span-2">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Provincia</label>
+                                <select
+                                    name="province"
+                                    value={formData.province}
+                                    onChange={(e) => {
+                                        setFormData(prev => ({ ...prev, province: e.target.value, district: '' }));
+                                    }}
+                                    disabled={!formData.department}
+                                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800 disabled:opacity-50"
+                                >
+                                    <option value="">Selecciona</option>
+                                    {formData.department && (ubigeoData as any)[formData.department] && Object.keys((ubigeoData as any)[formData.department]).map((p) => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Distrito</label>
+                                <select
+                                    name="district"
+                                    value={formData.district}
+                                    onChange={handleChange}
+                                    disabled={!formData.province}
+                                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800 disabled:opacity-50"
+                                >
+                                    <option value="">Selecciona</option>
+                                    {formData.department && formData.province && (ubigeoData as any)[formData.department]?.[formData.province] && (ubigeoData as any)[formData.department][formData.province].map((d: string) => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
                                 <label className="block text-sm font-bold text-slate-800 mb-1">Dirección</label>
                                 <input name="address" value={formData.address} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="Av. ..." />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Latitud</label>
+                                <input name="latitude" value={formData.latitude} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="-12.1234" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-800 mb-1">Longitud</label>
+                                <input name="longitude" value={formData.longitude} onChange={handleChange} className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800" placeholder="-77.1234" />
                             </div>
                         </div>
                     </div>
