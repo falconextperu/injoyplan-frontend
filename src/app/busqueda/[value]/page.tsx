@@ -230,20 +230,11 @@ const BusquedaEvento = () => {
 
     console.log(eventSearchByFilters)
     const addFavoritesByUser = (item: any) => {
-        if (auth) {
-            console.log(item)
-            if (item.esfavorito === 1) {
-                deleteFavorite(item)
-            } else {
-                const data = {
-                    idEvento: item.ideventos,
-                    idFecha: item.idfecha,
-                    registrado: false
-                }
-                addFavorite(data)
-            }
+        console.log(item)
+        if (item.esfavorito === 1 || item.favorito) { // added item.favorito check for consistency
+            deleteFavorite(item)
         } else {
-            setOpenAuth(true)
+            addFavorite(item)
         }
     }
 
@@ -387,7 +378,7 @@ const BusquedaEvento = () => {
 
                                             {/* Checkboxes */}
                                             <div className="space-y-3 mb-6">
-                                                <div
+                                                {/* <div
                                                     className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
                                                     onClick={() => setFiltersMore({ ...filtersMore, enCurso: !filtersMore.enCurso })}
                                                 >
@@ -395,7 +386,7 @@ const BusquedaEvento = () => {
                                                     <div className={`w-5 h-5 rounded border flex items-center justify-center ${filtersMore.enCurso ? 'bg-[#007FA4] border-[#007FA4]' : 'bg-white border-gray-300'}`}>
                                                         {filtersMore.enCurso && <Icon icon="ei:check" className="text-white" width={18} />}
                                                     </div>
-                                                </div>
+                                                </div> */}
                                                 <div
                                                     className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
                                                     onClick={() => setFiltersMore({ ...filtersMore, esGratis: !filtersMore.esGratis })}

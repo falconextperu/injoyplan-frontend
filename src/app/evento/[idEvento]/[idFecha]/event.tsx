@@ -314,20 +314,11 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     };
 
     const addFavoritesByUser = (item: any) => {
-        if (auth) {
-            console.log(item)
-            if (item?.favorito) {
-                deleteFavorite(item)
-            } else {
-                const data = {
-                    idEvento: item?.ideventos,
-                    idFecha: item?.idfecha,
-                    registrado: false
-                }
-                addFavorite(data)
-            }
+        console.log(item)
+        if (item?.favorito) {
+            deleteFavorite(item)
         } else {
-            // setOpenAuth(true)
+            addFavorite(item)
         }
     }
 
@@ -393,7 +384,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     </div>
 
                     {/* Organizador */}
-                    {owner?.id && (
+                    {/* {owner?.id && (
                         <div className="mt-5 bg-white border border-solid border-[#EDEFF5] rounded-2xl p-4 shadow-sm">
                             <div className="flex items-center justify-between gap-3">
                                 <Link href={ownerHref} className="flex items-center gap-3 min-w-0">
@@ -414,7 +405,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                 </Link>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {
                         // !isMobile && (
@@ -552,7 +543,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
             </div>
 
             {/* Comments */}
-            {eventId && (
+            {/* {eventId && (
                 <div className="mt-10 px-5 xl:px-0">
                     <div className="bg-white border border-solid border-[#EDEFF5] rounded-2xl p-6 shadow-sm">
                         <div className="flex items-start justify-between gap-4">
@@ -614,7 +605,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {categoriesRelations?.code ? "" : <RelatedEvents data={data} />}
         </div >

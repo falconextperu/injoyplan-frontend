@@ -16,19 +16,10 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
 
     const addFavoritesByUser = (item: any) => {
-        if (auth) {
-            if (item.favorito || item.esfavorito === 1) {
-                deleteFavorite(item)
-            } else {
-                const data = {
-                    idEvento: item.idEventos || item.ideventos,
-                    idFecha: item.idfecha,
-                    registrado: false
-                }
-                addFavorite(data)
-            }
+        if (item.favorito || item.esfavorito === 1) {
+            deleteFavorite(item)
         } else {
-            setOpenAuth(true)
+            addFavorite(item)
         }
     }
 

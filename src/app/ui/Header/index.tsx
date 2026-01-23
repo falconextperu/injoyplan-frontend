@@ -401,18 +401,7 @@ const Header = () => {
                     )
                 }
 
-                {
-                    (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (
-                        <div className='col-start-9 md:col-start-8 xl:col-start-7 col-end-13 md:col-end-10 flex justify-end items-center mr-4'>
-                            <div className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px]'>
-                                <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
-                            </div>
-                            <div className='ml-3 border-[#007FA4] border border-solid rounded-full md:px-2.5 px-3 py-3 md:py-[10px]'>
-                                <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20} alt='ig' />
-                            </div>
-                        </div>
-                    )
-                }
+
 
                 <div className={`col-start-9 col-end-13 flex justify-end md:relative items-center gap-2 ${path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? 'hidden md:flex' : ''}`} ref={favoritesRef}>
                     {/* User Section - Avatar Dropdown (Desktop & Mobile) */}
@@ -521,27 +510,40 @@ const Header = () => {
                     )}
 
 
+                    {
+                        (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (
+                            <div className='col-start-9 md:col-start-8 xl:col-start-7 col-end-13 md:col-end-10 flex justify-end items-center mr-4'>
+                                <div className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px]'>
+                                    <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
+                                </div>
+                                <div className='ml-3 border-[#007FA4] border border-solid rounded-full md:px-2.5 px-3 py-3 md:py-[10px]'>
+                                    <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20} alt='ig' />
+                                </div>
+                            </div>
+                        )
+                    }
+
 
                     {/* Login Button (Not Authenticated) */}
-                    {auth === null && !isMobile && (
+                    {/* {auth === null && !isMobile && path !== "/nosotros" && path !== "/preguntas-frecuentes" && path !== "/terminos-y-condiciones" && path !== "/contactanos" && (
                         <button onClick={() => setOpenAuth(true)}
                             className='text-white bg-[#007FA4] text-[15px] py-[10px] px-[25px] rounded-[20px] font-open-sans cursor-pointer'
                         >Ingresar</button>
-                    )}
-                    {auth === null && isMobile && (
+                    )} */}
+                    {/* {auth === null && isMobile && path !== "/nosotros" && path !== "/preguntas-frecuentes" && path !== "/terminos-y-condiciones" && path !== "/contactanos" && (
                         <button onClick={() => setOpenAuth(true)}
                             className='text-white bg-[#007FA4] text-[15px] p-2 rounded-[20px] font-open-sans cursor-pointer'
                         ><Icon icon="solar:user-bold" width="10" height="10" /></button>
-                    )}
+                    )} */}
 
                     {/* Explore Icon (Desktop & Mobile) */}
-                    <Link
+                    {/* <Link
                         href="/explorar"
                         className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors"
                         title="Explorar"
                     >
                         <Icon icon="solar:compass-bold" className="text-[#007FA4]" width={28} />
-                    </Link>
+                    </Link> */}
 
                     {/* Mobile Search */}
                     {isMobile && !path.startsWith('/busqueda') && (
@@ -552,12 +554,15 @@ const Header = () => {
                         }} className='' src={lupaMobile} alt="lupa" width={30} height={30} />
                     )}
                     {
-                        isOpenFavorite ? (
-                            <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                        ) :
-                            (
-                                <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
-                            )
+                        path !== "/nosotros" && path !== "/preguntas-frecuentes" && path !== "/terminos-y-condiciones" && path !== "/contactanos" && (
+                            isOpenFavorite ? (
+                                <Image src={heartWhite} className='md:bg-[#007FA4] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                            ) :
+                                (
+                                    <Image src={cora} className='md:bg-[#DBEBF1] cursor-pointer rounded-full p-2' alt="cora" width={43} height={43} onClick={() => setIsOpenFavorite(true)} />
+                                )
+
+                        )
                     }
 
 

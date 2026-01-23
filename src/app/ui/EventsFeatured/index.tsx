@@ -20,20 +20,10 @@ const EventsFeatured = ({ setOpenAuth }: IProps) => {
     const { eventsDestacades, isLoading } = useEventStore();
 
     const addFavoritesByUser = (item: any) => {
-        if (auth) {
-            console.log(item)
-            if (item.favorito || item.esfavorito === 1) {
-                deleteFavorite(item)
-            } else {
-                const data = {
-                    idEvento: item.ideventos,
-                    idFecha: item.idfecha,
-                    registrado: false
-                }
-                addFavorite(data)
-            }
+        if (item.favorito || item.esfavorito === 1) {
+            deleteFavorite(item)
         } else {
-            setOpenAuth(true)
+            addFavorite(item)
         }
     }
 

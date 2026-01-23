@@ -84,7 +84,7 @@ const MoreFilters = ({ onApply }: Props) => {
 
                     {/* Checkboxes */}
                     <div className="space-y-3 mb-6">
-                        <div
+                        {/* <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
                             onClick={() => setEnCurso(!enCurso)}
                         >
@@ -92,7 +92,7 @@ const MoreFilters = ({ onApply }: Props) => {
                             <div className={`w-5 h-5 rounded border flex items-center justify-center ${enCurso ? 'bg-[#007FA4] border-[#007FA4]' : 'bg-white border-gray-300'}`}>
                                 {enCurso && <Icon icon="ei:check" className="text-white" width={18} />}
                             </div>
-                        </div>
+                        </div> */}
 
                         <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
