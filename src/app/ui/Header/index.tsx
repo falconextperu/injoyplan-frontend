@@ -403,7 +403,7 @@ const Header = () => {
 
 
 
-                <div className={`col-start-9 col-end-13 flex justify-end md:relative items-center gap-2 ${path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos" ? 'hidden md:flex' : ''}`} ref={favoritesRef}>
+                <div className={`col-start-9 col-end-13 flex justify-end md:relative items-center gap-2 ${(path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (auth as any)?.userType !== 'COMPANY' ? 'hidden md:flex' : ''}`} ref={favoritesRef}>
                     {/* User Section - Avatar Dropdown (Desktop & Mobile) */}
                     {auth !== null && (
                         <div className="relative" ref={refUserDropdown}>
@@ -484,7 +484,7 @@ const Header = () => {
                                     {/* Admin Link - Only for ADMIN role */}
                                     {(() => {
                                         const a: any = auth;
-                                        if (a?.role === 'ADMIN') {
+                                        if (a?.userType === 'COMPANY') {
                                             return (
                                                 <Link onClick={() => setIsUserDropdownOpen(false)} href="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors border-t border-gray-100">
                                                     <Icon icon="solar:widget-bold" className="text-purple-600" width={20} />
@@ -511,7 +511,7 @@ const Header = () => {
 
 
                     {
-                        (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (
+                        (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (auth as any)?.userType !== 'COMPANY' && (
                             <div className='col-start-9 md:col-start-8 xl:col-start-7 col-end-13 md:col-end-10 flex justify-end items-center mr-4'>
                                 <a href="https://www.facebook.com/injoyplan" target="_blank" rel="noopener noreferrer" className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px] hover:bg-gray-100 transition-colors'>
                                     <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />

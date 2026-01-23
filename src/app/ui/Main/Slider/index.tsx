@@ -62,7 +62,9 @@ const Slide = () => {
         <Slider className="slide" {...settings}>
             {banners?.length > 0 ? (
                 banners.map((item: any, index: number) => {
-                    const date = item.fecha ? moment(item.fecha) : null;
+                    // Parse date as UTC to avoid timezone conversion issues
+                    // This ensures "2026-05-24" displays as "24 MAY" instead of "23 MAY"
+                    const date = item.fecha ? moment.utc(item.fecha) : null;
                     const dayName = date ? date.format('ddd').toUpperCase().replace('.', '') : '';
                     const dayNumber = date ? date.format('D') : '';
                     const monthName = date ? date.format('MMM').toUpperCase().replace('.', '') : '';
@@ -95,14 +97,14 @@ const Slide = () => {
                                             </div>
                                         )}
 
-                                        <a className="bg-customText transition-colors p-3 px-6 text-md relative top-4 rounded uppercase text-[#fff] font-bold inline-block" rel="noopener noreferrer" target="_blank" href={item.link || item.urlFuente || "#"}>
+                                        <a className="bg-customText transition-colors p-3 px-6 text-md relative top-4 rounded uppercase text-[#fff] font-bold inline-block" href={item.link || item.urlFuente || "#"}>
                                             Conoce más
                                         </a>
                                     </div>
                                 </div>
                             </div>
                             {item.urlFuente && (
-                                <Link className="absolute md:bottom-2 bottom-1 z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center hover:text-white transition-colors" href={item.urlFuente} target="_blank" rel="noopener noreferrer">
+                                <Link className="absolute md:bottom-2 bottom-1 z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center transition-colors" href={item.urlFuente} target="_blank" rel="noopener noreferrer">
                                     VER FUENTE
                                     <Image className="ml-1 relative top-0.5" src={Angle} height={10} width={10} alt="Angulo" />
                                 </Link>
