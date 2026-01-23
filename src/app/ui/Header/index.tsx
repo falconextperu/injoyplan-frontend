@@ -513,12 +513,12 @@ const Header = () => {
                     {
                         (path === "/nosotros" || path === "/preguntas-frecuentes" || path === "/terminos-y-condiciones" || path === "/contactanos") && (
                             <div className='col-start-9 md:col-start-8 xl:col-start-7 col-end-13 md:col-end-10 flex justify-end items-center mr-4'>
-                                <div className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px]'>
+                                <a href="https://www.facebook.com/injoyplan" target="_blank" rel="noopener noreferrer" className='border-[#007FA4] border border-solid rounded-full md:px-4 px-4 py-0.5 md:py-[2px] hover:bg-gray-100 transition-colors'>
                                     <Image className='md:w-3 py-2 w-[10px]' src={fb} width={20} height={20} alt='facebook' />
-                                </div>
-                                <div className='ml-3 border-[#007FA4] border border-solid rounded-full md:px-2.5 px-3 py-3 md:py-[10px]'>
+                                </a>
+                                <a href="https://www.instagram.com/injoyplan" target="_blank" rel="noopener noreferrer" className='ml-3 border-[#007FA4] border border-solid rounded-full md:px-2.5 px-3 py-3 md:py-[10px] hover:bg-gray-100 transition-colors'>
                                     <Image className='md:w-6 w-[17px]' src={ig} width={20} height={20} alt='ig' />
-                                </div>
+                                </a>
                             </div>
                         )
                     }
