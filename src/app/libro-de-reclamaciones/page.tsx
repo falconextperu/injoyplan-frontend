@@ -343,12 +343,12 @@ const ClaimsBook = () => {
             formData.consumerName,
             formData.consumerDocType,
             formData.consumerDocNumber,
-            formData.consumerAddress,
-            formData.consumerDepartment,
-            formData.consumerProvince,
-            formData.consumerDistrict,
-            formData.consumerPhone,
-            formData.consumerEmail,
+            // formData.consumerAddress, // Optional
+            // formData.consumerDepartment, // Optional
+            // formData.consumerProvince, // Optional
+            // formData.consumerDistrict, // Optional
+            // formData.consumerPhone, // Optional
+            // formData.consumerEmail, // Optional
             formData.goodType,
             formData.claimAmount,
             formData.goodDescription,
@@ -511,7 +511,7 @@ const ClaimsBook = () => {
                                 {/* Row 3: Domicilio & Departamento */}
                                 <div>
                                     <label htmlFor="consumerAddress" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Domicilio
+                                        Domicilio
                                     </label>
                                     <input
                                         type="text"
@@ -519,21 +519,19 @@ const ClaimsBook = () => {
                                         name="consumerAddress"
                                         value={formData.consumerAddress}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400"
                                     />
                                 </div>
 
                                 <div>
                                     <label htmlFor="consumerDepartment" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Departamento
+                                        Departamento
                                     </label>
                                     <select
                                         id="consumerDepartment"
                                         name="consumerDepartment"
                                         value={formData.consumerDepartment}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400 bg-white"
                                     >
                                         <option value="">Seleccionar</option>
@@ -546,14 +544,13 @@ const ClaimsBook = () => {
                                 {/* Row 4: Provincia & Distrito */}
                                 <div>
                                     <label htmlFor="consumerProvince" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Provincia
+                                        Provincia
                                     </label>
                                     <select
                                         id="consumerProvince"
                                         name="consumerProvince"
                                         value={formData.consumerProvince}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400 bg-white"
                                     >
                                         <option value="">Seleccionar</option>
@@ -565,14 +562,13 @@ const ClaimsBook = () => {
 
                                 <div>
                                     <label htmlFor="consumerDistrict" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Distrito
+                                        Distrito
                                     </label>
                                     <select
                                         id="consumerDistrict"
                                         name="consumerDistrict"
                                         value={formData.consumerDistrict}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400 bg-white"
                                     >
                                         <option value="">Seleccionar</option>
@@ -585,7 +581,7 @@ const ClaimsBook = () => {
                                 {/* Row 5: Celular & Email */}
                                 <div>
                                     <label htmlFor="consumerPhone" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Celular/Teléfono
+                                        Celular/Teléfono
                                     </label>
                                     <input
                                         type="tel"
@@ -593,14 +589,13 @@ const ClaimsBook = () => {
                                         name="consumerPhone"
                                         value={formData.consumerPhone}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400"
                                     />
                                 </div>
 
                                 <div>
                                     <label htmlFor="consumerEmail" className="block text-gray-500 mb-2">
-                                        <span className="text-red-500">* </span> Correo electrónico
+                                        Correo electrónico
                                     </label>
                                     <input
                                         type="email"
@@ -608,7 +603,6 @@ const ClaimsBook = () => {
                                         name="consumerEmail"
                                         value={formData.consumerEmail}
                                         onChange={handleInputChange}
-                                        required
                                         className="w-full border border-gray-200 rounded p-2 focus:outline-none focus:border-gray-400"
                                     />
                                 </div>
@@ -919,7 +913,7 @@ const ClaimsBook = () => {
                                     <p><span className="font-bold text-black">Queja:</span> Inconformidad o malestar por el servicio prestado (atención).</p>
                                 </div>
                                 <div className="mt-8 mb-6 text-sm text-gray-600">
-                                    <p><strong>Nota: </strong>La respuesta a la presente queja o reclamo será brindada mediante comunicación electrónica enviada al correo electrónico que usted ha consignado en la presente Hoja de Reclamación. En caso de que usted desee que la respuesta le sea enviada a su domicilio deberá expresar ello en el detalle del reclamo o queja.</p>
+                                    <p><strong>Nota: </strong>La respuesta será brindada en un plazo no mayor a quince (15) días hábiles, contados desde el día hábil siguiente a la presentación del reclamo o queja. La respuesta será enviada prioritariamente al correo electrónico consignado voluntariamente por el consumidor en la presente Hoja de Reclamación. De no haberse consignado dicho dato, se utilizará el medio de contacto alternativo proporcionado por el consumidor que permita acreditar el envío de la respuesta. En caso de que el consumidor decida no consignar ningún medio de contacto que permita su notificación, el proveedor se verá imposibilitado de remitir la respuesta, quedando esta a disposición del consumidor, quien podrá contactarse para su entrega. En caso de que el consumidor desee que la respuesta le sea remitida a su domicilio físico, deberá indicarlo expresamente en el detalle del reclamo o queja.</p>
                                 </div>
 
                                 {/* Privacy Notice */}
