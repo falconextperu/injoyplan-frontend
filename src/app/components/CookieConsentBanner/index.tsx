@@ -3,61 +3,31 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-
-type CookieConsent = 'accepted' | 'denied' | 'configured' | null;
-
-interface CookiePreferences {
-    essential: boolean;
-    analytics: boolean;
-    advertising: boolean;
-    functional: boolean;
-}
+import { useCookieStore } from '../../zustand/cookies';
 
 const CookieConsentBanner = () => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [showConfig, setShowConfig] = useState(false);
-    const [preferences, setPreferences] = useState<CookiePreferences>({
-        essential: true, // Always true, can't be disabled
-        analytics: true,
-        advertising: true,
-        functional: true,
-    });
+    const {
+        isVisible,
+        setIsVisible,
+        consent,
+        preferences,
+        setPreferences,
+        setConsent,
+        acceptAll,
+        denyAll,
+        initialize
+    } = useCookieStore();
 
+    const [showConfig, setShowConfig] = useState(false);
+
+    // Initialize store on mount
     useEffect(() => {
-        // Check if user has already made a choice
-        const consent = localStorage.getItem('cookie_consent');
-        if (!consent) {
-            // Small delay for better UX
-            const timer = setTimeout(() => setIsVisible(true), 1000);
-            return () => clearTimeout(timer);
-        }
+        initialize();
     }, []);
 
-    const handleAccept = () => {
-        localStorage.setItem('cookie_consent', 'accepted');
-        localStorage.setItem('cookie_preferences', JSON.stringify({
-            essential: true,
-            analytics: true,
-            advertising: true,
-            functional: true,
-        }));
-        setIsVisible(false);
-    };
-
-    const handleDeny = () => {
-        localStorage.setItem('cookie_consent', 'denied');
-        localStorage.setItem('cookie_preferences', JSON.stringify({
-            essential: true,
-            analytics: false,
-            advertising: false,
-            functional: false,
-        }));
-        setIsVisible(false);
-    };
-
     const handleSaveConfig = () => {
-        localStorage.setItem('cookie_consent', 'configured');
-        localStorage.setItem('cookie_preferences', JSON.stringify(preferences));
+        setConsent('configured');
+        setPreferences(preferences); // Persists current state
         setIsVisible(false);
         setShowConfig(false);
     };
@@ -94,7 +64,7 @@ const CookieConsentBanner = () => {
 
                             <div className="flex flex-col sm:flex-row gap-3 mt-6">
                                 <button
-                                    onClick={handleAccept}
+                                    onClick={acceptAll}
                                     className="flex-1 bg-[#007FA4] hover:bg-[#006080] text-white font-bold py-3 px-6 rounded-full transition-all text-sm"
                                 >
                                     Aceptar
@@ -106,7 +76,7 @@ const CookieConsentBanner = () => {
                                     Configurar
                                 </button>
                                 <button
-                                    onClick={handleDeny}
+                                    onClick={denyAll}
                                     className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#666] font-bold py-3 px-6 rounded-full transition-all text-sm"
                                 >
                                     Denegar
@@ -215,7 +185,7 @@ const CookieConsentBanner = () => {
                                     Guardar preferencias
                                 </button>
                                 <button
-                                    onClick={handleAccept}
+                                    onClick={acceptAll}
                                     className="flex-1 bg-[#F0F8FF] hover:bg-[#e0f0fa] text-[#007FA4] font-bold py-3 px-6 rounded-full transition-all text-sm"
                                 >
                                     Aceptar todas
@@ -237,3 +207,4 @@ const CookieConsentBanner = () => {
 };
 
 export default CookieConsentBanner;
+

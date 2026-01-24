@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import Alert from "./components/Alert";
 import CookieConsentBanner from "./components/CookieConsentBanner";
+import ThirdPartyScripts from "./components/ThirdPartyScripts";
 
 import { usePathname } from "next/navigation";
 
@@ -57,6 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <>
+            <ThirdPartyScripts />
             <div className={isModalOpen ? "blur-background" : "overflow-hidden"}>
                 <Alert />
                 {!isAdmin && <Header />}
