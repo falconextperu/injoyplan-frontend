@@ -249,10 +249,18 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
     useEffect(() => {
         if (data !== undefined) {
-            const sortedDataFecha = [...dataFecha || data[0]].sort((a: any, b: any) => {
+            // Filter out past dates first, then sort
+            const today = moment().startOf('day');
+            const futureDates = (dataFecha || data[0]).filter((item: any) => {
+                const fechaEvento = moment(item.FechaInicio).startOf('day');
+                return fechaEvento.isSameOrAfter(today);
+            });
+
+            const sortedDataFecha = [...futureDates].sort((a: any, b: any) => {
                 // @ts-ignore
                 return new Date(a.FechaInicio) - new Date(b.FechaInicio);
             });
+
             setDataFechaOrdenada(sortedDataFecha);
             console.log(sortedDataFecha)
             // Configurar la fecha inicial como la primera disponible
@@ -469,15 +477,15 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     </div>
                                 )
                             }
-
                             <div>
                                 {visibleItems < dataFechaOrdenada?.length && (
                                     <button onClick={modalShowDates} className={styles.seeMoreButton}>Ver todas</button>
                                 )}
                             </div>
                             <div className='mt-8 max-w-full'>
-                                <h6>Lugar del evento y la dirección</h6>
-                                <p className='font-thin break-words'>{data[0]?.NombreLocal} - {data[0]?.direccion}</p>
+                                <h6>Lugar</h6>
+                                <p className='font-thin break-words'>{data[0]?.NombreLocal}</p>
+                                <p className='font-thin break-words'>{data[0]?.direccion} {data[0]?.Distrito ? ` - ${data[0]?.Distrito}` : ''}</p>
                             </div>
 
                             <div>
@@ -488,43 +496,46 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                             <h6 className='font-bold mb-2'>{Number(data[0]?.Monto) > 0 ? "Entradas desde" : "Entradas"}</h6>
                             <strong className='text-3xl'>{Number(data[0]?.Monto) === 0 ? "¡Gratis!" : 'S/ ' + Number(data[0]?.Monto).toFixed(2)}</strong>
                         </div>
-                        <div className="mt-10">
-                            <h6 className='font-bold'>Consigue tus entradas aquí</h6>
-                            {
-                                dataPlataformaVenta?.map((item: any, index: number) => {
-                                    const url = item.urlWebLugar ? (String(item.urlWebLugar).startsWith('http') ? String(item.urlWebLugar) : `https://${item.urlWebLugar}`) : '#';
-                                    return (
-                                        <div className='bg-[#9B292B] mt-6 p-4 text-center rounded-full' key={index}>
-                                            <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}><button className='flex items-center'><Image width={20} height={20} className='mr-3' src={item.iconos} alt="loguito" />{item.nombrePlataforma}</button></Link>
-                                        </div>
-                                    )
-                                })
-                            }
-                            {
-                                data[0]?.ticketUrls && Array.isArray(data[0].ticketUrls) && data[0].ticketUrls.map((link: { name: string; url: string }, idx: number) => {
-                                    const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+                        {/* Only show tickets section if there are platforms or ticketUrls */}
+                        {((dataPlataformaVenta && dataPlataformaVenta.length > 0) || (data[0]?.ticketUrls && data[0].ticketUrls.length > 0)) && (
+                            <div className="mt-10">
+                                <h6 className='font-bold'>Consigue tus entradas aquí</h6>
+                                {
+                                    dataPlataformaVenta?.map((item: any, index: number) => {
+                                        const url = item.urlWebLugar ? (String(item.urlWebLugar).startsWith('http') ? String(item.urlWebLugar) : `https://${item.urlWebLugar}`) : '#';
+                                        return (
+                                            <div className='bg-[#9B292B] mt-6 p-4 text-center rounded-full' key={index}>
+                                                <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}><button className='flex items-center'><Image width={20} height={20} className='mr-3' src={item.iconos} alt="loguito" />{item.nombrePlataforma}</button></Link>
+                                            </div>
+                                        )
+                                    })
+                                }
+                                {
+                                    data[0]?.ticketUrls && Array.isArray(data[0].ticketUrls) && data[0].ticketUrls.map((link: { name: string; url: string }, idx: number) => {
+                                        const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
 
-                                    const getIcon = (name: string) => {
-                                        const n = (name || '').toLowerCase();
-                                        if (n.includes('tiktok')) return 'ic:baseline-tiktok';
-                                        if (n.includes('instagram')) return 'mdi:instagram';
-                                        if (n.includes('facebook')) return 'mdi:facebook';
-                                        if (n.includes('whatsapp')) return 'mdi:whatsapp';
-                                        if (n.includes('web')) return 'mdi:web';
-                                        return 'solar:ticket-bold';
-                                    };
+                                        const getIcon = (name: string) => {
+                                            const n = (name || '').toLowerCase();
+                                            if (n.includes('tiktok')) return 'ic:baseline-tiktok';
+                                            if (n.includes('instagram')) return 'mdi:instagram';
+                                            if (n.includes('facebook')) return 'mdi:facebook';
+                                            if (n.includes('whatsapp')) return 'mdi:whatsapp';
+                                            if (n.includes('web')) return 'mdi:web';
+                                            return 'solar:ticket-bold';
+                                        };
 
-                                    return (
-                                        <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
-                                            <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
-                                                <Icon icon={getIcon(link.name)} width={24} className='mr-3' />
-                                                {link.name || 'Comprar entradas'}
-                                            </Link>
-                                        </div>
-                                    );
-                                })
-                            }
-                        </div>
+                                        return (
+                                            <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
+                                                <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
+                                                    <Icon icon={getIcon(link.name)} width={24} className='mr-3' />
+                                                    {link.name || 'Comprar entradas'}
+                                                </Link>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+                        )}
 
                     </div>
                     {/*responsive*/}

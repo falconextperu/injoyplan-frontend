@@ -5,7 +5,7 @@ import useAlertStore from './alert';
 import moment from 'moment';
 
 export interface IEventsState {
-    getEvents: (limit: number) => void;
+    getEvents: (page?: number) => void;
     isLoading: boolean;
     eventsEntreteiment: Event[],
     eventsCulture: Event[],
@@ -143,24 +143,28 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         })
     },
     events: [],
-    getEvents: async (limit: number) => {
+    getEvents: async (page: number = 1) => {
         set({ isLoading: true });
         try {
-            console.log(limit)
-            // Use public/search to get chronological ordering (by nearest date) and date filtering
-            const resp: any = await get(`events/public/search?page=1&limit=${limit}&excludeFeatured=true`);
-            console.log(resp)
+            console.log(`Loading page ${page}`);
+            // Use proper page-based pagination
+            const resp: any = await get(`events/public/search?page=${page}&limit=12&excludeFeatured=true`);
+            console.log(resp);
+
             if (resp?.eventos && Array.isArray(resp.eventos)) {
-                set({
-                    events: resp.eventos.map((item: any) => mapEventFromBackend(item)),
+                const newEvents = resp.eventos.map((item: any) => mapEventFromBackend(item));
+
+                set((state) => ({
+                    // Append new events if page > 1, otherwise replace
+                    events: page === 1 ? newEvents : [...state.events, ...newEvents],
                     isLoading: false
-                });
+                }));
             } else {
-                set({ events: [], isLoading: false })
+                set({ events: page === 1 ? [] : _get().events, isLoading: false });
             }
         } catch (error) {
             console.error('Error loading events:', error);
-            set({ events: [], isLoading: false })
+            set({ events: page === 1 ? [] : _get().events, isLoading: false });
         }
     },
     getEventsDestacades: async () => {

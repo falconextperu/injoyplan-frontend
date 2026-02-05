@@ -21,7 +21,7 @@ const MailBox = dynamic(() => import("./ui/MainBox"));
 export default function Home() {
   const [openAuth, setOpenAuth] = useState<boolean>(false);
   const [openCategories, setOpenCategories] = useState<boolean>(false); // Inicializamos en falso
-  const [limit, setLimit] = useState(12);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasVisited, setHasVisited] = useState<boolean | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string | null>(null);
@@ -37,10 +37,10 @@ export default function Home() {
     window?.scrollTo(0, 0);
   }, []);
 
-  // Fetch events when limit changes
+  // Fetch events when page changes
   useEffect(() => {
-    getEvents(limit);
-  }, [limit]);
+    getEvents(page);
+  }, [page]);
 
   // ALWAYS fetch featured events, categories, and sync favorites when Home mounts
   // This ensures favorites are fresh on every visit
@@ -112,7 +112,7 @@ export default function Home() {
         )}
         <Main />
         <EventsFeatured setOpenAuth={setOpenAuth} />
-        <Events setLimit={setLimit} setOpenAuth={setOpenAuth} />
+        <Events setPage={setPage} setOpenAuth={setOpenAuth} />
         <MailBox />
       </div>
       <Auth openAuth={openAuth} setOpenAuth={setOpenAuth} />

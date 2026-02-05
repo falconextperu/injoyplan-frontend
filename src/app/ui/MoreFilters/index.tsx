@@ -55,8 +55,11 @@ const MoreFilters = ({ onApply }: Props) => {
                 >
                     {/* Time Filter */}
                     <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-                        <div className="flex justify-between items-center mb-2" onClick={() => setStartTime("")}>
-                            <span className={`text-sm font-medium ${!startTime ? 'text-[#007FA4] font-bold' : 'text-gray-700 cursor-pointer'}`}>
+                        <div
+                            className={`flex justify-between items-center mb-2 cursor-pointer p-2 rounded transition-colors ${!startTime ? 'bg-[#007FA4]/10' : 'hover:bg-gray-100'}`}
+                            onClick={() => setStartTime("")}
+                        >
+                            <span className={`text-sm font-medium ${!startTime ? 'text-[#007FA4] font-bold' : 'text-gray-700'}`}>
                                 Cualquier hora
                             </span>
                             {!startTime && <Icon icon="ei:check" className="text-[#007FA4]" width={20} />}

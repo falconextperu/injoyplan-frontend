@@ -7,7 +7,7 @@ import Card from '@/app/components/Card'
 import CardSkeleton from '@/app/components/CardSkeleton'
 import { Event } from '@/app/interfaces/event'
 
-const Events = ({ setLimit, setOpenAuth }: any) => {
+const Events = ({ setPage, setOpenAuth }: any) => {
     const router = useRouter();
     const [clickCount, setClickCount] = useState(0);
 
@@ -28,7 +28,7 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
             router.push('/busqueda/0');
         } else {
             setClickCount(prev => prev + 1);
-            setLimit((page: any) => page + 12);
+            setPage((prevPage: any) => prevPage + 1);
         }
     };
 
@@ -69,7 +69,7 @@ const Events = ({ setLimit, setOpenAuth }: any) => {
 
                     <div className='text-[#007fa4] font-bold flex justify-center mt-10 mb-10 border-2 border-solid border-[#007FA4] p-2 w-fit mx-auto rounded-full px-16'>
                         <button onClick={handleLoadMore} disabled={isLoading} type="submit">
-                            {isLoading ? 'CARGANDO...' : 'VER MÁS EVENTOS'}
+                            {isLoading ? 'CARGANDO...' : clickCount >= 2 ? 'IR AL BUSCADOR' : 'VER MÁS EVENTOS'}
                         </button>
                     </div>
                 </div>

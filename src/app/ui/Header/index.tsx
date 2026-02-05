@@ -126,6 +126,7 @@ const Header = () => {
     const eventsOnlyFavorites = favorites ?? [];
 
     const navigateEvent = (item: any) => {
+        setIsOpenFavorite(false); // Close modal before navigating
         navigation.push(`/evento/${item?.ideventos}/${item.idfecha}`)
     }
 
@@ -301,8 +302,35 @@ const Header = () => {
 
                                 {
                                     isMobile && isOpenEvent && (
-                                        <ReactModal isOpen ariaHideApp={false} className={"p-0 bg-[#fff] overflow-y-auto h-[100vh]"}>
-                                            <div ref={refEvent} className={"md:hidden md:max-h-[400px] px-5 pr-10 md:px-0 md:p-0 md:h-auto overflow-y-auto absolute bg-[#fff] w-full left-0 rounded-xl shadow-custom-2 md:top-16 h-[100vh] top-0 z-50"}>
+                                        <ReactModal
+                                            isOpen
+                                            ariaHideApp={false}
+                                            className={"p-0 m-0 bg-[#fff] overflow-y-auto overflow-x-hidden h-screen w-screen"}
+                                            style={{
+                                                content: {
+                                                    position: 'fixed',
+                                                    inset: 0,
+                                                    padding: 0,
+                                                    margin: 0,
+                                                    border: 'none',
+                                                    borderRadius: 0,
+                                                    width: '100vw',
+                                                    height: '100vh',
+                                                    maxWidth: '100vw',
+                                                    maxHeight: '100vh',
+                                                    overflow: 'hidden',
+                                                },
+                                                overlay: {
+                                                    position: 'fixed',
+                                                    inset: 0,
+                                                    backgroundColor: '#ffffff',
+                                                    zIndex: 9999,
+                                                    margin: 0,
+                                                    padding: 0,
+                                                }
+                                            }}
+                                        >
+                                            <div ref={refEvent} className={"w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#fff] px-5"}>
                                                 {
                                                     isMobile && <div className="flex border mt-5 border-solid border-[#ddd] p-3 rounded-full icon">
                                                         <Image src={lupa} alt="lupa" className="" />
@@ -331,7 +359,7 @@ const Header = () => {
                                                                                         <Image className='w-full h-full object-fill' objectFit='contain' width={100} height={100} src={item.url || item.imageUrl} alt="" />
                                                                                     </div>
                                                                                     <div>
-                                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis md:w-[320px] w-[190px] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
+                                                                                        <h3 className='font-normal text-md text-[#444] text-ellipsis md:w-[320px] max-w-[50vw] overflow-hidden whitespace-nowrap'> <HighlightedText text={item.titulo} highlight={search} /></h3>
                                                                                         <span className='opacity-[0.5] text-[13px]'>{item.NombreLocal}</span>
                                                                                     </div>
                                                                                 </div>
@@ -566,15 +594,39 @@ const Header = () => {
                     }
 
 
-                    <div className='md:hidden overflow-y-hidden'>
+                    <div className='md:hidden'>
                         {
                             isOpenFavorite && isMobile && (
                                 <ReactModal
                                     isOpen
                                     ariaHideApp={false}
-                                    className={"p-0 bg-[#fff] overflow-hidden overflow-x-auto h-[100vh] blur-0"}
+                                    className={"p-0 m-0 bg-[#fff] overflow-y-auto overflow-x-hidden h-screen w-screen"}
+                                    style={{
+                                        content: {
+                                            position: 'fixed',
+                                            inset: 0,
+                                            padding: 0,
+                                            margin: 0,
+                                            border: 'none',
+                                            borderRadius: 0,
+                                            width: '100vw',
+                                            height: '100vh',
+                                            minHeight: '100vh',
+                                            maxHeight: '100vh',
+                                            overflow: 'auto',
+                                            background: '#ffffff',
+                                        },
+                                        overlay: {
+                                            position: 'fixed',
+                                            inset: 0,
+                                            backgroundColor: '#ffffff',
+                                            zIndex: 9999,
+                                            margin: 0,
+                                            padding: 0,
+                                        }
+                                    }}
                                 >
-                                    <ul className='overflow-y-hidden'>
+                                    <div ref={refFavorite} className='overflow-y-auto min-h-screen bg-white pb-20'>
                                         <div className='pr-6'>
                                             <div className='sticky top-0 bg-[#fff] z-50'>
                                                 <h6 className='text-[18px] text-center md:text-left text-[#333] font-bold p-3  px-5 border-b border-solid border-[#e8e8e8]'>Favoritos</h6>
@@ -597,25 +649,37 @@ const Header = () => {
                                                             <div className='w-[45px] h-[35px] mr-4'>
                                                                 <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
                                                             </div>
-                                                            <div>
+                                                            <div className="flex-1">
                                                                 <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
-                                                                <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis w-[310px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
+                                                                <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
                                                                 <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
                                                             </div>
 
-                                                            {
-                                                                isMobile && <Icon className='absolute right-0 top-0' icon="ic:baseline-close" onClick={(e: any) => deleteFavorites(e, item)} />
-                                                            }
+                                                            {/* Mobile delete button - always visible */}
+                                                            {isMobile && (
+                                                                <button
+                                                                    className='absolute right-0 top-0 p-2 z-50'
+                                                                    onClick={(e: any) => {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        deleteFavorites(e, item);
+                                                                    }}
+                                                                >
+                                                                    <Icon icon="ic:baseline-close" width={20} />
+                                                                </button>
+                                                            )}
 
-                                                            <Icon
-                                                                className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"
-                                                                    }`}
-                                                                icon="ic:baseline-close"
-                                                                onClick={(e: any) => {
-                                                                    e.stopPropagation(); // Evita que el evento alcance otros handlers
-                                                                    deleteFavorites(e, item);
-                                                                }}
-                                                            />
+                                                            {/* Desktop delete button - show on hover */}
+                                                            {!isMobile && (
+                                                                <Icon
+                                                                    className={`absolute right-0 top-0 transition-opacity duration-200 ${hoveredFavoriteId === item.idfavoritos ? "opacity-100" : "opacity-0"}`}
+                                                                    icon="ic:baseline-close"
+                                                                    onClick={(e: any) => {
+                                                                        e.stopPropagation();
+                                                                        deleteFavorites(e, item);
+                                                                    }}
+                                                                />
+                                                            )}
                                                         </div>
                                                     )) :
 
@@ -629,7 +693,7 @@ const Header = () => {
                                                 }
                                             </div>
                                         </div>
-                                    </ul>
+                                    </div>
                                 </ReactModal>
                             )
                         }

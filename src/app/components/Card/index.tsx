@@ -7,6 +7,7 @@ import Angle from '../../../../public/svg/angle_right.svg'
 import moment from "moment";
 import { Event } from "@/app/interfaces/event";
 import { useEventStore } from "@/app/zustand/events";
+import { useRef, useEffect } from "react";
 
 interface IProps {
     item: Event
@@ -19,6 +20,19 @@ interface IProps {
 const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: IProps) => {
 
     const { resetEvent } = useEventStore();
+    const wasDraggingRef = useRef(false);
+
+    useEffect(() => {
+        if (isDragging) {
+            wasDraggingRef.current = true;
+        } else if (wasDraggingRef.current) {
+            // Small delay to prevent navigation immediately after drag
+            const timer = setTimeout(() => {
+                wasDraggingRef.current = false;
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [isDragging]);
 
     return (
         <motion.div
@@ -30,7 +44,7 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
             <Link
                 prefetch={true}
                 onClick={(e) => {
-                    if (isDragging) {
+                    if (isDragging || wasDraggingRef.current) {
                         e.preventDefault();
                         e.stopPropagation();
                         return;
@@ -91,7 +105,7 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                     </div>
                 </div>
             </Link>
-            <Link className='flex text-[11px] mt-1 text-[#A3ABCC] font-bold relative -top-0 md:-top-0 left-4'
+            <Link className='flex w-fit text-[11px] mt-1 text-[#A3ABCC] font-bold relative -top-0 md:-top-0 left-4'
                 href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}
                 target="_blank"
                 rel="noopener noreferrer"

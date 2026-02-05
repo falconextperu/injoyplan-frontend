@@ -27,7 +27,7 @@
     font-weight: 500;
 }
 
-.date > div:nth-child(2) {
+.date>div:nth-child(2) {
     font-family: 'Quicksand', sans-serif;
     border-radius: 20px;
     background: #fff;
@@ -129,28 +129,35 @@
     cursor: pointer;
     color: #5E6278;
     background-color: #fff;
-    border-radius: 5px;
-    padding: 11px 8px !important;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    padding: 0 !important;
     transition: 0.5s;
 }
 
 .day:hover {
-    background: #007FA4; 
-    border-radius:100%;
+    background: #007FA4;
+    border-radius: 50%;
     color: #fff;
     transition: 0.5s;
 }
 
 .day.selected {
-    background: #007FA4; 
-    border-radius:100%;
-    color: #fff;
+    background: #007FA4 !important;
+    border-radius: 50%;
+    color: #fff !important;
     transition: 0.5s;
 }
 
-.date__select > div
+.day.today {
+    border: 2px solid #007FA4;
+    border-radius: 50%;
+    color: #007FA4;
+    font-weight: bold;
+}
 
-.day.active {
+.date__select>div .day.active {
     background-color: red;
     color: #fff;
 }
@@ -176,23 +183,28 @@
 }
 
 @media (max-width: 768px) {
-    .header { 
+    .header {
         margin-bottom: 0px;
     }
-    .date > div:nth-child(3) {
+
+    .date>div:nth-child(3) {
         width: auto;
     }
+
     .days {
-        margin-top:30px;
+        margin-top: 30px;
         grid-gap: 10px 0px;
     }
+
     .header>button>svg {
         width: 15px;
         height: 15px;
     }
+
     .month {
         font-size: 15px;
     }
+
     .day {
         font-size: 11px;
         font-weight: 900;

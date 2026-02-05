@@ -480,14 +480,6 @@ const BusquedaEvento = () => {
                             }
                         </div>
 
-                        {
-                            limit >= total ? "" : (
-                                <div className='text-[#007fa4] font-bold flex justify-center mt-10 mb-10 border-2 border-solid border-[#007FA4] p-2 w-fit mx-auto rounded-full px-16'>
-                                    <button onClick={() => setLimit((page: any) => page + 12)} type="submit">VER MÁS EVENTOS</button>
-                                </div>
-                            )
-                        }
-
                         <div className="block md:hidden px-8">
                             {
                                 eventSearchByFilters?.map((item: any, index: number) => (
@@ -495,6 +487,14 @@ const BusquedaEvento = () => {
                                 ))
                             }
                         </div>
+
+                        {
+                            limit >= total ? "" : (
+                                <div className='text-[#007fa4] font-bold flex justify-center mt-10 mb-10 border-2 border-solid border-[#007FA4] p-2 w-fit mx-auto rounded-full px-16'>
+                                    <button onClick={() => setLimit((page: any) => page + 12)} type="submit">VER MÁS EVENTOS</button>
+                                </div>
+                            )
+                        }
                     </div>
                 </div>
             </>
