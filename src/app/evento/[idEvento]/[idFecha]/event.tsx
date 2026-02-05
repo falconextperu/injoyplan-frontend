@@ -301,7 +301,6 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     const modalShowDates = () => {
         setShowModal(true);
     }
-
     const mapRefDesktop: any = useRef(null);
     const mapRefMobile: any = useRef(null);
 
@@ -313,12 +312,31 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
         mapRefMobile.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            useAlertStore.getState().alert("Se ha copiado la url, compartelo con tus amigos :)", "notification");
-        }).catch(err => {
-            console.error('Error al copiar el enlace', err);
-        });
+    const handleCopyLink = async () => {
+        const shareData = {
+            title: data[0]?.titulo || 'Evento en InjoyPlan',
+            text: `¡Mira este evento! ${data[0]?.titulo || ''}`,
+            url: window.location.href
+        };
+
+        // Use native share if available (mainly mobile devices)
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+            } catch (err: any) {
+                // User cancelled share or error
+                if (err.name !== 'AbortError') {
+                    console.error('Error al compartir', err);
+                }
+            }
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                useAlertStore.getState().alert("Se ha copiado la url, compartelo con tus amigos :)", "notification");
+            }).catch(err => {
+                console.error('Error al copiar el enlace', err);
+            });
+        }
     };
 
     const addFavoritesByUser = (item: any) => {
@@ -511,28 +529,52 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                     })
                                 }
                                 {
-                                    data[0]?.ticketUrls && Array.isArray(data[0].ticketUrls) && data[0].ticketUrls.map((link: { name: string; url: string }, idx: number) => {
-                                        const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+                                    (() => {
+                                        const ticketUrls = data[0]?.ticketUrls;
+                                        if (!ticketUrls || !Array.isArray(ticketUrls)) return null;
 
-                                        const getIcon = (name: string) => {
-                                            const n = (name || '').toLowerCase();
-                                            if (n.includes('tiktok')) return 'ic:baseline-tiktok';
-                                            if (n.includes('instagram')) return 'mdi:instagram';
-                                            if (n.includes('facebook')) return 'mdi:facebook';
-                                            if (n.includes('whatsapp')) return 'mdi:whatsapp';
-                                            if (n.includes('web')) return 'mdi:web';
-                                            return 'solar:ticket-bold';
-                                        };
+                                        // Count occurrences of each platform name
+                                        const nameCounts: { [key: string]: number } = {};
+                                        ticketUrls.forEach((link: { name: string }) => {
+                                            const name = link.name || 'Entradas';
+                                            nameCounts[name] = (nameCounts[name] || 0) + 1;
+                                        });
 
-                                        return (
-                                            <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
-                                                <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
-                                                    <Icon icon={getIcon(link.name)} width={24} className='mr-3' />
-                                                    {link.name || 'Comprar entradas'}
-                                                </Link>
-                                            </div>
-                                        );
-                                    })
+                                        // Track current index for each name
+                                        const currentIndex: { [key: string]: number } = {};
+
+                                        return ticketUrls.map((link: { name: string; url: string }, idx: number) => {
+                                            const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+                                            const baseName = link.name || 'Entradas';
+
+                                            // Increment index for this name
+                                            currentIndex[baseName] = (currentIndex[baseName] || 0) + 1;
+
+                                            // Add number if there are multiple of the same type
+                                            const displayName = nameCounts[baseName] > 1
+                                                ? `${baseName} ${currentIndex[baseName]}`
+                                                : baseName;
+
+                                            const getIcon = (name: string) => {
+                                                const n = (name || '').toLowerCase();
+                                                if (n.includes('tiktok')) return 'ic:baseline-tiktok';
+                                                if (n.includes('instagram')) return 'mdi:instagram';
+                                                if (n.includes('facebook')) return 'mdi:facebook';
+                                                if (n.includes('whatsapp')) return 'mdi:whatsapp';
+                                                if (n.includes('web')) return 'mdi:web';
+                                                return 'solar:ticket-bold';
+                                            };
+
+                                            return (
+                                                <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
+                                                    <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
+                                                        <Icon icon={getIcon(baseName)} width={24} className='mr-3' />
+                                                        {displayName}
+                                                    </Link>
+                                                </div>
+                                            );
+                                        });
+                                    })()
                                 }
                             </div>
                         )}

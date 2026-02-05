@@ -1180,6 +1180,7 @@ export default function AdminPage() {
                             imageUrl: data.imageUrl || undefined,
                             websiteUrl: data.websiteUrl || undefined,
                             isFeatured: data.isFeatured,
+                            ticketUrls: data.ticketUrls || [],
                             dates: (data.dates || []).map((d: any) => ({
                                 date: d.date,
                                 startTime: d.startTime || undefined,
