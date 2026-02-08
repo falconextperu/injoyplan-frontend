@@ -74,10 +74,10 @@ const BusquedaEvento = () => {
     });
 
     useEffect(() => {
-        if (!isNumericCategory && categoryInfo) {
+        if (!isNumericCategory && !isAllCategories && categoryInfo) {
             setCategory(categoryInfo.idCategorias);
         }
-    }, [categoryInfo, isNumericCategory]);
+    }, [categoryInfo, isNumericCategory, isAllCategories]);
 
     const distritos = [
         { "id": 0, "value": "Todos los distritos" },
@@ -289,7 +289,7 @@ const BusquedaEvento = () => {
                             <SelectPro isIconLeft={false} options={[{ id: 0, value: "Todas las categorías" }, ...(countsCategories?.map((item: any) => ({
                                 id: item?.idCategorias,
                                 value: item?.nombreCategoria
-                            })) || [])]} defaultValue={categoryInfo?.nombreCategoria} placeholder={`Todas las categorías`} name='categoria' onChange={handleSelectCategory} />
+                            })) || [])]} defaultValue={Number(category) === 0 ? undefined : categoryInfo?.nombreCategoria} placeholder={`Todas las categorías`} name='categoria' onChange={handleSelectCategory} />
                         </div>
                         <div className="md:col-auto col-start-1 col-end-5 flex items-center">
                             <MoreFilters onApply={(data: any) => setFiltersMore({ ...filtersMore, ...data })} />
