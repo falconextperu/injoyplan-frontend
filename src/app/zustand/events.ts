@@ -32,7 +32,7 @@ export interface IEventsState {
     setEventDeleteFiltersFavoriteByEventId: (eventId: any) => void;
     setEventDataDeleteFavoriteByEventId: (eventId: any) => void;
     getEventByEventAndDate: (event: number, date: number) => any
-    getEventSearchByFilters: (params: any) => any
+    getEventSearchByFilters: (params: any, options?: { page?: number, isLoadMore?: boolean, limit?: number }) => any
     setFeaturedEventsAsFavorite: (idEvento: any, resp: any) => any
     setFeaturedEventsDeleteFavorite: (idFavorito: any) => any
     setFeaturedEventsDeleteFavoriteByEventId: (eventId: any) => void
@@ -42,32 +42,46 @@ export interface IEventsState {
 
 // Función para mapear eventos del nuevo backend al formato del frontend antiguo
 // Función para mapear eventos del nuevo backend al formato del frontend antiguo
-export const mapEventFromBackend = (item: any): Event => {
+export const mapEventFromBackend = (item: any, filterDate?: string): Event => {
     // Logic to find the most relevant upcoming date
     let firstDate = item.dates?.[0];
 
     if (item.dates && item.dates.length > 0) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Compare from start of today
-
-        // Sort dates chronologically first to be safe
+        // Sort dates chronologically
         const sortedDates = [...item.dates].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        // Find first date >= today
-        const upcoming = sortedDates.find((d: any) => {
-            const dDate = new Date(d.date);
-            // We can compare strictly or with time, but start of day is usually best for "Active"
-            // Adjust for timezone if needed, but basic comparison works for now
-            return new Date(d.date).getTime() >= today.getTime();
-        });
+        // If a specific filter date is provided, try to find a match
+        if (filterDate) {
+            // filterDate is usually "DD-MM-YYYY" or "YYYY-MM-DD". Let's handle string inputs carefully.
+            // Assuming filterDate from store is "DD-MM-YYYY" based on usage in page.tsx: setDate(moment(value).format('DD-MM-YYYY'))
+            // But verify format. If it comes from `data` in search, it might be in different format.
+            // Let's normalize to comparison string YYYY-MM-DD for safety.
 
-        if (upcoming) {
-            firstDate = upcoming;
+            const targetDateStr = typeof filterDate === 'string' && filterDate.includes('-')
+                ? (filterDate.split('-')[2]?.length === 4 ? filterDate.split('-').reverse().join('-') : filterDate) // simple check if DD-MM-YYYY -> YYYY-MM-DD
+                : null;
+
+            // Better yet, just use moment if available or simple date string matching
+            const match = sortedDates.find((d: any) => {
+                const dDate = new Date(d.date).toISOString().split('T')[0]; // YYYY-MM-DD
+                // filterDate should already be in YYYY-MM-DD format from buildSearchData()
+                return dDate === filterDate;
+            });
+
+            if (match) {
+                firstDate = match;
+            } else {
+                // Fallback to upcoming logic if no exact match (though backend likely filtered by it)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const upcoming = sortedDates.find((d: any) => new Date(d.date).getTime() >= today.getTime());
+                firstDate = upcoming || sortedDates[0];
+            }
         } else {
-            // If all are past, keep the last one or first? 
-            // Better to show the last one if all past, or just first. 
-            // Let's stick to first or sorted[0] if no upcoming.
-            firstDate = sortedDates[0];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = sortedDates.find((d: any) => new Date(d.date).getTime() >= today.getTime());
+            firstDate = upcoming || sortedDates[0];
         }
     }
 
@@ -316,9 +330,61 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
             const resp: any = await get(`events/search?q=${palabraBusqueda}`);
             console.log(resp)
             if (resp?.data && Array.isArray(resp.data)) {
-                // Map backend response to frontend format
-                const mappedEvents = resp.data.map((item: any) => mapEventFromBackend(item));
-                set({ eventSearch: mappedEvents });
+                // Map backend response to frontend format, expanding by dates
+                const allEvents: any[] = [];
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                resp.data.forEach((item: any) => {
+                    // Filter and sort verified upcoming dates
+                    let eventDates = item.dates || [];
+
+                    // Filter future dates
+                    const upcomingDates = eventDates.filter((d: any) => {
+                        const dateObj = new Date(d.date);
+                        // Optional: clear time component for strict date comparison if needed
+                        // dateObj.setHours(0,0,0,0); 
+                        // But server returns ISO strings often with time or just date. 
+                        // Let's rely on standard comparison.
+                        // Ideally we check if date + endTime (if exists) is >= now.
+                        // For search results, simple Date check is good.
+                        return new Date(d.date).getTime() >= today.getTime();
+                    });
+
+                    // If we have upcoming dates, generate an item for EACH date
+                    if (upcomingDates.length > 0) {
+                        upcomingDates.forEach((dateInfo: any) => {
+                            // Create a base mapped event using the standard mapper 
+                            // (which might default to first date logic, but we override it)
+                            const baseEvent = mapEventFromBackend(item);
+
+                            // Override with THIS specific date's info
+                            const specificEventInstance = {
+                                ...baseEvent,
+                                idfecha: dateInfo.id,
+                                FechaInicio: dateInfo.date,
+                                HoraInicio: dateInfo.startTime,
+                                HoraFinal: dateInfo.endTime,
+                                Monto: dateInfo.price,
+                                EsGratis: (dateInfo.price === 0 || !dateInfo.price) ? 1 : 0
+                            };
+                            allEvents.push(specificEventInstance);
+                        });
+                    } else {
+                        // Fallback mechanism: if no upcoming dates (or only past),
+                        // show the event as "Past" or just use the standard mapping (usually shows last date or first)
+                        // This ensures the event is at least visible if it matches search terms.
+                        // Or we can choose to HIDE past events from search entirely. 
+                        // Current logic: mapEventFromBackend picks *some* date.
+                        // Let's keep showing it but mapped once.
+                        allEvents.push(mapEventFromBackend(item));
+                    }
+                });
+
+                // Sort all resulting events by date
+                allEvents.sort((a, b) => new Date(a.FechaInicio).getTime() - new Date(b.FechaInicio).getTime());
+
+                set({ eventSearch: allEvents });
             } else {
                 set({ eventSearch: null })
             }
@@ -379,30 +445,53 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         }
     },
     // aqui se llama asi por que el api debe ser con params pero metodo get y no post 
-    getEventSearchByFilters: async (data: any) => {
-        console.log("Searching with filters:", data);
+    // aqui se llama asi por que el api debe ser con params pero metodo get y no post 
+    getEventSearchByFilters: async (data: any, options?: { page?: number, isLoadMore?: boolean, limit?: number }) => {
+        console.log("Searching with filters:", data, options);
 
         // Remove empty/undefined params
         const filteredParams = Object.entries(data)
             .filter(([_, value]) => value !== undefined && value !== '' && value !== 0)
             .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
 
-        const query = new URLSearchParams(filteredParams).toString();
+        // Add pagination params
+        const page = options?.page || 1;
+        const limit = options?.limit || 12;
+
+        // Construct query string
+        const queryParams: any = { ...filteredParams, page, limit };
+        const query = new URLSearchParams(queryParams).toString();
 
         try {
+            // Extract date from params to pass to mapper
+            const params = new URLSearchParams(data);
+            const dateFilter = params.get('fechaInicio') || undefined;
+
             const resp: any = await get(`events/public/search?${query}`);
             console.log("Search response:", resp);
 
             if (resp && Array.isArray(resp.eventos)) {
+                const mappedEvents = resp.eventos.map((item: any) => mapEventFromBackend(item, dateFilter))
+                    .sort((a: any, b: any) => new Date(a.FechaInicio).getTime() - new Date(b.FechaInicio).getTime());
 
-                const mappedEvents = resp.eventos.map((item: any) => mapEventFromBackend(item));
-                set({ eventSearchByFilters: mappedEvents, total: resp.total || 0 });
+                if (options?.isLoadMore) {
+                    set((state: any) => ({
+                        eventSearchByFilters: [...(state.eventSearchByFilters || []), ...mappedEvents],
+                        total: resp.total || 0
+                    }));
+                } else {
+                    set({ eventSearchByFilters: mappedEvents, total: resp.total || 0 });
+                }
             } else {
-                set({ eventSearchByFilters: [], total: 0 })
+                if (!options?.isLoadMore) {
+                    set({ eventSearchByFilters: [], total: 0 })
+                }
             }
         } catch (error) {
             console.error('Error searching events by filters:', error);
-            set({ eventSearchByFilters: [], total: 0 })
+            if (!options?.isLoadMore) {
+                set({ eventSearchByFilters: [], total: 0 })
+            }
         }
     },
     updateEventsWithFavorites: (favorites: any[]) => {

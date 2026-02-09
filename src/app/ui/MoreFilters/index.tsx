@@ -27,15 +27,37 @@ const MoreFilters = ({ onApply }: Props) => {
         return { value: `${hour}:00`, label: `${hour}:00` };
     });
 
-    const handleApply = () => {
+    const triggerApply = (newStartTime: string, newEsGratis: boolean, newEnCurso: boolean) => {
         onApply({
-            horaInicio: startTime || undefined,
+            horaInicio: newStartTime || undefined,
             horaFin: undefined, // "Desde" implies onwards, backend handles open-ended range if fin is missing
-            esGratis,
-            enCurso
+            esGratis: newEsGratis,
+            enCurso: newEnCurso
         });
-        setIsOpen(false);
     };
+
+    const handleStartTimeChange = (value: string) => {
+        setStartTime(value);
+        triggerApply(value, esGratis, enCurso);
+    };
+
+    const handleAnyTimeClick = () => {
+        const newValue = "";
+        setStartTime(newValue);
+        triggerApply(newValue, esGratis, enCurso);
+    };
+
+    const handleEsGratisChange = () => {
+        const newValue = !esGratis;
+        setEsGratis(newValue);
+        triggerApply(startTime, newValue, enCurso);
+    };
+
+    // const handleEnCursoChange = () => {
+    //     const newValue = !enCurso;
+    //     setEnCurso(newValue);
+    //     triggerApply(startTime, esGratis, newValue);
+    // };
 
     return (
         <div ref={ref} className="relative z-20">
@@ -56,22 +78,22 @@ const MoreFilters = ({ onApply }: Props) => {
                     {/* Time Filter */}
                     <div className="mb-4 bg-gray-50 p-3 rounded-lg">
                         <div
-                            className={`flex justify-between items-center mb-2 cursor-pointer p-2 rounded transition-colors ${!startTime ? 'bg-[#007FA4]/10' : 'hover:bg-gray-100'}`}
-                            onClick={() => setStartTime("")}
+                            className="flex justify-between items-center mb-2 cursor-pointer p-2 rounded transition-colors hover:bg-gray-100"
+                            onClick={handleAnyTimeClick}
                         >
-                            <span className={`text-sm font-medium ${!startTime ? 'text-[#007FA4] font-bold' : 'text-gray-700'}`}>
-                                Cualquier hora
-                            </span>
-                            {!startTime && <Icon icon="ei:check" className="text-[#007FA4]" width={20} />}
+                            <span className="text-gray-700 font-medium text-sm">Cualquier hora</span>
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${!startTime ? 'bg-[#007FA4] border-[#007FA4]' : 'bg-white border-gray-300'}`}>
+                                {!startTime && <Icon icon="ei:check" className="text-white" width={18} />}
+                            </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center justify-between mt-3 px-2">
                             <span className="text-sm text-gray-600">Desde</span>
                             <div className="relative">
                                 <select
                                     className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-full py-1 px-3 pr-8 leading-tight focus:outline-none focus:border-[#007FA4]"
                                     value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
+                                    onChange={(e) => handleStartTimeChange(e.target.value)}
                                 >
                                     <option value="" disabled>--:--</option>
                                     {hours.map(h => (
@@ -86,7 +108,7 @@ const MoreFilters = ({ onApply }: Props) => {
                     </div>
 
                     {/* Checkboxes */}
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-3 mb-2">
                         {/* <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
                             onClick={() => setEnCurso(!enCurso)}
@@ -99,7 +121,7 @@ const MoreFilters = ({ onApply }: Props) => {
 
                         <div
                             className="bg-gray-100 p-3 rounded-lg flex justify-between items-center cursor-pointer"
-                            onClick={() => setEsGratis(!esGratis)}
+                            onClick={handleEsGratisChange}
                         >
                             <span className="text-gray-700 font-medium text-sm">Gratis</span>
                             <div className={`w-5 h-5 rounded border flex items-center justify-center ${esGratis ? 'bg-[#007FA4] border-[#007FA4]' : 'bg-white border-gray-300'}`}>
@@ -107,14 +129,6 @@ const MoreFilters = ({ onApply }: Props) => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Apply Button */}
-                    <button
-                        onClick={handleApply}
-                        className="w-full bg-[#007FA4] text-white font-bold py-3 rounded-full hover:bg-[#006a8a] transition-colors"
-                    >
-                        APLICAR
-                    </button>
                 </motion.div>
             )}
         </div>

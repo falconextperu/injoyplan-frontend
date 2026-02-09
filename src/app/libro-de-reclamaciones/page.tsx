@@ -211,7 +211,7 @@ const SuccessModal = ({ isOpen, onClose, data }: { isOpen: boolean; onClose: () 
                         onClick={generatePDF}
                         className="bg-[#277FA4] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#1f6683] transition-all w-full uppercase tracking-wide flex items-center justify-center gap-2"
                     >
-                        <Icon icon="solar:file-download-bold" /> Descargar PDF
+                        <Icon icon="solar:file-download-bold" /> Imprimir PDF
                     </button>
                     <button
                         onClick={onClose}
@@ -629,7 +629,7 @@ const ClaimsBook = () => {
                                     {/* Row 1: Nombre completo (Full Width) */}
                                     <div className="md:col-span-2">
                                         <label htmlFor="repName" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Nombre completo
+                                            Nombre completo
                                         </label>
                                         <input
                                             type="text"
@@ -645,7 +645,7 @@ const ClaimsBook = () => {
                                     {/* Row 2: Tipo de documento & Número */}
                                     <div>
                                         <label htmlFor="repDocType" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Tipo de documento
+                                            Tipo de documento
                                         </label>
                                         <select
                                             id="repDocType"
@@ -664,7 +664,7 @@ const ClaimsBook = () => {
 
                                     <div>
                                         <label htmlFor="repDocNumber" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Número de documento
+                                            Número de documento
                                         </label>
                                         <input
                                             type="text"
@@ -680,7 +680,7 @@ const ClaimsBook = () => {
                                     {/* Row 3: Domicilio & Departamento */}
                                     <div>
                                         <label htmlFor="repAddress" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Domicilio
+                                            Domicilio
                                         </label>
                                         <input
                                             type="text"
@@ -695,7 +695,7 @@ const ClaimsBook = () => {
 
                                     <div>
                                         <label htmlFor="repDepartment" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Departamento
+                                            Departamento
                                         </label>
                                         <select
                                             id="repDepartment"
@@ -715,7 +715,7 @@ const ClaimsBook = () => {
                                     {/* Row 4: Provincia & Distrito */}
                                     <div>
                                         <label htmlFor="repProvince" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Provincia
+                                            Provincia
                                         </label>
                                         <select
                                             id="repProvince"
@@ -734,7 +734,7 @@ const ClaimsBook = () => {
 
                                     <div>
                                         <label htmlFor="repDistrict" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Distrito
+                                            Distrito
                                         </label>
                                         <select
                                             id="repDistrict"
@@ -754,7 +754,7 @@ const ClaimsBook = () => {
                                     {/* Row 5: Celular & Email */}
                                     <div>
                                         <label htmlFor="repPhone" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Celular/Teléfono
+                                            Celular/Teléfono
                                         </label>
                                         <input
                                             type="tel"
@@ -769,7 +769,7 @@ const ClaimsBook = () => {
 
                                     <div>
                                         <label htmlFor="repEmail" className="block text-gray-500 mb-2">
-                                            <span className="text-red-500">* </span> Correo electrónico
+                                            Correo electrónico
                                         </label>
                                         <input
                                             type="email"

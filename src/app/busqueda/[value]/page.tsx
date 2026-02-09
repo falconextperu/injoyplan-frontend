@@ -61,7 +61,8 @@ const BusquedaEvento = () => {
 
     // Initialize category from URL params if available (only if numeric), otherwise fallback to store or 0.
     // IF isAllCategories (param is 0), FORCE category to 0.
-    const initialCategory = isNumericCategory ? paramAsNumber : (isAllCategories ? 0 : (categoryInfo !== null ? categoryInfo?.idCategorias : 0));
+    // IF isSearchTerm (text search like "rock"), RESET category to 0 to show all categories
+    const initialCategory = isNumericCategory ? paramAsNumber : (isAllCategories || isSearchTerm ? 0 : (categoryInfo !== null ? categoryInfo?.idCategorias : 0));
     const [category, setCategory] = useState<number>(initialCategory);
     const { addFavorite, deleteFavorite }: IFavoriteState = useFavoriteStore();
     const { auth }: IAuthState = useAuthStore();
@@ -74,10 +75,15 @@ const BusquedaEvento = () => {
     });
 
     useEffect(() => {
-        if (!isNumericCategory && !isAllCategories && categoryInfo) {
+        // If it's a numeric category or all categories OR A SEARCH TERM context, don't override from store
+        // We only want to sync from store if we are NOT in a specific route mode
+        if (!isNumericCategory && !isAllCategories && !isSearchTerm && categoryInfo) {
             setCategory(categoryInfo.idCategorias);
+        } else if (isSearchTerm) {
+            // Force reset to 0 if it is a search term, to ensure we don't keep previous category
+            setCategory(0);
         }
-    }, [categoryInfo, isNumericCategory, isAllCategories]);
+    }, [categoryInfo, isNumericCategory, isAllCategories, isSearchTerm]);
 
     const distritos = [
         { "id": 0, "value": "Todos los distritos" },
@@ -127,13 +133,17 @@ const BusquedaEvento = () => {
     const [limit, setLimit] = useState(12);
     const [distrito, setDistrito] = useState<string | undefined>(undefined);
 
-    // New validation filters state
     const [filtersMore, setFiltersMore] = useState({
         esGratis: false,
         enCurso: false,
         horaInicio: "",
         horaFin: ""
     });
+
+    // Pagination State
+    const [page, setPage] = useState(1);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
     const handleDate = (value: string, _name: string) => {
         // setSearch("");
@@ -169,7 +179,7 @@ const BusquedaEvento = () => {
             "enCurso": filtersMore.enCurso ? true : undefined,
             "horaInicio": filtersMore.horaInicio || undefined,
             "horaFin": filtersMore.horaFin || undefined,
-            "excludeFeatured": true, // Always exclude featured in search results as per user preference on "For You" parity
+            "excludeFeatured": !searchDebounce, // Only exclude featured events if NOT searching by text
         };
     }
 
@@ -245,15 +255,75 @@ const BusquedaEvento = () => {
         document.body.classList.remove('ReactModal__Body--open');
     }
 
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            useAlertStore.getState().alert("Se ha copiado la url, compartelo con tus amigos :)", "notification");
-        }).catch(err => {
-            console.error('Error al copiar el enlace', err);
-        });
-    };
+
 
     console.log(eventSearchByFilters)
+
+    // Effect to reset pagination when filters change
+    useEffect(() => {
+        setPage(1);
+        setHasMore(true);
+    }, [searchDebounce, category, date, filtersMore, distrito]);
+
+    // Update hasMore based on total results
+    useEffect(() => {
+        if (eventSearchByFilters && total) {
+            setHasMore(eventSearchByFilters.length < total);
+        }
+    }, [eventSearchByFilters, total]);
+
+    const loadMoreEvents = () => {
+        if (isLoadingMore || !hasMore) return;
+
+        const nextPage = page + 1;
+        setIsLoadingMore(true);
+
+        const data = buildSearchData();
+
+        // Add artificial delay for better UX (spinner visibility)
+        setTimeout(() => {
+            getEventSearchByFilters(data, { page: nextPage, isLoadMore: true, limit: 12 })
+                .finally(() => {
+                    setIsLoadingMore(false);
+                    setPage(nextPage);
+                });
+        }, 1500);
+    };
+
+    const handleViewAll = () => {
+        if (isLoadingMore) return;
+        setIsLoadingMore(true);
+
+        const data = buildSearchData();
+        const nextPage = page + 1;
+
+        // Load the next page of 12 events
+        setTimeout(() => {
+            getEventSearchByFilters(data, { page: nextPage, isLoadMore: true, limit: 12 })
+                .finally(() => {
+                    setIsLoadingMore(false);
+                    setPage(nextPage);
+                    // hasMore will be updated by the useEffect that checks total vs current count
+                });
+        }, 500);
+    };
+
+    // Infinite Scroll Listener
+    useEffect(() => {
+        const handleScroll = () => {
+            if (page >= 3 || !hasMore || isLoadingMore) return;
+
+            const scrollTop = window.innerHeight + document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+
+            if (scrollTop + 1 >= scrollHeight - 500) {
+                loadMoreEvents();
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [page, hasMore, isLoadingMore]);
 
     return (
         <div>
@@ -264,7 +334,7 @@ const BusquedaEvento = () => {
                         <div className="">
                             <div className="flex items-center px-5 md:px-0">
                                 <div className="w-full max-w-[400px] border-b border-solid border-[#fff] z-0 relative top-2">
-                                    <input value={search} placeholder="Ingresa tu busqueda" className="placeholder:text-[#fff] w-full bg-transparent outline-none capitalize text-[#fff]" onChange={handleChange} type="text" name='search' />
+                                    <input value={search} placeholder="Busca por palabra" className="placeholder:text-[#fff] w-full bg-transparent outline-none capitalize text-[#fff]" onChange={handleChange} type="text" name='search' />
                                     {search.length === 0 && <Icon icon="ei:search" className="absolute right-2 top-[-8px]" width={30} color="#fff" onClick={() => setSearch("")} />}
                                     <div className="absolute top-[-10px] right-2 cursor-pointer">
                                         {search.length > 0 && <Icon icon="ei:close" width={30} color="#fff" onClick={() => setSearch("")} />}
@@ -289,7 +359,7 @@ const BusquedaEvento = () => {
                             <SelectPro isIconLeft={false} options={[{ id: 0, value: "Todas las categorías" }, ...(countsCategories?.map((item: any) => ({
                                 id: item?.idCategorias,
                                 value: item?.nombreCategoria
-                            })) || [])]} defaultValue={Number(category) === 0 ? undefined : categoryInfo?.nombreCategoria} placeholder={`Todas las categorías`} name='categoria' onChange={handleSelectCategory} />
+                            })) || [])]} defaultValue={Number(category) === 0 ? undefined : (countsCategories?.find((c: any) => Number(c.idCategorias) === Number(category))?.nombreCategoria || undefined)} placeholder={`Todas las categorías`} name='categoria' onChange={handleSelectCategory} />
                         </div>
                         <div className="md:col-auto col-start-1 col-end-5 flex items-center">
                             <MoreFilters onApply={(data: any) => setFiltersMore({ ...filtersMore, ...data })} />
@@ -448,12 +518,27 @@ const BusquedaEvento = () => {
                                                     {/* <h6>Visto 21 veces</h6> */}
                                                     <div className="flex justify-end items-center">
                                                         <div onClick={(e) => {
-                                                            handleCopyLink();
                                                             e.preventDefault();
-                                                            e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
+                                                            e.stopPropagation();
 
+                                                            const shareUrl = `${window.location.origin}/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`;
+                                                            const shareData = {
+                                                                title: item?.titulo || 'Evento en InjoyPlan',
+                                                                text: `¡Mira este evento! ${item?.titulo || ''}`,
+                                                                url: shareUrl
+                                                            };
+
+                                                            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                                                                navigator.share(shareData).catch((err) => {
+                                                                    if (err.name !== 'AbortError') console.error('Error al compartir', err);
+                                                                });
+                                                            } else {
+                                                                navigator.clipboard.writeText(shareUrl).then(() => {
+                                                                    useAlertStore.getState().alert("Se ha copiado la url, compártelo con tus amigos :)", "notification");
+                                                                }).catch(err => console.error('Error al copiar', err));
+                                                            }
                                                         }}>
-                                                            <Icon color="#037BA1" className="mr-2 top-1 relative" icon="iconamoon:copy-light" width="26" height="26" />
+                                                            <Image src={comp} width={26} height={26} alt="compartir" className="mr-2 top-1 relative" />
                                                         </div>
 
                                                         <div onClick={(e) => {
@@ -478,6 +563,27 @@ const BusquedaEvento = () => {
                                     </div>
                                 ))
                             }
+                            {/* View All Button - Only show after initial scrolling pages are exhausted */}
+                            {hasMore && page >= 3 && !isLoadingMore && (
+                                <div className="flex justify-center mt-12 mb-20 text-center w-full">
+                                    <button
+                                        onClick={handleViewAll}
+                                        className="bg-[#007FA4] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#006b8a] transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
+                                    >
+                                        <span>Ver todos los eventos</span>
+                                        <Icon icon="ei:plus" width={24} className="font-bold" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Professional Loading Spinner */}
+                            {isLoadingMore && (
+                                <div className="flex flex-col items-center justify-center mt-12 mb-20 w-full">
+                                    <Icon icon="svg-spinners:ring-resize" width={40} height={40} className="text-[#007FA4]" />
+                                    <p className="text-gray-400 text-sm mt-3 font-medium animate-pulse">Cargando eventos...</p>
+                                </div>
+                            )}
+
                         </div>
 
                         <div className="block md:hidden px-8">
@@ -487,14 +593,6 @@ const BusquedaEvento = () => {
                                 ))
                             }
                         </div>
-
-                        {
-                            limit >= total ? "" : (
-                                <div className='text-[#007fa4] font-bold flex justify-center mt-10 mb-10 border-2 border-solid border-[#007FA4] p-2 w-fit mx-auto rounded-full px-16'>
-                                    <button onClick={() => setLimit((page: any) => page + 12)} type="submit">VER MÁS EVENTOS</button>
-                                </div>
-                            )
-                        }
                     </div>
                 </div>
             </>
