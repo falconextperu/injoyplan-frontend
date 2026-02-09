@@ -43,6 +43,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         }
     }, [auth]);
 
+    // Reset modal state on route change to prevent stuck blur effect
+    useEffect(() => {
+        setIsModalOpen(false);
+        document.body.classList.remove('ReactModal__Body--open'); // Force cleanup
+    }, [pathname]);
+
     useEffect(() => {
         const checkModalClass = () => {
             const modalElements = document.getElementsByClassName("ReactModal__Body--open");

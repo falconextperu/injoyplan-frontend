@@ -482,85 +482,87 @@ const BusquedaEvento = () => {
                         <div className="hidden md:block">
                             {
                                 eventSearchByFilters?.map((item: any, index: number) => (
-                                    <div className="relative" key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}>
-                                        <motion.div {...({ className: "max-h-[200px] grid rounded-2xl items-center grid-cols-12 shadow-custom-2 mb-16 relative" }) as any}
-                                            // key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={() => navigateEvent(item)}
-                                            layout
-                                            initial={{ opacity: 0, y: 50 }}  // Animación inicial (fuera de la vista)
-                                            animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
-                                            exit={{ opacity: 0, y: -50 }}  // Animación al salir (desplazamiento hacia abajo)
-                                            transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
-                                        >
-                                            <div className="col-start-1 col-end-2 text-center">
-                                                <strong className={`${quicksand.className} block font-[900] text-5xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('DD')}</strong>
-                                                <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
-                                            </div>
-                                            <div className="col-start-2 col-end-6 max-h-[200px]">
-                                                <div className="max-h-[200px] w-full">
-                                                    {item?.url ? (
-                                                        <Image width={250} height={200} className="h-[revert-layer] w-full object-fill" src={item.url} alt="imagenes1" />
-                                                    ) : (
-                                                        <div className="h-[200px] w-full bg-[#f2f2f2]" />
-                                                    )}
+                                    <Link href={`/evento/${item?.idEventos ?? item?.ideventos}`} key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}>
+                                        <div className="relative">
+                                            <motion.div {...({ className: "max-h-[200px] grid rounded-2xl items-center grid-cols-12 shadow-custom-2 mb-16 relative" }) as any}
+                                                // key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => navigateEvent(item)}
+                                                layout
+                                                initial={{ opacity: 0, y: 50 }}  // Animación inicial (fuera de la vista)
+                                                animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
+                                                exit={{ opacity: 0, y: -50 }}  // Animación al salir (desplazamiento hacia abajo)
+                                                transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
+                                            >
+                                                <div className="col-start-1 col-end-2 text-center">
+                                                    <strong className={`${quicksand.className} block font-[900] text-5xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('DD')}</strong>
+                                                    <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
                                                 </div>
-                                            </div>
-                                            <div className="col-start-6 col-end-11">
-                                                <h3 className={`${sans.className} ml-10 font-bold font-sans text-2xl text-[#444]`}>{item?.titulo}</h3>
-                                                <h6 className={`${sans.className} ml-10 mt-4 font-[300] text-[14px] font-sans`}>{moment(item?.FechaInicio).utcOffset(-5).format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
-                                                <h5 className={`${sans.className} ml-10 mt-1 font-[300] text-[14px] font-sans`}>{item?.descripcion || item?.NombreLocal}</h5>
-                                            </div>
-                                            <div className="col-start-11 col-end-13 justify-end flex">
-                                                <div className="mr-8">
-                                                    <span className="text-sm flex justify-end">Desde</span>
-                                                    <p className="mt-5 text-[#007FA4] text-2xl font-bold">{item?.Monto > 0 ? `S/ ${Number(item.Monto).toFixed(2)}` : "¡Gratis!"}</p>
-                                                    {/* <h6>Visto 21 veces</h6> */}
-                                                    <div className="flex justify-end items-center">
-                                                        <div onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
+                                                <div className="col-start-2 col-end-6 max-h-[200px]">
+                                                    <div className="max-h-[200px] w-full">
+                                                        {item?.url ? (
+                                                            <Image width={250} height={200} className="h-[revert-layer] w-full object-fill" src={item.url} alt="imagenes1" />
+                                                        ) : (
+                                                            <div className="h-[200px] w-full bg-[#f2f2f2]" />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="col-start-6 col-end-11">
+                                                    <h3 className={`${sans.className} ml-10 font-bold font-sans text-2xl text-[#444]`}>{item?.titulo}</h3>
+                                                    <h6 className={`${sans.className} ml-10 mt-4 font-[300] text-[14px] font-sans`}>{moment(item?.FechaInicio).utcOffset(-5).format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
+                                                    <h5 className={`${sans.className} ml-10 mt-1 font-[300] text-[14px] font-sans`}>{item?.descripcion || item?.NombreLocal}</h5>
+                                                </div>
+                                                <div className="col-start-11 col-end-13 justify-end flex">
+                                                    <div className="mr-8">
+                                                        <span className="text-sm flex justify-end">Desde</span>
+                                                        <p className="mt-5 text-[#007FA4] text-2xl font-bold">{item?.Monto > 0 ? `S/ ${Number(item.Monto).toFixed(2)}` : "¡Gratis!"}</p>
+                                                        {/* <h6>Visto 21 veces</h6> */}
+                                                        <div className="flex justify-end items-center">
+                                                            <div onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
 
-                                                            const shareUrl = `${window.location.origin}/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`;
-                                                            const shareData = {
-                                                                title: item?.titulo || 'Evento en InjoyPlan',
-                                                                text: `¡Mira este evento! ${item?.titulo || ''}`,
-                                                                url: shareUrl
-                                                            };
+                                                                const shareUrl = `${window.location.origin}/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`;
+                                                                const shareData = {
+                                                                    title: item?.titulo || 'Evento en InjoyPlan',
+                                                                    text: `¡Mira este evento! ${item?.titulo || ''}`,
+                                                                    url: shareUrl
+                                                                };
 
-                                                            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-                                                                navigator.share(shareData).catch((err) => {
-                                                                    if (err.name !== 'AbortError') console.error('Error al compartir', err);
-                                                                });
-                                                            } else {
-                                                                navigator.clipboard.writeText(shareUrl).then(() => {
-                                                                    useAlertStore.getState().alert("Se ha copiado la url, compártelo con tus amigos :)", "notification");
-                                                                }).catch(err => console.error('Error al copiar', err));
-                                                            }
-                                                        }}>
-                                                            <Image src={comp} width={26} height={26} alt="compartir" className="mr-2 top-1 relative" />
-                                                        </div>
+                                                                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                                                                    navigator.share(shareData).catch((err) => {
+                                                                        if (err.name !== 'AbortError') console.error('Error al compartir', err);
+                                                                    });
+                                                                } else {
+                                                                    navigator.clipboard.writeText(shareUrl).then(() => {
+                                                                        useAlertStore.getState().alert("Se ha copiado la url, compártelo con tus amigos :)", "notification");
+                                                                    }).catch(err => console.error('Error al copiar', err));
+                                                                }
+                                                            }}>
+                                                                <Image src={comp} width={26} height={26} alt="compartir" className="mr-2 top-1 relative" />
+                                                            </div>
 
-                                                        <div onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
-                                                            addFavoritesByUser(item);
-                                                        }}>
-                                                            {item?.favorito ? <div className='relative top-4'>
-                                                                <Icon color='#037BA1' width={28} icon="mdi:heart" /><span className='text-[#037BA1] ml-3 font-bold text-md'></span>
-                                                            </div> :
-                                                                <div className='relative top-4'>
-                                                                    <Image src={corp} alt="fav" width={24} /><span className='text-[#037BA1] ml-3 font-bold text-md'></span>
-                                                                </div>}
+                                                            <div onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation(); // Evitar que el clic en el ícono de favorito navegue a la página del evento
+                                                                addFavoritesByUser(item);
+                                                            }}>
+                                                                {item?.favorito ? <div className='relative top-4'>
+                                                                    <Icon color='#037BA1' width={28} icon="mdi:heart" /><span className='text-[#037BA1] ml-3 font-bold text-md'></span>
+                                                                </div> :
+                                                                    <div className='relative top-4'>
+                                                                        <Image src={corp} alt="fav" width={24} /><span className='text-[#037BA1] ml-3 font-bold text-md'></span>
+                                                                    </div>}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                        </motion.div>
+                                            </motion.div>
 
-                                        <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" target="_blank" href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}>VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
-                                    </div>
+                                            <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" target="_blank" href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}>VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
+                                        </div>
+                                    </Link>
                                 ))
                             }
                             {/* View All Button - Only show after initial scrolling pages are exhausted */}

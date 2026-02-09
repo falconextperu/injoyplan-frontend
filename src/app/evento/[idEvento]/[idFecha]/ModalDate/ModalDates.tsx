@@ -109,7 +109,7 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                                         </td>
                                                         <td>{Number(item.Monto) === 0 ? '¡Gratis!' : `S/ ${Number(item.Monto).toFixed(2)}`}</td>
                                                         <td>
-                                                            <Link className="text-[#9A2A2B] uppercase font-semibold text-sm" href={`/evento/${item?.idfecha}/${item?.evento_id}`}>Ver evento</Link>
+                                                            <Link className="text-[#9A2A2B] uppercase font-semibold text-sm" href={`/evento/${item?.evento_id}/${item?.idfecha}`}>Ver evento</Link>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -137,7 +137,7 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                                     </div>
                                                     <Link
                                                         className="inline-block mt-2 text-[#9A2A2B] uppercase font-semibold text-xs"
-                                                        href={`/evento/${item?.idfecha}/${item?.evento_id}`}
+                                                        href={`/evento/${item?.evento_id}/${item?.idfecha}`}
                                                     >
                                                         Ver evento →
                                                     </Link>

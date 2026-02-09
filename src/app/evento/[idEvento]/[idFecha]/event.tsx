@@ -16,6 +16,7 @@ import ReactHtmlParser from 'react-html-parser'
 import Map from '@/app/components/Map';
 import useIsMobile from '@/app/hooks/useIsMobile';
 import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation';
 import ticket from '../../../../../public/svg/tickets_gray.svg'
 import RelatedEvents from '@/app/ui/RelatedEvents';
 import { quicksand, sans } from '../../../../../public/fonts';
@@ -206,6 +207,9 @@ const CommentItem = ({ comment, eventId, depth = 0 }: { comment: any, eventId: s
 const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
     const isMobile = useIsMobile();
+    const router = useRouter();
+    const params = useParams(); // Get params
+    const idFechaParam = params?.idFecha;
     const [date, setDate] = useState<string>("");
     const [daysRemaining, setDaysRemaining] = useState<string>("");
     const [dataFechaOrdenada, setDataFechaOrdenada] = useState<any>(dataFecha);
@@ -265,17 +269,21 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
             console.log(sortedDataFecha)
             // Configurar la fecha inicial como la primera disponible
             if (sortedDataFecha.length > 0) {
-                const initialDate = moment(sortedDataFecha[0]?.FechaInicio).utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY');
-                const days = calcularDiasRestantes(sortedDataFecha[0]?.FechaInicio); // Calcular días restantes
+                // Find the date matching the URL param, or default to the first one
+                const selectedDateObj = sortedDataFecha.find((d: any) => d.idfecha === idFechaParam) || sortedDataFecha[0];
+
+                const initialDate = moment(selectedDateObj?.FechaInicio).utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY');
+                const days = calcularDiasRestantes(selectedDateObj?.FechaInicio);
                 setDate(initialDate);
-                setDaysRemaining(days); // Establecer días restantes
-                setInitHour(sortedDataFecha[0]?.HoraInicio);
-                setEndHour(sortedDataFecha[0]?.HoraFinal);
+                setDaysRemaining(days);
+                setInitHour(selectedDateObj?.HoraInicio);
+                setEndHour(selectedDateObj?.HoraFinal);
             }
         }
-    }, [dataFecha, data]);
+    }, [dataFecha, data, idFechaParam]);
 
     const getDate = (item: any) => {
+        router.push(`/evento/${eventId}/${item.idfecha}`);
         let date = moment(item.FechaInicio).locale('es').utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY')
         setDate(date);
         const days = calcularDiasRestantes(item.FechaInicio); // Calcular días restantes

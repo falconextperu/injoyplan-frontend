@@ -162,7 +162,7 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         try {
             console.log(`Loading page ${page}`);
             // Use proper page-based pagination
-            const resp: any = await get(`events/public/search?page=${page}&limit=12&excludeFeatured=true`);
+            const resp: any = await get(`events/public/search?page=${page}&limit=12&excludeFeatured=true&expandDates=false`);
             console.log(resp);
 
             if (resp?.eventos && Array.isArray(resp.eventos)) {
@@ -426,6 +426,7 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
                     data: [mappedEvent],
                     dataFecha: dates.map((d: any) => ({
                         idfecha: d.id,
+                        evento_id: resp.id, // Add event ID here
                         FechaInicio: d.date,
                         HoraInicio: d.startTime,
                         HoraFinal: d.endTime,
