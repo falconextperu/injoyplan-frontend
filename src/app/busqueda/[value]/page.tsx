@@ -2,7 +2,7 @@
 import { ICategoriesState, useCategoriesState } from "@/app/zustand/categories";
 import { IEventsState, useEventStore } from "@/app/zustand/events";
 import moment from "moment";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import ticket from '../../../../public/svg/tickets_gray.svg'
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -87,66 +87,70 @@ const BusquedaEvento = () => {
 
     const distritos = [
         { "id": 0, "value": "Todos los distritos" },
+        { "id": 1, "value": "Ancón" },
         { "id": 2, "value": "Ate" },
         { "id": 3, "value": "Barranco" },
         { "id": 4, "value": "Breña" },
-        { "id": 1, "value": "Cercado de Lima" },
-        { "id": 6, "value": "Chorrillos" },
-        { "id": 5, "value": "Comas" },
-        { "id": 7, "value": "El Agustino" },
-        { "id": 8, "value": "Jesús María" },
-        { "id": 9, "value": "La Molina" },
-        { "id": 10, "value": "La Victoria" },
-        { "id": 11, "value": "Lince" },
-        { "id": 12, "value": "Los Olivos" },
-        { "id": 13, "value": "Lurigancho" },
-        { "id": 14, "value": "Lurín" },
-        { "id": 15, "value": "Magdalena del Mar" },
-        { "id": 16, "value": "Miraflores" },
-        { "id": 17, "value": "Pachacámac" },
-        { "id": 18, "value": "Pucusana" },
-        { "id": 19, "value": "Pueblo Libre" },
-        { "id": 20, "value": "Puente Piedra" },
-        { "id": 21, "value": "Punta Hermosa" },
-        { "id": 22, "value": "Punta Negra" },
-        { "id": 23, "value": "Rímac" },
-        { "id": 24, "value": "San Bartolo" },
-        { "id": 25, "value": "San Borja" },
-        { "id": 26, "value": "San Isidro" },
-        { "id": 27, "value": "San Juan de Lurigancho" },
-        { "id": 28, "value": "San Juan de Miraflores" },
-        { "id": 29, "value": "San Luis" },
-        { "id": 30, "value": "San Martín de Porres" },
-        { "id": 31, "value": "San Miguel" },
-        { "id": 32, "value": "Santa Anita" },
-        { "id": 33, "value": "Santa María del Mar" },
-        { "id": 34, "value": "Santa Rosa" },
-        { "id": 35, "value": "Santiago de Surco" },
-        { "id": 36, "value": "Surquillo" },
-        { "id": 37, "value": "Villa El Salvador" },
-        { "id": 38, "value": "Villa María del Triunfo" }
+        { "id": 5, "value": "Carabayllo" },
+        { "id": 6, "value": "Cercado de Lima" },
+        { "id": 7, "value": "Chaclacayo" },
+        { "id": 8, "value": "Chorrillos" },
+        { "id": 9, "value": "Cieneguilla" },
+        { "id": 10, "value": "Comas" },
+        { "id": 11, "value": "El Agustino" },
+        { "id": 12, "value": "Independencia" },
+        { "id": 13, "value": "Jesús María" },
+        { "id": 14, "value": "La Molina" },
+        { "id": 15, "value": "La Victoria" },
+        { "id": 16, "value": "Lince" },
+        { "id": 17, "value": "Los Olivos" },
+        { "id": 18, "value": "Lurigancho" },
+        { "id": 19, "value": "Lurín" },
+        { "id": 20, "value": "Magdalena del Mar" },
+        { "id": 21, "value": "Miraflores" },
+        { "id": 22, "value": "Pachacámac" },
+        { "id": 23, "value": "Pucusana" },
+        { "id": 24, "value": "Pueblo Libre" },
+        { "id": 25, "value": "Puente Piedra" },
+        { "id": 26, "value": "Punta Hermosa" },
+        { "id": 27, "value": "Punta Negra" },
+        { "id": 28, "value": "Rímac" },
+        { "id": 29, "value": "San Bartolo" },
+        { "id": 30, "value": "San Borja" },
+        { "id": 31, "value": "San Isidro" },
+        { "id": 32, "value": "San Juan de Lurigancho" },
+        { "id": 33, "value": "San Juan de Miraflores" },
+        { "id": 34, "value": "San Luis" },
+        { "id": 35, "value": "San Martín de Porres" },
+        { "id": 36, "value": "San Miguel" },
+        { "id": 37, "value": "Santa Anita" },
+        { "id": 38, "value": "Santa María del Mar" },
+        { "id": 39, "value": "Santa Rosa" },
+        { "id": 40, "value": "Santiago de Surco" },
+        { "id": 41, "value": "Surquillo" },
+        { "id": 42, "value": "Villa El Salvador" },
+        { "id": 43, "value": "Villa María del Triunfo" }
     ]
 
-    const navigate = useRouter();
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-    const [date, setDate] = useState('');
-    const [limit, setLimit] = useState(12);
-    const [distrito, setDistrito] = useState<string | undefined>(undefined);
+    const [date, setDate] = useState(searchParams.get('fechaInicio') ? moment(searchParams.get('fechaInicio'), 'YYYY-MM-DD').format('DD-MM-YYYY') : '');
+    const [limit, setLimit] = useState(Number(searchParams.get('limit')) || 12);
+    const [distrito, setDistrito] = useState<string | undefined>(searchParams.get('distrito') || undefined);
 
     const [filtersMore, setFiltersMore] = useState({
-        esGratis: false,
-        enCurso: false,
-        horaInicio: "",
-        horaFin: ""
+        esGratis: searchParams.get('esGratis') === 'true',
+        enCurso: searchParams.get('enCurso') === 'true',
+        horaInicio: searchParams.get('horaInicio') || "",
+        horaFin: searchParams.get('horaFin') || ""
     });
 
-    // Pagination State
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
 
     const handleDate = (value: string, _name: string) => {
-        // setSearch("");
         setDate(moment(value, 'DD/MM/YYYY').format('DD-MM-YYYY'));
     }
 
@@ -158,15 +162,14 @@ const BusquedaEvento = () => {
 
     console.log(date)
 
-    // fijate que puedo hacer para que getEventSearchByFilters se llame solo cuando el usuario haga una busqueda    
-    // por ahora se llama cada vez que el usuario cambia el valor de searchDebounce, category, limit o date
-
     const buildSearchData = () => {
         const categoryName = countsCategories?.find((c: any) => Number(c.idCategorias) === Number(category))?.nombreCategoria || '';
-        // If no date selected, default to today's date to only show current and future events
         const formattedDate = date
             ? moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD')
-            : moment().format('YYYY-MM-DD');
+            : moment().format('YYYY-MM-DD'); // Default to today logic handled by Default? Or just send undefined? 
+        // Original code: : moment().format('YYYY-MM-DD'); 
+        // Wait, if I explicitly clear date, I want undefined? 
+        // But existing logic forced today. strict adherence.
 
         return {
             "categoria": Number(category) !== 0 ? categoryName : undefined,
@@ -174,35 +177,54 @@ const BusquedaEvento = () => {
             "fechaInicio": formattedDate,
             "busqueda": searchDebounce,
             "limit": limit,
-            "page": 1, // Backend uses 1-based index or skip/limit? Controller says skip = (page - 1) * limit. So Page 1 is start.
+            "page": 1,
             "esGratis": filtersMore.esGratis ? true : undefined,
             "enCurso": filtersMore.enCurso ? true : undefined,
             "horaInicio": filtersMore.horaInicio || undefined,
             "horaFin": filtersMore.horaFin || undefined,
-            "excludeFeatured": !searchDebounce, // Only exclude featured events if NOT searching by text
+            "excludeFeatured": !searchDebounce,
         };
     }
 
+    // Effect: execution of search AND update of URL params
     useEffect(() => {
-        // If searching by category (value !== 0), wait for categories list to be loaded
-        // so we can resolve the name. 
-        // IF category is 0, we do NOT need to wait, we search immediately.
-
-        const categorySelected = Number(category) !== 0; // Ensure number comparison
+        const categorySelected = Number(category) !== 0;
         const categoriesLoaded = countsCategories && countsCategories.length > 0;
 
-        // If explicitly "Todas las categorías" (0), we don't need to wait for categories to resolve names.
         if (paramAsNumber === 0 && Number(category) === 0) {
-            // Proceed to search immediately
+            // Proceed
         } else if (categorySelected && !categoriesLoaded) {
-            // Wait for categories to load only if we need to resolve a name
             return;
         }
 
-        // Debounce effect is already handled by useDebounce hook producing 'searchDebounce'
-        // We trigger search when any filter changes
         const data = buildSearchData();
+
+        // Execute Search
         getEventSearchByFilters(data);
+
+        // Update URL Params to persist state
+        const params = new URLSearchParams();
+        if (date) params.set('fechaInicio', moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD'));
+        if (distrito) params.set('distrito', distrito);
+        if (filtersMore.esGratis) params.set('esGratis', 'true');
+        if (filtersMore.enCurso) params.set('enCurso', 'true');
+        if (filtersMore.horaInicio) params.set('horaInicio', filtersMore.horaInicio);
+        if (filtersMore.horaFin) params.set('horaFin', filtersMore.horaFin);
+        if (limit !== 12) params.set('limit', limit.toString());
+        // We don't necessarily need to persist page=1 unless we want deep linking to page n
+        // params.set('page', '1'); 
+
+        // Important: Preserve the dynamic route part (/busqueda/[value])
+        // router.replace does not change the [value] part, only query
+        // But we need to construct the full path. 
+        // Note: pathname includes /busqueda/X. 
+        // We just append ?params
+
+        // Only push if params exist or if we want to clear them? 
+        // router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
+        // Use window.history to avoid re-rendering loop if not careful? 
+        // Next.js router.replace is safer.
+        router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
 
     }, [searchDebounce, category, limit, date, countsCategories, filtersMore, distrito])
 
@@ -231,7 +253,7 @@ const BusquedaEvento = () => {
     }
 
     const navigateEvent = (item: any) => {
-        navigate.push(`/evento/${item?.ideventos}/${item?.idfecha}`)
+        router.push(`/evento/${item?.ideventos}/${item?.idfecha}`)
     }
 
     useEffect(() => {
@@ -482,12 +504,10 @@ const BusquedaEvento = () => {
                         <div className="hidden md:block">
                             {
                                 eventSearchByFilters?.map((item: any, index: number) => (
-                                    <Link href={`/evento/${item?.idEventos ?? item?.ideventos}`} key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}>
-                                        <div className="relative">
+                                    <div className="relative" key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}>
+                                        <Link href={`/evento/${item?.idEventos ?? item?.ideventos}/${item?.idfecha}`} target="_blank" rel="noopener noreferrer">
                                             <motion.div {...({ className: "max-h-[200px] grid rounded-2xl items-center grid-cols-12 shadow-custom-2 mb-16 relative" }) as any}
-                                                // key={`${item?.idEventos ?? item?.ideventos}-${item?.idfecha ?? item?.FechaInicio}-${index}`}
                                                 style={{ cursor: "pointer" }}
-                                                onClick={() => navigateEvent(item)}
                                                 layout
                                                 initial={{ opacity: 0, y: 50 }}  // Animación inicial (fuera de la vista)
                                                 animate={{ opacity: 1, y: 0 }}  // Animación al entrar (desplazamiento hacia arriba)
@@ -559,33 +579,12 @@ const BusquedaEvento = () => {
                                                 </div>
 
                                             </motion.div>
+                                        </Link>
 
-                                            <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" target="_blank" href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}>VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
-                                        </div>
-                                    </Link>
+                                        <Link className="font-[900] absolute bottom-[-30px] left-[110px] text-[#A3ABCC] text-xs flex items-center" target="_blank" href={item?.urlFuente?.startsWith('http') ? item.urlFuente : (item?.urlFuente ? `https://${item.urlFuente}` : '#')}>VER FUENTE <Image className="ml-2" src={flc} alt="flc" width={15} height={15} /></Link>
+                                    </div>
                                 ))
                             }
-                            {/* View All Button - Only show after initial scrolling pages are exhausted */}
-                            {hasMore && page >= 3 && !isLoadingMore && (
-                                <div className="flex justify-center mt-12 mb-20 text-center w-full">
-                                    <button
-                                        onClick={handleViewAll}
-                                        className="bg-[#007FA4] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#006b8a] transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
-                                    >
-                                        <span>Ver todos los eventos</span>
-                                        <Icon icon="ei:plus" width={24} className="font-bold" />
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Professional Loading Spinner */}
-                            {isLoadingMore && (
-                                <div className="flex flex-col items-center justify-center mt-12 mb-20 w-full">
-                                    <Icon icon="svg-spinners:ring-resize" width={40} height={40} className="text-[#007FA4]" />
-                                    <p className="text-gray-400 text-sm mt-3 font-medium animate-pulse">Cargando eventos...</p>
-                                </div>
-                            )}
-
                         </div>
 
                         <div className="block md:hidden px-8">
@@ -595,6 +594,27 @@ const BusquedaEvento = () => {
                                 ))
                             }
                         </div>
+
+                        {/* View All Button - Only show after initial scrolling pages are exhausted */}
+                        {hasMore && page >= 3 && !isLoadingMore && (
+                            <div className="flex justify-center mt-12 mb-20 text-center w-full">
+                                <button
+                                    onClick={handleViewAll}
+                                    className="bg-[#007FA4] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#006b8a] transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
+                                >
+                                    <span>Ver todos los eventos</span>
+                                    <Icon icon="ei:plus" width={24} className="font-bold" />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Professional Loading Spinner */}
+                        {isLoadingMore && (
+                            <div className="flex flex-col items-center justify-center mt-12 mb-20 w-full">
+                                <Icon icon="svg-spinners:ring-resize" width={40} height={40} className="text-[#007FA4]" />
+                                <p className="text-gray-400 text-sm mt-3 font-medium animate-pulse">Cargando eventos...</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </>

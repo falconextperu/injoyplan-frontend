@@ -24,7 +24,7 @@ export const useFavoriteStore = create<IFavoriteState>((set, _get) => ({
                     idFecha: data.idfecha || data.idFecha
                 };
 
-                const resp: any = await post(`favorites`, { eventId: payload.idEvento });
+                const resp: any = await post(`favorites`, { eventId: payload.idEvento, eventDateId: payload.idFecha });
                 console.log(data)
                 console.log(resp)
                 if (resp && resp.id) {

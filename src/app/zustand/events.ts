@@ -12,6 +12,8 @@ export interface IEventsState {
     eventsTeatro: Event[],
     eventsMusic: Event[],
     eventsDestacades: Event[],
+    bannerEvents: Event[],
+    getBannerEvents: () => void,
     getEventsDestacades: () => void,
     resetEventBySearch: () => void
     resetEvent: () => void
@@ -133,6 +135,7 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
     isLoading: false,
     eventsEntreteiment: [],
     eventsDestacades: [],
+    bannerEvents: [],
     eventsCulture: [],
     eventsTeatro: [],
     eventsMusic: [],
@@ -197,6 +200,25 @@ export const useEventStore = create<IEventsState>((set, _get) => ({
         } catch (error) {
             console.error('Error loading featured events:', error);
             set({ eventsDestacades: [] })
+        }
+    },
+    getBannerEvents: async () => {
+        try {
+            // Fetch events marked as isBanner=true
+            const resp: any = await get(`events?isBanner=true&limit=10`);
+            console.log("Banner events:", resp);
+            const eventsArray = resp?.data && Array.isArray(resp.data) ? resp.data : (Array.isArray(resp?.events) ? resp.events : (Array.isArray(resp) ? resp : []));
+
+            if (eventsArray.length > 0) {
+                set({
+                    bannerEvents: eventsArray.map((item: any) => mapEventFromBackend(item))
+                });
+            } else {
+                set({ bannerEvents: [] })
+            }
+        } catch (error) {
+            console.error('Error loading banner events:', error);
+            set({ bannerEvents: [] })
         }
     },
     setEventsAsFavorite: (idEvento, resp) => {

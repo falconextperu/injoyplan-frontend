@@ -58,7 +58,7 @@ export default function EventFeed() {
             </div>
 
             {isLoading && items.length === 0 ? (
-                <div className="bg-white rounded-2xl p-6 border border-[#EDEFF5] shadow-sm text-[#666]">Cargando eventos...</div>
+                <div className="bg-white rounded-2xl p-6 border border-[#EDEFF5] shadow-sm text-[#666]">Cargando planes...</div>
             ) : items.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 border border-[#EDEFF5] shadow-sm text-center">
                     <div className="w-16 h-16 bg-[#E0F2F7] rounded-full flex items-center justify-center text-[#007FA4] mx-auto mb-4">

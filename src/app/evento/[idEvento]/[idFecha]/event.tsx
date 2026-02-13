@@ -482,7 +482,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                     <div className='bg-[#f7f7fa] xl:mt-14 mt-0 xl:p-10 p-6 xl:sticky top-0 xl:top-4'>
                         <div>
                             <h6 className='font-bold'>Fecha y hora</h6>
-                            {date?.length > 0 ? <p className='font-thin'>{date}. {initHour} - {endHour}</p> : "Aún por confirmar"}
+                            {date?.length > 0 ? <p className='font-thin'>{date}. {initHour} {endHour ? `- ${endHour}` : ''}</p> : "Aún por confirmar"}
                         </div>
 
                         <div className='mt-8 font-bold'>
@@ -538,22 +538,37 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                 }
                                 {
                                     (() => {
-                                        const ticketUrls = data[0]?.ticketUrls;
+                                        let ticketUrls = data[0]?.ticketUrls;
                                         if (!ticketUrls || !Array.isArray(ticketUrls)) return null;
 
-                                        // Count occurrences of each platform name
+                                        // Filter out invalid URLs
+                                        ticketUrls = ticketUrls.filter((link: any) => link.url && link.url !== '-' && link.url.trim() !== '');
+
+                                        if (ticketUrls.length === 0) return null;
+
+                                        // Count occurrences of each platform name (after renaming logic applied implicitly below?)
+                                        // Better to map names first.
+
+                                        const processedLinks = ticketUrls.map((link: any) => {
+                                            let name = link.name || 'Entradas';
+                                            if (link.url && link.url.toLowerCase().includes('joinnus')) {
+                                                name = 'Joinnus';
+                                            }
+                                            return { ...link, name };
+                                        });
+
                                         const nameCounts: { [key: string]: number } = {};
-                                        ticketUrls.forEach((link: { name: string }) => {
-                                            const name = link.name || 'Entradas';
+                                        processedLinks.forEach((link: any) => {
+                                            const name = link.name;
                                             nameCounts[name] = (nameCounts[name] || 0) + 1;
                                         });
 
                                         // Track current index for each name
                                         const currentIndex: { [key: string]: number } = {};
 
-                                        return ticketUrls.map((link: { name: string; url: string }, idx: number) => {
+                                        return processedLinks.map((link: { name: string; url: string }, idx: number) => {
                                             const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
-                                            const baseName = link.name || 'Entradas';
+                                            const baseName = link.name;
 
                                             // Increment index for this name
                                             currentIndex[baseName] = (currentIndex[baseName] || 0) + 1;

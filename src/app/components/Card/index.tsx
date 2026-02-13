@@ -52,6 +52,8 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                     resetEvent()
                 }}
                 href={`/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className='h-full w-full relative'>
                 <div className={heartDisabled ? "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 pb-5" : "bg-[#fff] h-full w-full rounded-t-2xl rounded-b-2xl border border-solid] shadow-custom-2 group pb-5"}>
 

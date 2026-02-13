@@ -1,6 +1,7 @@
 import Slider from "react-slick";
 import { useEffect } from "react";
-import { IBannersState, useBannersStore } from "../../../zustand/banners";
+import { IEventsState, useEventStore } from "../../../zustand/events";
+import { useRouter } from "next/navigation";
 import moment from "moment";
 import Image from "next/image";
 import Angle from '../../../../../public/svg/angle_right.svg';
@@ -9,7 +10,8 @@ import BannerSkeleton from "@/app/components/Skeletons/banner";
 moment.locale('es');
 
 const Slide = () => {
-    const { getBanners, banners, isLoading }: IBannersState = useBannersStore();
+    const { getBannerEvents, bannerEvents, isLoading }: IEventsState = useEventStore();
+    const router = useRouter(); // For navigation
 
     const settings = {
         dots: true,
@@ -18,7 +20,8 @@ const Slide = () => {
         speed: 500,
         slidesToShow: 1,
         slidesToScroll: 1,
-        autoplay: false,
+        autoplay: true, // Enable autoplay for banners
+        autoplaySpeed: 5000,
         responsive: [
             {
                 breakpoint: 1024,
@@ -51,60 +54,71 @@ const Slide = () => {
     };
 
     useEffect(() => {
-        getBanners();
+        getBannerEvents();
     }, []);
 
-    console.log(banners)
+    console.log("Banners (Events):", bannerEvents)
 
-    if (isLoading) return <BannerSkeleton />
+    if (isLoading && (!bannerEvents || bannerEvents.length === 0)) return <BannerSkeleton />
 
     return (
         <Slider className="slide" {...settings}>
-            {banners?.length > 0 ? (
-                banners.map((item: any, index: number) => {
-                    // Parse date as UTC to avoid timezone conversion issues
-                    // This ensures "2026-05-24" displays as "24 MAY" instead of "23 MAY"
-                    const date = item.fecha ? moment.utc(item.fecha) : null;
+            {bannerEvents?.length > 0 ? (
+                bannerEvents.map((item: any, index: number) => {
+                    // Item is now an Event object (mapped)
+                    // Fields: titulo, url, FechaInicio, HoraInicio, NombreLocal, etc.
+
+                    const date = item.FechaInicio ? moment.utc(item.FechaInicio) : null;
                     const dayName = date ? date.format('ddd').toUpperCase().replace('.', '') : '';
                     const dayNumber = date ? date.format('D') : '';
                     const monthName = date ? date.format('MMM').toUpperCase().replace('.', '') : '';
 
+                    const eventLink = `/evento/${item?.idEventos ?? item?.ideventos}/${item?.idfecha}`;
+
                     return (
                         <div key={index} className="h-full">
                             <div className="h-full relative">
-                                <Image src={item.imageUrl} alt="banner" width={2000} height={1000} className="w-full h-full object-fill" />
-                                <div className="absolute md:top-36 top-24 left-5 md:left-10">
+                                <Image src={item.url || '/img/placeholder.png'} alt="banner" width={2000} height={1000} className="w-full h-full object-fill rounded-xl" />
+                                <div className="absolute md:top-36 top-24 left-5 md:left-10 max-w-[80%] md:max-w-[60%]">
                                     <div>
-                                        <h4 className="bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-2xl md:text-3xl p-2 w-fit font-bold">{item.title}</h4>
+                                        <h4 className="bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-2xl md:text-3xl p-2 w-fit font-bold line-clamp-2">
+                                            {item.titulo}
+                                        </h4>
 
-                                        {(item.fecha || item.horaInicio || item.categoria) && (
+                                        {(item.FechaInicio || item.HoraInicio || item.NombreLocal) && (
                                             <div className="flex items-center w-fit bg-customText text-[#fff] rounded rounded-bl-none rounded-tl-none text-md p-2 mt-1">
                                                 {date && (
                                                     <p className="ml-2 leading-tight">
                                                         {dayName} <strong className="font-normal block text-xl">{dayNumber} {monthName}</strong>
                                                     </p>
                                                 )}
-                                                {(item.horaInicio || item.categoria) && (
+                                                {(item.HoraInicio || item.NombreLocal) && (
                                                     <div className={`border-l border-solid border-[#fff] ml-4 pl-3 flex flex-col justify-center ${!date ? 'border-none ml-0 pl-2' : ''}`}>
-                                                        {item.horaInicio && (
-                                                            <p className="">{item.horaInicio} {item.horaFin ? `- ${item.horaFin}` : ''}</p>
+                                                        {item.HoraInicio && (
+                                                            <p className="">{item.HoraInicio} {item.HoraFinal ? `- ${item.HoraFinal}` : ''}</p>
                                                         )}
-                                                        {item.direccion && (
-                                                            <p className="font-bold opacity-90">{item.direccion}</p>
+                                                        {item.NombreLocal && (
+                                                            <p className="font-bold opacity-90 text-sm">{item.NombreLocal}</p>
                                                         )}
                                                     </div>
                                                 )}
                                             </div>
                                         )}
 
-                                        <a className="bg-customText transition-colors p-3 px-6 text-md relative top-4 rounded uppercase text-[#fff] font-bold inline-block" href={item.link || item.urlFuente || "#"}>
+                                        <Link href={eventLink} className="bg-customText transition-colors p-3 px-6 text-md relative top-4 rounded uppercase text-[#fff] font-bold inline-block">
                                             Conoce más
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
+                            {/* Source link if available - usually ticket link */}
                             {item.urlFuente && (
-                                <Link className="absolute md:bottom-2 bottom-1 z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center transition-colors" href={item.urlFuente} target="_blank" rel="noopener noreferrer">
+                                <Link
+                                    className="absolute md:bottom-2 bottom-1 z-50 flex justify-center text-[11px] md:text-left xl:text-left md:justify-start mt-2 text-[#A3ABCC] font-bold w-full text-center"
+                                    href={item.urlFuente.startsWith('http') ? item.urlFuente : `https://${item.urlFuente}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     VER FUENTE
                                     <Image className="ml-1 relative top-0.5" src={Angle} height={10} width={10} alt="Angulo" />
                                 </Link>
@@ -113,7 +127,9 @@ const Slide = () => {
                     );
                 })
             ) : (
-                <BannerSkeleton />
+                <div className="h-[400px] bg-gray-200 rounded-xl flex items-center justify-center">
+                    <p className="text-gray-500 font-bold">Sin eventos destacados</p>
+                </div>
             )}
         </Slider>
     );

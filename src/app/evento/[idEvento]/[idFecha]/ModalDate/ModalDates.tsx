@@ -105,7 +105,7 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                                 dataFechaOrdenada?.map((item: any, index: number) => (
                                                     <tr key={index} className="items-center">
                                                         <td><p className="mt-4">{moment(item.FechaInicio).locale('es').utc().format('dddd D MMMM')}</p>
-                                                            <div>{item.HoraInicio} - {item.HoraFinal}</div>
+                                                            <div>{item.HoraInicio} {item.HoraFinal ? `- ${item.HoraFinal}` : ''}</div>
                                                         </td>
                                                         <td>{Number(item.Monto) === 0 ? '¡Gratis!' : `S/ ${Number(item.Monto).toFixed(2)}`}</td>
                                                         <td>
@@ -127,7 +127,7 @@ const ModalDates = ({ showModal, setShowModal, dataFechaOrdenada }: IProps) => {
                                                             <p className="font-semibold text-[#212121] capitalize">
                                                                 {moment(item.FechaInicio).locale('es').utc().format('dddd D MMMM')}
                                                             </p>
-                                                            <p className="text-sm text-[#666]">{item.HoraInicio} - {item.HoraFinal}</p>
+                                                            <p className="text-sm text-[#666]">{item.HoraInicio} {item.HoraFinal ? `- ${item.HoraFinal}` : ''}</p>
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="font-bold text-[#212121]">

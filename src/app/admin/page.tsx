@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthStore } from '../zustand/auth';
+import useDebounce from '../hooks/useDebounce';
 import ubigeoData from '@/data/ubigeo.json';
 
 // --- Components ---
@@ -197,10 +198,10 @@ type DateEntry = { date: string; startTime: string; endTime: string; price: stri
 
 const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) => {
     const [formData, setFormData] = useState<{
-        title: string; description: string; category: string; imageUrl: string; websiteUrl: string; isFeatured: boolean;
+        title: string; description: string; category: string; imageUrl: string; websiteUrl: string; isFeatured: boolean; isBanner: boolean;
         locationName: string; department: string; province: string; district: string; address: string; latitude: string; longitude: string;
     }>({
-        title: '', description: '', category: '', imageUrl: '', websiteUrl: '', isFeatured: false,
+        title: '', description: '', category: '', imageUrl: '', websiteUrl: '', isFeatured: false, isBanner: false,
         locationName: '', department: 'Lima', province: 'Lima', district: '', address: '', latitude: '', longitude: ''
     });
     const [ticketUrls, setTicketUrls] = useState<{ name: string; url: string }[]>([{ name: '', url: '' }]);
@@ -218,6 +219,7 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                     imageUrl: initialData.imageUrl || '',
                     websiteUrl: initialData.websiteUrl || initialData.bannerUrl || '',
                     isFeatured: initialData.isFeatured || false,
+                    isBanner: initialData.isBanner || false,
                     locationName: initialData.location?.name || '',
                     department: initialData.location?.department || 'Lima',
                     province: initialData.location?.province || 'Lima',
@@ -248,7 +250,7 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
             } else {
                 // Creating mode - reset
                 setFormData({
-                    title: '', description: '', category: categories?.[0] || '', imageUrl: '', websiteUrl: '', isFeatured: false,
+                    title: '', description: '', category: categories?.[0] || '', imageUrl: '', websiteUrl: '', isFeatured: false, isBanner: false,
                     locationName: '', department: 'Lima', province: 'Lima', district: '', address: '', latitude: '', longitude: ''
                 });
                 setTicketUrls([{ name: '', url: '' }]);
@@ -324,6 +326,10 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                             <div className="flex items-center gap-3">
                                 <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} id="featuredCheck" className="w-5 h-5 text-[#277FA4] rounded" />
                                 <label htmlFor="featuredCheck" className="text-slate-800 font-bold">Destacado</label>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <input type="checkbox" name="isBanner" checked={formData.isBanner} onChange={handleChange} id="bannerCheck" className="w-5 h-5 text-[#277FA4] rounded" />
+                                <label htmlFor="bannerCheck" className="text-slate-800 font-bold">Banner Principal</label>
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-bold text-slate-800 mb-1">Descripción *</label>
@@ -540,6 +546,8 @@ export default function AdminPage() {
     const [categories, setCategories] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'banners' | 'events'>('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -575,9 +583,39 @@ export default function AdminPage() {
         if (!loading && auth && (auth as any).role === 'ADMIN') {
             fetchEvents(1);
         }
-    }, [filterStatus, filterFeatured]);
+    }, [filterStatus, filterFeatured, debouncedSearch]);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
+
+    const handleDeleteAllEvents = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/events/all`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                // const data = await res.json();
+                fetchEvents(1);
+                fetchData(); // Reload stats
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            } else {
+                console.error('Error deleting events');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const openConfirmDeleteAll = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: '¿Estás seguro?',
+            message: 'Esta acción ELIMINARÁ TODOS los eventos de la base de datos permanentemente. Se recomienda tener un respaldo.',
+            onConfirm: handleDeleteAllEvents
+        });
+    }
 
     const fetchData = async () => {
         const token = localStorage.getItem('token');
@@ -611,10 +649,12 @@ export default function AdminPage() {
             let url = `${API_URL}/events?limit=24&page=${page}&status=${filterStatus}`;
             if (filterFeatured === 'featured') url += `&isFeatured=true`;
             if (filterFeatured === 'standard') url += `&isFeatured=false`;
+            if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
 
             const eventsRes = await fetch(url, { headers }).then(r => r.json());
-            setEvents(eventsRes?.data || eventsRes?.events || eventsRes || []);
-            setEventsTotal(eventsRes?.total || eventsRes?.length || 0);
+            const list = Array.isArray(eventsRes?.data) ? eventsRes.data : Array.isArray(eventsRes?.events) ? eventsRes.events : Array.isArray(eventsRes) ? eventsRes : [];
+            setEvents(list);
+            setEventsTotal(eventsRes?.total || list.length || 0);
             setEventsPage(page);
             if (mainRef.current) mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
@@ -738,12 +778,7 @@ export default function AdminPage() {
                             active={activeTab === 'users'}
                             onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }}
                         />
-                        <SidebarItem
-                            icon="solar:gallery-wide-bold"
-                            label="Banners"
-                            active={activeTab === 'banners'}
-                            onClick={() => { setActiveTab('banners'); setIsSidebarOpen(false); }}
-                        />
+
                         <SidebarItem
                             icon="solar:calendar-bold"
                             label="Eventos"
@@ -787,7 +822,13 @@ export default function AdminPage() {
                     <div className="flex items-center gap-3 bg-white p-2.5 rounded-full shadow-sm border border-slate-100">
                         <div className="flex items-center bg-slate-50 rounded-full px-4 py-2">
                             <Icon icon="solar:magnifer-linear" className="text-[#277FA4]" />
-                            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm text-slate-600 ml-2 w-24 md:w-32" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-transparent border-none outline-none text-sm text-slate-600 ml-2 w-24 md:w-32"
+                            />
                         </div>
                         <div className="w-10 h-10 rounded-full bg-[#277FA4] text-white flex items-center justify-center font-bold overflow-hidden">
                             {user?.profile?.avatar ? <img src={user.profile.avatar} className="w-full h-full object-cover" /> : (user?.profile?.firstName?.[0] || 'A')}
@@ -1011,6 +1052,16 @@ export default function AdminPage() {
                                         }}
                                     />
                                 </label>
+
+                                {/* Delete All Button */}
+                                <button
+                                    onClick={openConfirmDeleteAll}
+                                    className="bg-[#FFEAEA] text-[#E31A1A] px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:bg-[#FFD6D6] transition-all text-sm cursor-pointer"
+                                    title="Eliminar todos los eventos"
+                                >
+                                    <Icon icon="solar:trash-bin-trash-bold" width={18} />
+                                    Vaciar Todo
+                                </button>
                                 <button
                                     onClick={() => { setEditingEvent(null); setIsEventModalOpen(true); }}
                                     className="bg-[#277FA4] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all text-sm"
@@ -1040,6 +1091,9 @@ export default function AdminPage() {
                                             <div className="absolute top-2 right-2 flex gap-1">
                                                 {event.isFeatured && (
                                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-[#277FA4]">★</span>
+                                                )}
+                                                {event.isBanner && (
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-[#FF8C00]">Banner</span>
                                                 )}
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${event.isActive ? 'bg-[#05CD99]' : 'bg-gray-400'}`}>
                                                     {event.isActive ? 'ON' : 'OFF'}
@@ -1100,7 +1154,10 @@ export default function AdminPage() {
                                                                 {event.imageUrl && <img src={event.imageUrl} className="w-full h-full object-cover" />}
                                                             </div>
                                                             <div>
-                                                                <h5 className="text-slate-800 font-bold text-sm line-clamp-1">{event.title}</h5>
+                                                                <h5 className="text-slate-800 font-bold text-sm line-clamp-1">
+                                                                    {event.title}
+                                                                    {event.isBanner && <span className="ml-2 px-1.5 py-0.5 rounded bg-[#FF8C00] text-white text-[10px] font-bold">Banner</span>}
+                                                                </h5>
                                                                 <p className="text-slate-400 text-xs">{event.location?.name || 'Sin ubicación'}</p>
                                                             </div>
                                                         </div>
@@ -1180,6 +1237,7 @@ export default function AdminPage() {
                             imageUrl: data.imageUrl || undefined,
                             websiteUrl: data.websiteUrl || undefined,
                             isFeatured: data.isFeatured,
+                            isBanner: data.isBanner,
                             ticketUrls: data.ticketUrls || [],
                             dates: (data.dates || []).map((d: any) => ({
                                 date: d.date,
