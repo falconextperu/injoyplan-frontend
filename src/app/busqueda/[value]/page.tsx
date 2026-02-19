@@ -602,7 +602,7 @@ const BusquedaEvento = () => {
                                     onClick={handleViewAll}
                                     className="bg-[#007FA4] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#006b8a] transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
                                 >
-                                    <span>Ver todos los eventos</span>
+                                    <span>Ver más planes</span>
                                     <Icon icon="ei:plus" width={24} className="font-bold" />
                                 </button>
                             </div>
@@ -612,7 +612,7 @@ const BusquedaEvento = () => {
                         {isLoadingMore && (
                             <div className="flex flex-col items-center justify-center mt-12 mb-20 w-full">
                                 <Icon icon="svg-spinners:ring-resize" width={40} height={40} className="text-[#007FA4]" />
-                                <p className="text-gray-400 text-sm mt-3 font-medium animate-pulse">Cargando eventos...</p>
+                                <p className="text-gray-400 text-sm mt-3 font-medium animate-pulse">Cargando planes...</p>
                             </div>
                         )}
                     </div>

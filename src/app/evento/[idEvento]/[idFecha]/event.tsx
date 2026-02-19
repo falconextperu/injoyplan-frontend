@@ -541,8 +541,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                         let ticketUrls = data[0]?.ticketUrls;
                                         if (!ticketUrls || !Array.isArray(ticketUrls)) return null;
 
-                                        // Filter out invalid URLs
-                                        ticketUrls = ticketUrls.filter((link: any) => link.url && link.url !== '-' && link.url.trim() !== '');
+                                        // Filter out invalid URLs, but allow '-' for offline ticket info (e.g. "En boletería")
+                                        ticketUrls = ticketUrls.filter((link: any) => link.url && link.url.trim() !== '');
 
                                         if (ticketUrls.length === 0) return null;
 
@@ -551,8 +551,11 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
                                         const processedLinks = ticketUrls.map((link: any) => {
                                             let name = link.name || 'Entradas';
-                                            if (link.url && link.url.toLowerCase().includes('joinnus')) {
+                                            const lowerUrl = (link.url || '').toLowerCase();
+                                            if (lowerUrl.includes('joinnus')) {
                                                 name = 'Joinnus';
+                                            } else if (lowerUrl.includes('wa.me') || lowerUrl.includes('whatsapp')) {
+                                                name = 'WhatsApp';
                                             }
                                             return { ...link, name };
                                         });
@@ -567,7 +570,9 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                         const currentIndex: { [key: string]: number } = {};
 
                                         return processedLinks.map((link: { name: string; url: string }, idx: number) => {
-                                            const url = link.url?.startsWith('http') ? link.url : `https://${link.url}`;
+                                            const rawUrl = link.url || '';
+                                            const isPlaceholder = rawUrl === '-' || rawUrl === '#';
+                                            const url = isPlaceholder ? '#' : (rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`);
                                             const baseName = link.name;
 
                                             // Increment index for this name
@@ -588,9 +593,20 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                                 return 'solar:ticket-bold';
                                             };
 
+                                            if (isPlaceholder) {
+                                                return (
+                                                    <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full cursor-default' key={`ticket-${idx}`}>
+                                                        <span className='flex items-center justify-center text-[#fff] font-bold'>
+                                                            <Icon icon={getIcon(baseName)} width={24} className='mr-3' />
+                                                            {displayName}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
+
                                             return (
-                                                <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full' key={`ticket-${idx}`}>
-                                                    <Link className='flex items-center justify-center text-[#fff] font-bold' rel="noopener noreferrer" target="_blank" href={url}>
+                                                <div className='bg-[#9B282B] mt-4 p-4 text-center rounded-full hover:bg-[#7a1f22] transition-colors' key={`ticket-${idx}`}>
+                                                    <Link className='flex items-center justify-center text-[#fff] font-bold w-full h-full' rel="noopener noreferrer" target="_blank" href={url}>
                                                         <Icon icon={getIcon(baseName)} width={24} className='mr-3' />
                                                         {displayName}
                                                     </Link>

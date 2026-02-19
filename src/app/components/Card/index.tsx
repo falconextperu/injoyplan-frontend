@@ -6,7 +6,7 @@ import heart from '../../../../public/svg/shape.svg'
 import Angle from '../../../../public/svg/angle_right.svg'
 import moment from "moment";
 import { Event } from "@/app/interfaces/event";
-import { useEventStore } from "@/app/zustand/events";
+
 import { useRef, useEffect } from "react";
 
 interface IProps {
@@ -19,7 +19,6 @@ interface IProps {
 
 const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: IProps) => {
 
-    const { resetEvent } = useEventStore();
     const wasDraggingRef = useRef(false);
 
     useEffect(() => {
@@ -49,7 +48,7 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                         e.stopPropagation();
                         return;
                     }
-                    resetEvent()
+
                 }}
                 href={`/evento/${item?.idEventos || item.ideventos}/${item?.idfecha}`}
                 target="_blank"
@@ -116,7 +115,7 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                 VER FUENTE
                 <Image className='ml-1' src={Angle} height={10} width={10} alt='Angulo' />
             </Link>
-        </motion.div>
+        </motion.div >
     )
 }
 

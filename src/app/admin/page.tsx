@@ -365,22 +365,49 @@ const EventModal = ({ isOpen, onClose, onSave, categories, initialData }: any) =
                                 <div className="space-y-3">
                                     {ticketUrls.map((link, idx) => (
                                         <div key={idx} className="flex gap-2 items-center">
-                                            <select
-                                                value={link.name}
-                                                onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
-                                                className="w-1/3 px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
-                                            >
-                                                <option value="" disabled>Plataforma</option>
-                                                <option value="Joinnus">Joinnus</option>
-                                                <option value="Teleticket">Teleticket</option>
-                                                <option value="Ticketmaster">Ticketmaster</option>
-                                                <option value="Instagram">Instagram</option>
-                                                <option value="TikTok">TikTok</option>
-                                                <option value="Facebook">Facebook</option>
-                                                <option value="WhatsApp">WhatsApp</option>
-                                                <option value="Web">Web</option>
-                                                <option value="Otro">Otro</option>
-                                            </select>
+                                            {(() => {
+                                                const knownPlatforms = ['Joinnus', 'Teleticket', 'Ticketmaster', 'Instagram', 'TikTok', 'Facebook', 'WhatsApp', 'Web'];
+                                                const isCustom = link.name && !knownPlatforms.includes(link.name);
+
+                                                if (isCustom) {
+                                                    return (
+                                                        <div className="w-1/3 flex gap-1">
+                                                            <input
+                                                                value={link.name === 'Otro' ? '' : link.name}
+                                                                onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                                                                className="w-full px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
+                                                                placeholder="Plataforma..."
+                                                                autoFocus
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: 'Web' } : l))}
+                                                                className="text-slate-400 hover:text-slate-600 px-1"
+                                                            >
+                                                                <Icon icon="solar:list-bold" width={20} />
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <select
+                                                        value={link.name}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            // If 'Otro' selected, we want to clear name to allow typing, but keep placeholder
+                                                            // We set it to 'Otro' initially to trigger isCustom logic?
+                                                            // Actually, 'Otro' is not in knownPlatforms, so it becomes custom.
+                                                            setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, name: val } : l));
+                                                        }}
+                                                        className="w-1/3 px-4 py-2 rounded-xl bg-slate-50 border-none outline-none text-slate-800"
+                                                    >
+                                                        <option value="" disabled>Plataforma</option>
+                                                        {knownPlatforms.map(p => <option key={p} value={p}>{p}</option>)}
+                                                        <option value="Otro">Otro / Escribir...</option>
+                                                    </select>
+                                                );
+                                            })()}
                                             <input
                                                 value={link.url}
                                                 onChange={(e) => setTicketUrls(prev => prev.map((l, i) => i === idx ? { ...l, url: e.target.value } : l))}
