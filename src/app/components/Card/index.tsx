@@ -95,9 +95,9 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                     </div>
                     <div className='p-4 bg-[#fff] rounded-bl-2xl rounded-br-2xl'>
                         <div>
-                            <span className='text-xs font-bold text-[#4a4a4a]'>{moment(item?.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item?.HoraInicio} {item?.HoraFinal === "" ? "" : `-${item?.HoraFinal}`}</span>
+                            <span className='text-xs font-bold text-[#4a4a4a]'>{moment.utc(item?.FechaInicio).format('D MMM').toUpperCase()} - {item?.HoraInicio} {item?.HoraFinal === "" ? "" : `-${item?.HoraFinal}`}</span>
                             <h3 className='font-black text-xl line-clamp-2 text-[#212121]'>{item?.titulo}</h3>
-                            <h5 className='text-sm font-normal mb-3 text-[#212121] mt-2'>{item?.NombreLocal?.replace(/\s\d+$/, '')}</h5>
+                            <h5 className='text-sm font-normal mb-3 text-[#212121] mt-2'>{item?.NombreLocal?.replace(/\s*(S\/N|s\/n|\d+)$/i, '').trim()}</h5>
                         </div>
                         <div className="absolute bottom-[20px] z-100">
                             <strong className='text-[10px] font-bold uppercase text-[#212121]'>Desde</strong>
