@@ -510,7 +510,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                             </div>
                             <div className='mt-8 max-w-full'>
                                 <h6>Lugar</h6>
-                                <p className='font-thin break-words'>{data[0]?.NombreLocal}</p>
+                                <p className='font-thin break-words'>{data[0]?.NombreLocal?.replace(/\s*(S\/N|s\/n|\d+)$/i, '').trim()}</p>
                                 <p className='font-thin break-words'>{data[0]?.direccion} {data[0]?.Distrito ? ` - ${data[0]?.Distrito}` : ''}</p>
                             </div>
 
@@ -549,16 +549,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                         // Count occurrences of each platform name (after renaming logic applied implicitly below?)
                                         // Better to map names first.
 
-                                        const processedLinks = ticketUrls.map((link: any) => {
-                                            let name = link.name || 'Entradas';
-                                            const lowerUrl = (link.url || '').toLowerCase();
-                                            if (lowerUrl.includes('joinnus')) {
-                                                name = 'Joinnus';
-                                            } else if (lowerUrl.includes('wa.me') || lowerUrl.includes('whatsapp')) {
-                                                name = 'WhatsApp';
-                                            }
-                                            return { ...link, name };
-                                        });
+                                        // Use ticket urls as-is, preserving platform names from the data
+                                        const processedLinks = ticketUrls;
 
                                         const nameCounts: { [key: string]: number } = {};
                                         processedLinks.forEach((link: any) => {

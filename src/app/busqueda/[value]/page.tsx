@@ -182,7 +182,7 @@ const BusquedaEvento = () => {
             "enCurso": filtersMore.enCurso ? true : undefined,
             "horaInicio": filtersMore.horaInicio || undefined,
             "horaFin": filtersMore.horaFin || undefined,
-            "excludeFeatured": !searchDebounce,
+
         };
     }
 
@@ -530,7 +530,7 @@ const BusquedaEvento = () => {
                                                 <div className="col-start-6 col-end-11">
                                                     <h3 className={`${sans.className} ml-10 font-bold font-sans text-2xl text-[#444]`}>{item?.titulo}</h3>
                                                     <h6 className={`${sans.className} ml-10 mt-4 font-[300] text-[14px] font-sans`}>{moment(item?.FechaInicio).utcOffset(-5).format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
-                                                    <h5 className={`${sans.className} ml-10 mt-1 font-[300] text-[14px] font-sans`}>{item?.descripcion || item?.NombreLocal}</h5>
+                                                    <h5 className={`${sans.className} ml-10 mt-1 font-[300] text-[14px] font-sans`}>{(item?.descripcion || item?.NombreLocal)?.replace(/\s*(S\/N|s\/n|\d+)$/i, '').trim()}</h5>
                                                 </div>
                                                 <div className="col-start-11 col-end-13 justify-end flex">
                                                     <div className="mr-8">

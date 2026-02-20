@@ -98,7 +98,7 @@ const Slide = () => {
                                                             <p className="">{item.HoraInicio} {item.HoraFinal ? `- ${item.HoraFinal}` : ''}</p>
                                                         )}
                                                         {item.NombreLocal && (
-                                                            <p className="font-bold opacity-90 text-sm">{item.NombreLocal}</p>
+                                                            <p className="font-bold opacity-90 text-sm">{item.NombreLocal.replace(/\s*(S\/N|s\/n|\d+)$/i, '').trim()}</p>
                                                         )}
                                                     </div>
                                                 )}

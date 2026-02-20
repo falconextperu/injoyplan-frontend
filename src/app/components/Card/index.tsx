@@ -97,7 +97,7 @@ const Card = ({ item, addFavoritesByUser, height, heartDisabled, isDragging }: I
                         <div>
                             <span className='text-xs font-bold text-[#4a4a4a]'>{moment(item?.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item?.HoraInicio} {item?.HoraFinal === "" ? "" : `-${item?.HoraFinal}`}</span>
                             <h3 className='font-black text-xl line-clamp-2 text-[#212121]'>{item?.titulo}</h3>
-                            <h5 className='text-sm font-normal mb-3 text-[#212121] mt-2'>{item?.NombreLocal}</h5>
+                            <h5 className='text-sm font-normal mb-3 text-[#212121] mt-2'>{item?.NombreLocal?.replace(/\s\d+$/, '')}</h5>
                         </div>
                         <div className="absolute bottom-[20px] z-100">
                             <strong className='text-[10px] font-bold uppercase text-[#212121]'>Desde</strong>

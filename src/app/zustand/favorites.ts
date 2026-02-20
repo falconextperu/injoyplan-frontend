@@ -218,7 +218,7 @@ export const useFavoriteStore = create<IFavoriteState>((set, _get) => ({
                             EsGratis: (firstDate?.price === 0 || !firstDate?.price) ? 1 : 0,
 
                             // Location
-                            NombreLocal: location?.address || (location?.district && location?.province ? `${location.district}, ${location.province}` : '') || '',
+                            NombreLocal: location?.name || (location?.district && location?.province ? `${location.district}, ${location.province}` : '') || '',
                             Distrito: location?.district || '',
                             direccion: location?.address || '',
 
