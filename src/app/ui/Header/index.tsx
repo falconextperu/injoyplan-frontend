@@ -242,7 +242,7 @@ const Header = () => {
                                                                                 </div>
                                                                             </div>
                                                                             <div className='text-right'>
-                                                                                <p className={quicksand.className + ' font-bold opacity-50'}> {moment.utc(item.FechaInicio).format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
+                                                                                <p className={quicksand.className + ' font-bold opacity-50'}> {moment(item.FechaInicio).utcOffset(-5).format('ddd, D MMM').toLowerCase().replace('.', "")}</p>
                                                                                 <p className={quicksand.className + ' text-right text-[#848484] text-[14px]'}>{item.HoraInicio}</p>
                                                                             </div>
                                                                         </div>
@@ -650,7 +650,7 @@ const Header = () => {
                                                                 <Image className='w-full h-full' width={45} height={45} src={item.url} alt="" />
                                                             </div>
                                                             <div className="flex-1">
-                                                                <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment.utc(item.FechaInicio).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
+                                                                <p className='text-[13px] font-bold text-[#4a4a4a]'>{moment(item.FechaInicio).utcOffset(-5).format('D MMM').toUpperCase()} - {item.HoraInicio} - {item.HoraFinal}</p>
                                                                 <h3 className='group-hover:text-[#037BA1] transition duration-100 font-bold mb-0 text-md text-[#212121] text-ellipsis max-w-[250px] overflow-hidden whitespace-nowrap'>{item.titulo}</h3>
                                                                 <p className='font-normal text-[13px]'>{item.NombreLocal}</p>
                                                             </div>

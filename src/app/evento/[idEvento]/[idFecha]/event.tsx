@@ -273,7 +273,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                 // Find the date matching the URL param, or default to the first one
                 const selectedDateObj = sortedDataFecha.find((d: any) => d.idfecha === idFechaParam) || sortedDataFecha[0];
 
-                const initialDate = moment.utc(selectedDateObj?.FechaInicio).format('dddd, D [de] MMMM [de] YYYY');
+                const initialDate = moment(selectedDateObj?.FechaInicio).utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY');
                 const days = calcularDiasRestantes(selectedDateObj?.FechaInicio);
                 setDate(initialDate);
                 setDaysRemaining(days);
@@ -285,7 +285,7 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
 
     const getDate = (item: any) => {
         router.push(`/evento/${eventId}/${item.idfecha}`);
-        let date = moment.utc(item.FechaInicio).locale('es').format('dddd, D [de] MMMM [de] YYYY')
+        let date = moment(item.FechaInicio).locale('es').utcOffset(-5).format('dddd, D [de] MMMM [de] YYYY')
         setDate(date);
         const days = calcularDiasRestantes(item.FechaInicio); // Calcular días restantes
         setDaysRemaining(days); // Establecer días restantes
@@ -496,8 +496,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
                                         {
                                             dataFechaOrdenada?.slice(0, 5).map((item: any, index: number) => (
                                                 <div className='cursor-pointer border py-2.5 w-[60px] sm:w-[70px] h-[60px] sm:h-[70px] rounded px-2 sm:px-3.5 bg-[#fff] border-solid border-[rgba(0,0,0,0.12)]' key={index} onClick={() => getDate(item)}>
-                                                    <strong className='block text-center text-lg sm:text-xl'>{moment.utc(item?.FechaInicio).format('D')}</strong>
-                                                    <span className='font-thin text-center mx-auto block text-xs sm:text-base'>{moment.utc(item?.FechaInicio).format('MMM').toUpperCase()}</span>
+                                                    <strong className='block text-center text-lg sm:text-xl'>{moment(item?.FechaInicio).utcOffset(-5).format('D')}</strong>
+                                                    <span className='font-thin text-center mx-auto block text-xs sm:text-base'>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
                                                 </div>
                                             ))
                                         }

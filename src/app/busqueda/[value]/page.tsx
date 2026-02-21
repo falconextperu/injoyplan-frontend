@@ -515,8 +515,8 @@ const BusquedaEvento = () => {
                                                 transition={{ duration: 0.5, ease: "easeInOut" }}  // Transición suave
                                             >
                                                 <div className="col-start-1 col-end-2 text-center">
-                                                    <strong className={`${quicksand.className} block font-[900] text-5xl text-[#444]`}>{moment.utc(item?.FechaInicio).format('DD')}</strong>
-                                                    <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment.utc(item?.FechaInicio).format('MMM').toUpperCase()}</span>
+                                                    <strong className={`${quicksand.className} block font-[900] text-5xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('DD')}</strong>
+                                                    <span className={`${quicksand.className}font-sans font-[700] text-2xl text-[#444]`}>{moment(item?.FechaInicio).utcOffset(-5).format('MMM').toUpperCase()}</span>
                                                 </div>
                                                 <div className="col-start-2 col-end-6 max-h-[200px]">
                                                     <div className="max-h-[200px] w-full">
@@ -529,7 +529,7 @@ const BusquedaEvento = () => {
                                                 </div>
                                                 <div className="col-start-6 col-end-11">
                                                     <h3 className={`${sans.className} ml-10 font-bold font-sans text-2xl text-[#444]`}>{item?.titulo}</h3>
-                                                    <h6 className={`${sans.className} ml-10 mt-4 font-[300] text-[14px] font-sans`}>{moment.utc(item?.FechaInicio).format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
+                                                    <h6 className={`${sans.className} ml-10 mt-4 font-[300] text-[14px] font-sans`}>{moment(item?.FechaInicio).utcOffset(-5).format('ddd')} {item?.HoraInicio} - {item?.HoraFinal}</h6>
                                                     <h5 className={`${sans.className} ml-10 mt-1 font-[300] text-[14px] font-sans`}>{(item?.descripcion || item?.NombreLocal)?.replace(/\s*(S\/N|s\/n|\d+)$/i, '').trim()}</h5>
                                                 </div>
                                                 <div className="col-start-11 col-end-13 justify-end flex">
