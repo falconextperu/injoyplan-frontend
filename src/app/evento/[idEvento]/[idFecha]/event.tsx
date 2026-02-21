@@ -254,10 +254,10 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     useEffect(() => {
         if (data !== undefined) {
             // Filter out past dates first, then sort
-            // Use UTC for comparison to prevent timezone shift (UTC midnight = previous day in Lima UTC-5)
-            const today = moment.utc().startOf('day');
+            // Use Lima timezone (UTC-5) for comparison since dates are stored at noon UTC = 7am Lima = same calendar day
+            const today = moment().utcOffset(-5).startOf('day');
             const futureDates = (dataFecha || data[0]).filter((item: any) => {
-                const fechaEvento = moment.utc(item.FechaInicio).startOf('day');
+                const fechaEvento = moment(item.FechaInicio).utcOffset(-5).startOf('day');
                 return fechaEvento.isSameOrAfter(today);
             });
 
@@ -294,8 +294,8 @@ const EventDate = ({ data, dataFecha, dataPlataformaVenta, owner }: any) => {
     }
 
     const calcularDiasRestantes = (fechaInicio: string) => {
-        const fechaActual = moment.utc().startOf('day');
-        const fechaEvento = moment.utc(fechaInicio).startOf('day');
+        const fechaActual = moment().utcOffset(-5).startOf('day');
+        const fechaEvento = moment(fechaInicio).utcOffset(-5).startOf('day');
         const diferenciaDias = fechaEvento.diff(fechaActual, 'days');
 
         if (diferenciaDias === 0) {
